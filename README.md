@@ -46,6 +46,7 @@ R8-2 / R8-3 リリース準備文書:
 docs/release/R8-2_RELEASE_READINESS_PLAN.md
 docs/release/R8-2_RELEASE_DECISION_TABLE.md
 docs/real_device/R8-3_REAL_DEVICE_TEST_PLAN.md
+docs/real_device/results/R8-3_REAL_DEVICE_TEST_RESULT.md
 ```
 
 ## 安全上の注意
