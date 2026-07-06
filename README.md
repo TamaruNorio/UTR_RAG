@@ -17,6 +17,7 @@
 - R8-1 pre-RC 社内共有用チェックリスト
 - R8-2 リリース準備文書
 - R8-3 実機確認計画
+- v005 full-command internal release no-PDF package
 
 ## 成果物
 
@@ -54,7 +55,18 @@ docs/commands/R8-7_COMMAND_COVERAGE_AUDIT.md
 docs/commands/R8-7_ALL_COMMAND_CATALOG_DRAFT.md
 docs/commands/R8-7_COMMAND_GAP_LIST.md
 docs/real_device/results/R8-8A_REAL_DEVICE_COMMAND_SEND_CHECK_RESULT.md
+artifacts/utr_s201_ai_v005/README.md
+artifacts/utr_s201_ai_v005/MANIFEST.md
+artifacts/utr_s201_ai_v005/utr_s201_ai_v005_full_command_internal_release_no_pdf.zip
 ```
+
+v005 full-command internal release:
+
+- no-PDF
+- 正式RCではありません
+- 顧客提供版ではありません
+- 本番利用可能版ではありません
+- UHF_Read standalone remains HOLD
 
 ## 安全上の注意
 
