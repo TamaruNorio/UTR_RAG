@@ -49,6 +49,7 @@ docs/real_device/R8-3_REAL_DEVICE_TEST_PLAN.md
 docs/real_device/results/R8-3_REAL_DEVICE_TEST_RESULT.md
 docs/real_device/R8-3B_SAFE_COMMAND_SELECTION.md
 docs/real_device/results/R8-3C_SAFE_REAL_DEVICE_CHECK_RESULT.md
+docs/release/R8-4_INTERNAL_PRE_RC_RELEASE_DECISION.md
 ```
 
 ## 安全上の注意
