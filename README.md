@@ -15,6 +15,8 @@
 - 実機確認未実施
 - 正式RCではない
 - R8-1 pre-RC 社内共有用チェックリスト
+- R8-2 リリース準備文書
+- R8-3 実機確認計画
 
 ## 成果物
 
@@ -36,6 +38,14 @@ R8-1 pre-RC 社内共有用チェックリスト:
 
 ```text
 docs/R8-1_PRE_RC_INTERNAL_SHARE_CHECKLIST.md
+```
+
+R8-2 / R8-3 リリース準備文書:
+
+```text
+docs/release/R8-2_RELEASE_READINESS_PLAN.md
+docs/release/R8-2_RELEASE_DECISION_TABLE.md
+docs/real_device/R8-3_REAL_DEVICE_TEST_PLAN.md
 ```
 
 ## 安全上の注意
