@@ -39,4 +39,8 @@
 | 31 | コマンド根拠参照の不足が一覧化されている | PASS | 必須 | R8-7レビュー | 一覧化済み | traceability不足5件 |
 | 32 | 全コマンド網羅確認は未完了またはHOLDである | HOLD | 必須 | R8-7レビュー | HOLD | PDF原本照合と不足補完が未完了 |
 | 33 | 実機へのコマンド送信確認が完了している | PASS | 必須 | R8-8A実機確認 | 既存サンプルでステータス取得とInventoryを実施 | `UHF_Read` 単体確認は未実施のためHOLD事項として継続 |
-| 34 | リリース判断者が確認している | TODO | 必須 | 判断者レビュー | 未実施 | R8-5以降で判断 |
+| 34 | v005 full-command no-PDF package が作成されている | PASS | 必須 | R8-9成果物確認 | 作成済み | `artifacts/utr_s201_ai_v005/utr_s201_ai_v005_full_command_internal_release_no_pdf.zip` |
+| 35 | v005 MANIFEST が作成されている | PASS | 必須 | R8-9成果物確認 | 作成済み | `artifacts/utr_s201_ai_v005/MANIFEST.md` |
+| 36 | v005 SHA256 が記録されている | PASS | 必須 | R8-9成果物確認 | 記録済み | `20F87EE55FC3B555EABE38BB3492CFEB303754E7539DAD8D0BC46BEBD7B29712` |
+| 37 | UHF_Read standalone は HOLD | HOLD | 必須 | R8-8A実機確認 | 未実施 | 既存入口に含まれないため単体確認は未実施 |
+| 38 | リリース判断者が確認している | TODO | 必須 | 判断者レビュー | 未実施 | R8-10以降で判断 |
