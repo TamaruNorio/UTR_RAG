@@ -43,4 +43,8 @@
 | 35 | v005 MANIFEST が作成されている | PASS | 必須 | R8-9成果物確認 | 作成済み | `artifacts/utr_s201_ai_v005/MANIFEST.md` |
 | 36 | v005 SHA256 が記録されている | PASS | 必須 | R8-9成果物確認 | 記録済み | `20F87EE55FC3B555EABE38BB3492CFEB303754E7539DAD8D0BC46BEBD7B29712` |
 | 37 | UHF_Read standalone は HOLD | HOLD | 必須 | R8-8A実機確認 | 未実施 | 既存入口に含まれないため単体確認は未実施 |
-| 38 | リリース判断者が確認している | TODO | 必須 | 判断者レビュー | 未実施 | R8-10以降で判断 |
+| 38 | v005 package validation が実施されている | PASS | 必須 | R8-10成果物検証 | 検証済み | `docs/release/R8-10_V005_PACKAGE_VALIDATION.md` |
+| 39 | v005 ZIP SHA256 が一致している | PASS | 必須 | R8-10成果物検証 | 一致 | `20F87EE55FC3B555EABE38BB3492CFEB303754E7539DAD8D0BC46BEBD7B29712` |
+| 40 | v005 ZIP が no-PDF である | PASS | 必須 | R8-10成果物検証 | PDFなし | 展開先でPDF混入なしを確認 |
+| 41 | v005 ZIP にR7-5A ZIPが二重梱包されていない | PASS | 必須 | R8-10成果物検証 | 二重梱包なし | 展開先でZIP混入なしを確認 |
+| 42 | リリース判断者が確認している | TODO | 必須 | 判断者レビュー | 未実施 | R8-11以降で判断 |

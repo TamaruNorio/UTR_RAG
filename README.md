@@ -55,6 +55,7 @@ docs/commands/R8-7_COMMAND_COVERAGE_AUDIT.md
 docs/commands/R8-7_ALL_COMMAND_CATALOG_DRAFT.md
 docs/commands/R8-7_COMMAND_GAP_LIST.md
 docs/real_device/results/R8-8A_REAL_DEVICE_COMMAND_SEND_CHECK_RESULT.md
+docs/release/R8-10_V005_PACKAGE_VALIDATION.md
 artifacts/utr_s201_ai_v005/README.md
 artifacts/utr_s201_ai_v005/MANIFEST.md
 artifacts/utr_s201_ai_v005/utr_s201_ai_v005_full_command_internal_release_no_pdf.zip
