@@ -12,7 +12,7 @@
 - R7-5A front matter notes cleanup
 - no-PDF package
 - pre-RC候補
-- 実機確認未実施
+- R8-8A 実機コマンド送信確認 PASS_WITH_NOTES
 - 正式RCではない
 - R8-1 pre-RC 社内共有用チェックリスト
 - R8-2 リリース準備文書
@@ -58,7 +58,7 @@ docs/real_device/results/R8-8A_REAL_DEVICE_COMMAND_SEND_CHECK_RESULT.md
 
 ## 安全上の注意
 
-- 本リポジトリの内容は、実機確認済みではありません
+- 本リポジトリの内容は、全項目が実機確認済みではありません
 - 正式RCではありません
 - 完成Hex、SUM計算済みコマンド、実機送信用コードの生成を目的としません
 - PDF原本は同梱しません
