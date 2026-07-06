@@ -14,6 +14,7 @@
 - pre-RC候補
 - 実機確認未実施
 - 正式RCではない
+- R8-1 pre-RC 社内共有用チェックリスト
 
 ## 成果物
 
@@ -27,6 +28,14 @@ SHA256:
 
 ```text
 2103B818045608383FD94F0047B471D4B2E3A3610BC8E46EAA644DF29F738521
+```
+
+## チェックリスト
+
+R8-1 pre-RC 社内共有用チェックリスト:
+
+```text
+docs/R8-1_PRE_RC_INTERNAL_SHARE_CHECKLIST.md
 ```
 
 ## 安全上の注意
