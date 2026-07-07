@@ -54,4 +54,9 @@
 | 46 | AI-ready品質基準が作成されている | PASS | 必須 | R9-0文書確認 | 作成済み | `docs/ai_ready/R9-0_AI_READY_QUALITY_CRITERIA.md` |
 | 47 | 外部レビュー候補GAPリストが作成されている | PASS | 必須 | R9-0文書確認 | 作成済み | `docs/release/R9-0_EXTERNAL_REVIEW_CANDIDATE_GAP_LIST.md` |
 | 48 | 正式社外公開判断 | HOLD | 必須 | 社内承認 | 未承認 | v006候補準備段階であり、正式公開ではない |
-| 49 | リリース判断者が確認している | TODO | 必須 | 判断者レビュー | 未実施 | R9-1以降で判断 |
+| 49 | 要件確認ガイドが作成されている | PASS | 必須 | R9-1文書確認 | 作成済み | `docs/use_cases/R9-1_REQUIREMENT_CLARIFICATION_GUIDE.md` |
+| 50 | 読み取り最適化ポリシーが作成されている | PASS | 必須 | R9-1文書確認 | 作成済み | `docs/use_cases/R9-1_READING_OPTIMIZATION_POLICY.md` |
+| 51 | 操作レベルと承認条件が定義されている | PASS | 必須 | R9-1文書確認 | 作成済み | `docs/use_cases/R9-1_OPERATION_LEVELS_AND_APPROVAL.md` |
+| 52 | 読み取りユースケースマトリクスが作成されている | PASS | 必須 | R9-1文書確認 | 作成済み | `docs/use_cases/R9-1_READING_USE_CASE_MATRIX.md` |
+| 53 | 確認質問テンプレートが作成されている | PASS | 必須 | R9-1文書確認 | 作成済み | `docs/use_cases/R9-1_CLARIFYING_QUESTION_TEMPLATES.md` |
+| 54 | リリース判断者が確認している | TODO | 必須 | 判断者レビュー | 未実施 | R9-2以降で判断 |
