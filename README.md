@@ -66,6 +66,11 @@ docs/policy/R9-0_SUPPORT_BOUNDARY_POLICY.md
 docs/policy/R9-0_LICENSE_AND_IP_CHECKLIST.md
 docs/ai_ready/R9-0_AI_READY_QUALITY_CRITERIA.md
 docs/release/R9-0_EXTERNAL_REVIEW_CANDIDATE_GAP_LIST.md
+docs/use_cases/R9-1_REQUIREMENT_CLARIFICATION_GUIDE.md
+docs/use_cases/R9-1_READING_OPTIMIZATION_POLICY.md
+docs/use_cases/R9-1_OPERATION_LEVELS_AND_APPROVAL.md
+docs/use_cases/R9-1_READING_USE_CASE_MATRIX.md
+docs/use_cases/R9-1_CLARIFYING_QUESTION_TEMPLATES.md
 ```
 
 v005 full-command internal release:
@@ -83,6 +88,13 @@ v006では社外向けリリース候補を目指します。ただし、現時�
 - 日本の電波法準拠機器向け
 - 海外販売・海外運用向けではありません
 - PDF正本の代替ではありません
+
+R9-1では、自然言語の依頼に対する確認質問と読み取り最適化方針を追加しました。
+
+- 危険操作を一律禁止するのではなく、必要性、影響、復旧方法、承認条件に基づいて扱います
+- 日本国内仕様の範囲を前提とします
+- 海外利用・海外販売は対象外です
+- Level 4以上はAIが勝手に実装しません
 
 ## 安全上の注意
 
