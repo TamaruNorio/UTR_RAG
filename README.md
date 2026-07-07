@@ -71,6 +71,11 @@ docs/use_cases/R9-1_READING_OPTIMIZATION_POLICY.md
 docs/use_cases/R9-1_OPERATION_LEVELS_AND_APPROVAL.md
 docs/use_cases/R9-1_READING_USE_CASE_MATRIX.md
 docs/use_cases/R9-1_CLARIFYING_QUESTION_TEMPLATES.md
+docs/commands/cards/README.md
+docs/commands/cards/SAFETY_INDEX.md
+docs/commands/cards/TEST_STATUS_INDEX.md
+docs/commands/cards/OPERATION_LEVEL_INDEX.md
+docs/commands/cards/AI_RETRIEVAL_INDEX.md
 ```
 
 v005 full-command internal release:
@@ -95,6 +100,15 @@ R9-1では、自然言語の依頼に対する確認質問と読み取り最適�
 - 日本国内仕様の範囲を前提とします
 - 海外利用・海外販売は対象外です
 - Level 4以上はAIが勝手に実装しません
+
+R9-3では、R8-7で抽出した38コマンドを1コマンド/1カード形式で整理し、AI検索用インデックス、安全分類インデックス、実機確認状況インデックス、操作レベル別インデックスを追加しました。
+
+- R8-7抽出結果を根拠にした構造化カードです
+- PDF原本との全件再照合は未完了です
+- 日本国内向け、日本の電波法準拠機器向けの整理です
+- 海外利用・海外販売は対象外です
+- 完成Hex、SUM計算済みコマンド、実機送信用コードは含めません
+- 正式な社外公開版ではありません
 
 ## 安全上の注意
 

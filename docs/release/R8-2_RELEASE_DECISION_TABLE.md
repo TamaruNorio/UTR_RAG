@@ -60,3 +60,10 @@
 | 52 | 読み取りユースケースマトリクスが作成されている | PASS | 必須 | R9-1文書確認 | 作成済み | `docs/use_cases/R9-1_READING_USE_CASE_MATRIX.md` |
 | 53 | 確認質問テンプレートが作成されている | PASS | 必須 | R9-1文書確認 | 作成済み | `docs/use_cases/R9-1_CLARIFYING_QUESTION_TEMPLATES.md` |
 | 54 | リリース判断者が確認している | TODO | 必須 | 判断者レビュー | 未実施 | R9-2以降で判断 |
+| 55 | structured command cards が作成されている | PASS | 必須 | R9-3文書確認 | 38件作成 | `docs/commands/cards/README.md` |
+| 56 | safety index が作成されている | PASS | 必須 | R9-3文書確認 | 作成済み | `docs/commands/cards/SAFETY_INDEX.md` |
+| 57 | test status index が作成されている | PASS | 必須 | R9-3文書確認 | 作成済み | `docs/commands/cards/TEST_STATUS_INDEX.md` |
+| 58 | operation level index が作成されている | PASS | 必須 | R9-3文書確認 | 作成済み | `docs/commands/cards/OPERATION_LEVEL_INDEX.md` |
+| 59 | AI retrieval index が作成されている | PASS | 必須 | R9-3文書確認 | 作成済み | `docs/commands/cards/AI_RETRIEVAL_INDEX.md` |
+| 60 | PDF原本との全件再照合が完了している | HOLD | 必須 | R9-3文書確認 | 未完了 | R8-7抽出結果を根拠に整理。PDF正本との全件再照合は次工程以降 |
+| 61 | 正式な社外公開判断 | HOLD | 必須 | 社内承認 | 未承認 | R9-3はAI-ready構造化段階であり正式社外公開版ではない |
