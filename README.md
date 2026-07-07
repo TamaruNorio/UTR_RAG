@@ -18,6 +18,7 @@
 - R8-2 リリース準備文書
 - R8-3 実機確認計画
 - v005 full-command internal release no-PDF package
+- v006 External Review Candidate preparation
 
 ## 成果物
 
@@ -59,6 +60,12 @@ docs/release/R8-10_V005_PACKAGE_VALIDATION.md
 artifacts/utr_s201_ai_v005/README.md
 artifacts/utr_s201_ai_v005/MANIFEST.md
 artifacts/utr_s201_ai_v005/utr_s201_ai_v005_full_command_internal_release_no_pdf.zip
+docs/policy/R9-0_JAPAN_DOMESTIC_SCOPE_POLICY.md
+docs/policy/R9-0_EXTERNAL_RELEASE_SCOPE_POLICY.md
+docs/policy/R9-0_SUPPORT_BOUNDARY_POLICY.md
+docs/policy/R9-0_LICENSE_AND_IP_CHECKLIST.md
+docs/ai_ready/R9-0_AI_READY_QUALITY_CRITERIA.md
+docs/release/R9-0_EXTERNAL_REVIEW_CANDIDATE_GAP_LIST.md
 ```
 
 v005 full-command internal release:
@@ -68,6 +75,14 @@ v005 full-command internal release:
 - 顧客提供版ではありません
 - 本番利用可能版ではありません
 - UHF_Read standalone remains HOLD
+
+v006では社外向けリリース候補を目指します。ただし、現時点では正式公開版ではありません。
+
+- 日本国内向け
+- 日本語利用者向け
+- 日本の電波法準拠機器向け
+- 海外販売・海外運用向けではありません
+- PDF正本の代替ではありません
 
 ## 安全上の注意
 
