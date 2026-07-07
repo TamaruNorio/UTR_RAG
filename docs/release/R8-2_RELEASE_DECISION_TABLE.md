@@ -67,3 +67,9 @@
 | 59 | AI retrieval index が作成されている | PASS | 必須 | R9-3文書確認 | 作成済み | `docs/commands/cards/AI_RETRIEVAL_INDEX.md` |
 | 60 | PDF原本との全件再照合が完了している | HOLD | 必須 | R9-3文書確認 | 未完了 | R8-7抽出結果を根拠に整理。PDF正本との全件再照合は次工程以降 |
 | 61 | 正式な社外公開判断 | HOLD | 必須 | 社内承認 | 未承認 | R9-3はAI-ready構造化段階であり正式社外公開版ではない |
+| 62 | AI-ready external review validation が実施されている | PASS | 必須 | R9-4文書確認 | 実施済み | `docs/release/R9-4_AI_READY_EXTERNAL_REVIEW_VALIDATION.md` |
+| 63 | External review decision が作成されている | PASS | 必須 | R9-4文書確認 | 作成済み | `docs/release/R9-4_EXTERNAL_REVIEW_DECISION.md` |
+| 64 | Remaining HOLD items が整理されている | PASS | 必須 | R9-4文書確認 | 整理済み | `docs/release/R9-4_REMAINING_HOLD_ITEMS.md` |
+| 65 | AI retrieval validation checklist が作成されている | PASS | 必須 | R9-4文書確認 | 作成済み | `docs/ai_ready/R9-4_AI_RETRIEVAL_VALIDATION_CHECKLIST.md` |
+| 66 | v006 package作成へ進める | PASS | 必須 | R9-4判断 | 進行可 | HOLD事項付きでR9-5 package作成へ進める |
+| 67 | 正式社外公開判断はHOLD | HOLD | 必須 | 社内承認 | 未承認 | R9-4時点では正式社外公開ではない |

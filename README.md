@@ -76,6 +76,10 @@ docs/commands/cards/SAFETY_INDEX.md
 docs/commands/cards/TEST_STATUS_INDEX.md
 docs/commands/cards/OPERATION_LEVEL_INDEX.md
 docs/commands/cards/AI_RETRIEVAL_INDEX.md
+docs/release/R9-4_AI_READY_EXTERNAL_REVIEW_VALIDATION.md
+docs/release/R9-4_EXTERNAL_REVIEW_DECISION.md
+docs/release/R9-4_REMAINING_HOLD_ITEMS.md
+docs/ai_ready/R9-4_AI_RETRIEVAL_VALIDATION_CHECKLIST.md
 ```
 
 v005 full-command internal release:
@@ -109,6 +113,14 @@ R9-3では、R8-7で抽出した38コマンドを1コマンド/1カード形式�
 - 海外利用・海外販売は対象外です
 - 完成Hex、SUM計算済みコマンド、実機送信用コードは含めません
 - 正式な社外公開版ではありません
+
+R9-4では、v006 External Review Candidate package作成前のAI-ready検証を実施し、package作成へ進めるかを判断しました。
+
+- 正式社外公開ではありません
+- PDF正本の代替ではありません
+- 日本国内仕様前提です
+- 海外利用・海外販売は対象外です
+- HOLD事項は残ります
 
 ## 安全上の注意
 
