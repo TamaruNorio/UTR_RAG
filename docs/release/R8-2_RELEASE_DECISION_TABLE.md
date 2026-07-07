@@ -47,4 +47,11 @@
 | 39 | v005 ZIP SHA256 が一致している | PASS | 必須 | R8-10成果物検証 | 一致 | `20F87EE55FC3B555EABE38BB3492CFEB303754E7539DAD8D0BC46BEBD7B29712` |
 | 40 | v005 ZIP が no-PDF である | PASS | 必須 | R8-10成果物検証 | PDFなし | 展開先でPDF混入なしを確認 |
 | 41 | v005 ZIP にR7-5A ZIPが二重梱包されていない | PASS | 必須 | R8-10成果物検証 | 二重梱包なし | 展開先でZIP混入なしを確認 |
-| 42 | リリース判断者が確認している | TODO | 必須 | 判断者レビュー | 未実施 | R8-11以降で判断 |
+| 42 | 日本国内向けスコープ方針が作成されている | PASS | 必須 | R9-0文書確認 | 作成済み | `docs/policy/R9-0_JAPAN_DOMESTIC_SCOPE_POLICY.md` |
+| 43 | 社外向けスコープ方針が作成されている | PASS | 必須 | R9-0文書確認 | 作成済み | `docs/policy/R9-0_EXTERNAL_RELEASE_SCOPE_POLICY.md` |
+| 44 | サポート範囲方針が作成されている | PASS | 必須 | R9-0文書確認 | 作成済み | `docs/policy/R9-0_SUPPORT_BOUNDARY_POLICY.md` |
+| 45 | ライセンス/IPチェックリストが作成されている | PASS | 必須 | R9-0文書確認 | 作成済み | `docs/policy/R9-0_LICENSE_AND_IP_CHECKLIST.md` |
+| 46 | AI-ready品質基準が作成されている | PASS | 必須 | R9-0文書確認 | 作成済み | `docs/ai_ready/R9-0_AI_READY_QUALITY_CRITERIA.md` |
+| 47 | 外部レビュー候補GAPリストが作成されている | PASS | 必須 | R9-0文書確認 | 作成済み | `docs/release/R9-0_EXTERNAL_REVIEW_CANDIDATE_GAP_LIST.md` |
+| 48 | 正式社外公開判断 | HOLD | 必須 | 社内承認 | 未承認 | v006候補準備段階であり、正式公開ではない |
+| 49 | リリース判断者が確認している | TODO | 必須 | 判断者レビュー | 未実施 | R9-1以降で判断 |
