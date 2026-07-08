@@ -91,3 +91,10 @@
 | 83 | 外部レビュー依頼文面が作成されている | PASS | 必須 | R9-9文書確認 | 作成済み | `docs/release/R9-9_EXTERNAL_REVIEW_REQUEST_MESSAGE.md` |
 | 84 | 外部共有は社内判断後である | HOLD | 必須 | 社内承認 | 判断待ち | 共有範囲、レビュー先、期限は社内確認後に決定 |
 | 85 | 正式社外公開判断はHOLD | HOLD | 必須 | 社内承認 | 未承認 | R9-8/R9-9時点では正式社外公開ではない |
+| 86 | artifact inventory が作成されている | PASS | 必須 | R9-10文書確認 | 作成済み | `docs/release/R9-10_ARTIFACT_AND_ZIP_INVENTORY.md` |
+| 87 | ZIP handling policy が作成されている | PASS | 必須 | R9-10文書確認 | 作成済み | `docs/release/R9-10_ZIP_HANDLING_POLICY.md` |
+| 88 | post-release document status が整理されている | PASS | 必須 | R9-10文書確認 | 整理済み | `docs/release/R9-10_POST_RELEASE_DOCUMENT_STATUS.md` |
+| 89 | 現在の外部レビュー候補ZIPはv006である | PASS | 必須 | R9-10文書確認 | v006 | `artifacts/utr_s201_ai_v006/utr_s201_ai_v006_external_review_candidate_no_pdf.zip` |
+| 90 | Release済みZIPは変更しない | PASS | 必須 | R9-10方針確認 | 方針化済み | v004/v005/v006 ZIPは削除・上書き・再作成しない |
+| 91 | R9-8/R9-9はv006 ZIP未収録で問題ない | PASS | 必須 | R9-10文書確認 | 問題なし | Release後文書として扱い、必要なら別途参照する |
+| 92 | 正式社外公開判断はHOLD | HOLD | 必須 | 社内承認 | 未承認 | R9-10時点では正式社外公開ではない |

@@ -87,6 +87,10 @@ docs/release/R9-6_V006_PACKAGE_VALIDATION.md
 docs/release/R9-6_V006_RELEASE_READINESS_DECISION.md
 docs/release/R9-8_INTERNAL_SHARE_MESSAGE.md
 docs/release/R9-9_EXTERNAL_REVIEW_REQUEST_MESSAGE.md
+artifacts/README.md
+docs/release/R9-10_ARTIFACT_AND_ZIP_INVENTORY.md
+docs/release/R9-10_ZIP_HANDLING_POLICY.md
+docs/release/R9-10_POST_RELEASE_DOCUMENT_STATUS.md
 ```
 
 v005 full-command internal release:
@@ -149,6 +153,14 @@ R9-8では社内共有文面を作成し、R9-9では外部レビュー依頼文
 
 - v006はExternal Review Candidateであり正式社外公開ではありません
 - 外部共有は社内判断後に行います
+
+R9-10ではZIP成果物の整理方針を追加しました。
+
+- 現在の外部レビュー候補ZIPはv006です
+- v004/v005は履歴保持用です
+- Release済みZIPは削除・再作成・上書きしません
+- R9-8/R9-9はRelease後文書であり、v006 ZIP未収録でも問題ありません
+- 次にZIPを更新する場合は新versionを作ります
 
 ## 安全上の注意
 
