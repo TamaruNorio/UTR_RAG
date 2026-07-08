@@ -83,6 +83,8 @@ docs/ai_ready/R9-4_AI_RETRIEVAL_VALIDATION_CHECKLIST.md
 artifacts/utr_s201_ai_v006/README.md
 artifacts/utr_s201_ai_v006/MANIFEST.md
 artifacts/utr_s201_ai_v006/utr_s201_ai_v006_external_review_candidate_no_pdf.zip
+docs/release/R9-6_V006_PACKAGE_VALIDATION.md
+docs/release/R9-6_V006_RELEASE_READINESS_DECISION.md
 ```
 
 v005 full-command internal release:
@@ -134,6 +136,11 @@ R9-5では、v006 External Review Candidate package を作成しました。
 - PDF正本の代替ではありません
 - 日本国内仕様前提です
 - 海外利用・海外販売は対象外です
+- HOLD事項があります
+
+R9-6では、v006 package validation を実施し、R9-7 GitHub pre-releaseへ進めるかを判断しました。
+
+- 正式社外公開ではありません
 - HOLD事項があります
 
 ## 安全上の注意
