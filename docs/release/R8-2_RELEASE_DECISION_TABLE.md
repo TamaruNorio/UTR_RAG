@@ -80,3 +80,10 @@
 | 72 | v006 ZIP が no-PDF である | PASS | 必須 | R9-5 ZIP確認 | PDFなし | no-PDF packageとして作成 |
 | 73 | v006 ZIP に既存ZIPが二重梱包されていない | PASS | 必須 | R9-5 ZIP確認 | 二重梱包なし | R7-5A/v005/v006 ZIP自身を含めない |
 | 74 | 正式社外公開判断はHOLD | HOLD | 必須 | 社内承認 | 未承認 | v006はExternal Review Candidateであり正式社外公開版ではない |
+| 75 | v006 package validation が実施されている | PASS | 必須 | R9-6検証 | 実施済み | `docs/release/R9-6_V006_PACKAGE_VALIDATION.md` |
+| 76 | v006 ZIP SHA256 が一致している | PASS | 必須 | R9-6検証 | 一致 | `A68486F7DCD2EA932D0C6DA63C9AE282A8751BEB03CD6A33F6AB4463BC3333CA` |
+| 77 | v006 ZIP が no-PDF である | PASS | 必須 | R9-6検証 | PDFなし | 展開先でPDFなしを確認 |
+| 78 | v006 ZIP に既存ZIPが二重梱包されていない | PASS | 必須 | R9-6検証 | 二重梱包なし | 既存ZIPおよびv006 ZIP自身なし |
+| 79 | v006 Release readiness decision が作成されている | PASS | 必須 | R9-6判断 | 作成済み | `docs/release/R9-6_V006_RELEASE_READINESS_DECISION.md` |
+| 80 | R9-7 pre-releaseへ進める | PASS | 必須 | R9-6判断 | 進行可 | HOLD事項付きでGitHub pre-releaseへ進める |
+| 81 | 正式社外公開判断はHOLD | HOLD | 必須 | 社内承認 | 未承認 | R9-6時点では正式社外公開ではない |
