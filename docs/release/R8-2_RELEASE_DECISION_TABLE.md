@@ -87,3 +87,7 @@
 | 79 | v006 Release readiness decision が作成されている | PASS | 必須 | R9-6判断 | 作成済み | `docs/release/R9-6_V006_RELEASE_READINESS_DECISION.md` |
 | 80 | R9-7 pre-releaseへ進める | PASS | 必須 | R9-6判断 | 進行可 | HOLD事項付きでGitHub pre-releaseへ進める |
 | 81 | 正式社外公開判断はHOLD | HOLD | 必須 | 社内承認 | 未承認 | R9-6時点では正式社外公開ではない |
+| 82 | 社内共有文面が作成されている | PASS | 必須 | R9-8文書確認 | 作成済み | `docs/release/R9-8_INTERNAL_SHARE_MESSAGE.md` |
+| 83 | 外部レビュー依頼文面が作成されている | PASS | 必須 | R9-9文書確認 | 作成済み | `docs/release/R9-9_EXTERNAL_REVIEW_REQUEST_MESSAGE.md` |
+| 84 | 外部共有は社内判断後である | HOLD | 必須 | 社内承認 | 判断待ち | 共有範囲、レビュー先、期限は社内確認後に決定 |
+| 85 | 正式社外公開判断はHOLD | HOLD | 必須 | 社内承認 | 未承認 | R9-8/R9-9時点では正式社外公開ではない |
