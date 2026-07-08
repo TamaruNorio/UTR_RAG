@@ -73,3 +73,10 @@
 | 65 | AI retrieval validation checklist が作成されている | PASS | 必須 | R9-4文書確認 | 作成済み | `docs/ai_ready/R9-4_AI_RETRIEVAL_VALIDATION_CHECKLIST.md` |
 | 66 | v006 package作成へ進める | PASS | 必須 | R9-4判断 | 進行可 | HOLD事項付きでR9-5 package作成へ進める |
 | 67 | 正式社外公開判断はHOLD | HOLD | 必須 | 社内承認 | 未承認 | R9-4時点では正式社外公開ではない |
+| 68 | v006 External Review Candidate package が作成されている | PASS | 必須 | R9-5成果物確認 | 作成済み | `artifacts/utr_s201_ai_v006/utr_s201_ai_v006_external_review_candidate_no_pdf.zip` |
+| 69 | v006 README が作成されている | PASS | 必須 | R9-5成果物確認 | 作成済み | `artifacts/utr_s201_ai_v006/README.md` |
+| 70 | v006 MANIFEST が作成されている | PASS | 必須 | R9-5成果物確認 | 作成済み | `artifacts/utr_s201_ai_v006/MANIFEST.md` |
+| 71 | v006 ZIP SHA256 が記録されている | PASS | 必須 | R9-5成果物確認 | 記録済み | `A68486F7DCD2EA932D0C6DA63C9AE282A8751BEB03CD6A33F6AB4463BC3333CA` |
+| 72 | v006 ZIP が no-PDF である | PASS | 必須 | R9-5 ZIP確認 | PDFなし | no-PDF packageとして作成 |
+| 73 | v006 ZIP に既存ZIPが二重梱包されていない | PASS | 必須 | R9-5 ZIP確認 | 二重梱包なし | R7-5A/v005/v006 ZIP自身を含めない |
+| 74 | 正式社外公開判断はHOLD | HOLD | 必須 | 社内承認 | 未承認 | v006はExternal Review Candidateであり正式社外公開版ではない |

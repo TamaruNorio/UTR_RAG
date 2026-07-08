@@ -80,6 +80,9 @@ docs/release/R9-4_AI_READY_EXTERNAL_REVIEW_VALIDATION.md
 docs/release/R9-4_EXTERNAL_REVIEW_DECISION.md
 docs/release/R9-4_REMAINING_HOLD_ITEMS.md
 docs/ai_ready/R9-4_AI_RETRIEVAL_VALIDATION_CHECKLIST.md
+artifacts/utr_s201_ai_v006/README.md
+artifacts/utr_s201_ai_v006/MANIFEST.md
+artifacts/utr_s201_ai_v006/utr_s201_ai_v006_external_review_candidate_no_pdf.zip
 ```
 
 v005 full-command internal release:
@@ -121,6 +124,17 @@ R9-4では、v006 External Review Candidate package作成前のAI-ready検証を
 - 日本国内仕様前提です
 - 海外利用・海外販売は対象外です
 - HOLD事項は残ります
+
+R9-5では、v006 External Review Candidate package を作成しました。
+
+- no-PDF package
+- 正式社外公開版ではありません
+- 正式RCではありません
+- 顧客提供版ではありません
+- PDF正本の代替ではありません
+- 日本国内仕様前提です
+- 海外利用・海外販売は対象外です
+- HOLD事項があります
 
 ## 安全上の注意
 
