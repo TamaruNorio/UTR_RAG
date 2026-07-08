@@ -85,6 +85,8 @@ artifacts/utr_s201_ai_v006/MANIFEST.md
 artifacts/utr_s201_ai_v006/utr_s201_ai_v006_external_review_candidate_no_pdf.zip
 docs/release/R9-6_V006_PACKAGE_VALIDATION.md
 docs/release/R9-6_V006_RELEASE_READINESS_DECISION.md
+docs/release/R9-8_INTERNAL_SHARE_MESSAGE.md
+docs/release/R9-9_EXTERNAL_REVIEW_REQUEST_MESSAGE.md
 ```
 
 v005 full-command internal release:
@@ -142,6 +144,11 @@ R9-6では、v006 package validation を実施し、R9-7 GitHub pre-releaseへ�
 
 - 正式社外公開ではありません
 - HOLD事項があります
+
+R9-8では社内共有文面を作成し、R9-9では外部レビュー依頼文面を作成しました。
+
+- v006はExternal Review Candidateであり正式社外公開ではありません
+- 外部共有は社内判断後に行います
 
 ## 安全上の注意
 
