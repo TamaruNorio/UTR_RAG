@@ -1,71 +1,115 @@
-# Flash Initialize Command Card
+# FLASH設定の初期化
 
-## 1. Command Identity
+## 1. Command identity
 
-- Command name: Flash Initialize
-- Command group: reader persistent settings
-- Command code reference: 4E/6F
-- R8-7 catalog source: `docs/current/06_COMMAND_INDEX.md`
+- PDF section: 7.3.11
+- Command name: FLASH設定の初期化
+- Category: リーダライタ制御
+- Command byte: 4Eh
+- Detail command byte: 6Fh
+- Subcommand byte: -
+- Command family: リーダライタ制御
+- Read / Write / Control / RF tag / Mode: Control
+- Source PDF: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17 (TDR-MNL-PRC-UTR-S201-117.pdf, 2025-06-16)
+- Verification status: PDF Ver.1.17 desk review
 
 ## 2. Purpose
 
-FLASH初期化に関する整理用カードである。永続設定の初期化や復旧困難な状態変更につながる可能性があるため、実施対象外とする。
+FLASH設定を初期化する。
 
-## 3. Safety Classification
+## 3. Usage status
 
-- Safety class: `FLASH_WRITE_PROHIBITED`
-- Risk: 永続設定初期化、設定喪失、復旧困難
-- Default handling: 実行禁止
+- Status: SUPPORTED_WITH_RECOVERY_NOTE
+- Reason: PDF Ver.1.17 lists this command in section 7.3.11. AI/RAG organizes device, ROM, parameter, impact, response, and recovery conditions instead of deciding arbitrary non-use.
 
-## 4. Operation Level
+## 4. Safety / impact classification
 
-- Operation level: Level 5
-- Approval: 原則不可。必要時はメーカー仕様、復旧手順、明示承認が必要
+- RF emission: No or indirect
+- Setting change: Yes
+- RAM change: No
+- FLASH change: Possible
+- Tag memory change: No
+- External I/O change: No
+- Persistent effect: Check whether the target field is RAM-only, FLASH-backed, or tag-memory persistent.
+- Recovery note required: Yes
+- Parameter confirmation required: Target device series, ROM version, connection address, timeout policy, exact value, RAM or FLASH target, recovery method
 
-## 5. Parameters Overview
+## 5. Device / ROM support
 
-初期化範囲や条件の詳細はPDF原本との照合対象である。完成Hex、SUM計算済みコマンド、実機送信用コードは記載しない。
+- UTR-S201: Supported
+- UTR-SUN02-4CH: Supported
+- UTR-SHR201: Supported
+- UTR-SUN02V-8CH: Supported
+- UTR-SUN02-8CH: Supported
+- ROM/version notes: Use the rightmost applicable ROM column in the support table.
+- How to identify device:
+  - Read ROM version first
+  - Parse series name
+  - Map USM01/USM02/USM05/USM06/USM08 to product type
+- Unsupported cases: Treat as unsupported only when the PDF support table or ROM/version notes say so.
 
-## 6. Expected Response Overview
+## 6. Required parameters
 
-レスポンス仕様はPDF原本との再照合が必要である。確認目的の送信は行わない。
+- Parameters: Target device series, ROM version, connection address, timeout policy, exact value, RAM or FLASH target, recovery method
+- Parameter constraints: Follow the field definitions in PDF section 7.3.11.
+- Parameters that should be asked from user: Field conditions and values not obtainable from ROM.
+- Parameters that can be read from device: ROM version number, series name, and applicable readable settings.
+- Parameters that can be inferred from ROM/series: Product type, 4CH/8CH class, and ROM-dependent support.
 
-## 7. Real-device Test Status
+## 7. Command format summary
 
-- Status: `PROHIBITED`
-- R8-8A: 未実施
-- Reason: FLASH初期化禁止
+- Command format overview: Use the common frame from chapter 5 and the command/detail/subcommand identifiers above.
+- Do not include completed Hex: This card intentionally avoids a ready-to-send full frame.
+- Do not include SUM-calculated command: This card intentionally avoids a SUM-calculated command.
 
-## 8. Preconditions
+## 8. ACK response
 
-- 社内pre-RC、外部レビュー候補、AI-ready整備では実施しない
-- 実施が必要な場合は別途HOLD解除判断が必要
+- ACK exists: Yes, unless the PDF section defines asynchronous, multiple-response, completion-response, or no-response behavior.
+- ACK command: Use the command-specific ACK structure described in PDF section 7.3.11.
+- Data length: See PDF section 7.3.11.
+- Data fields: Parse the fields documented in the command section.
+- Multiple responses: RF tag and automatic-reading related commands may require a receive loop.
+- Completion response: Required when the command section defines an end/completion response.
+- No response: Treat only as specified by the command section or timeout policy.
+- Notes: Always distinguish ACK, NACK, multiple response, completion response, and timeout.
 
-## 9. Prohibited Use
+## 9. NACK response
 
-- 自動送信
-- 初期化手順の生成
-- 実機送信用コード生成
-- 復旧準備なしの確認
+- NACK uses common 7.6 format: Yes.
+- Error code 1 relevance: Check CRC, time-over, receive, RF tag no response, internal command error, UHF IC error, LBT, hardware, antenna, SUM, and format errors.
+- Error code 2 relevance: Used mainly when Error code 1 is CMD_UHF_IC_ERROR.
+- Error code 3 relevance: Important for UHF_Encode and UHF_BlockWrite2 partial-failure diagnostics.
+- Error code 4 relevance: Important for UHF_BlockWrite2 when the code indicates RF tag access error.
+- Command-specific NACK notes: Check PDF section 7.3.11 and section 7.6 together.
+- Partial success risk: Relevant for write, erase, lock, kill, encode, and multi-word tag operations.
+- Notes: Reserved bytes in NACK should be ignored unless the PDF assigns meaning.
 
-## 10. Related Documents
+## 10. Important errors and diagnostics
 
-- `docs/current/06_COMMAND_INDEX.md`
-- `docs/current/06_COMMAND_INDEX.md`
-- `docs/current/02_SAFETY_AND_HOLD_ITEMS.md`
+- CMD_LBT_ERROR
+- CMD_ANT_ERROR
+- CMD_RXBUSY_ERROR
+- FORMAT_ERROR
+- SUM_ERROR
+- CMD_UHF_IC_ERROR
+- Access password error
+- Memory lock
+- Tag not detected
 
-## 11. AI Retrieval Tags
+## 11. Implementation notes for AI
 
-- command: Flash Initialize
-- category: persistent_reader_setting
-- safety: flash_write_prohibited
-- operation_level: 5
-- test_status: prohibited
+- まずROMバージョン読み取りで機種とROMを自動判定する。
+- AIが勝手に使用不可と決めない。
+- 実行に必要なパラメータを整理する。
+- 実機確認が必要な点と机上確認で可能な点を分ける。
+- ログには送信目的、パラメータ、ACK/NACK、エラーコード、タイムアウト、復旧判断を残す。
+- タイムアウト、受信ループ、複数レスポンス、完了レスポンス、無応答を区別する。
 
-## 12. AI Handling Notes
+## 12. Current RAG decision
 
-AIはFLASH初期化を候補化しない。必要性を問われた場合も、実行ではなくHOLD事項と承認条件を説明する。
-
-## 13. Current Decision
-
-`PROHIBITED_DOCUMENT_ONLY_WITH_SPEC_HOLD`
+- Decision: SUPPORTED_WITH_RECOVERY_NOTE
+- Reason: Listed in PDF Ver.1.17 command master and classified by impact and required confirmation.
+- Required parameter confirmation: Target device series, ROM version, connection address, timeout policy, exact value, RAM or FLASH target, recovery method
+- Required device/ROM check: Read ROM version first and consult the support table.
+- Required recovery note: Yes
+- Next action: Use this card with the command master, response/NACK master, ROM support document, and parameter confirmation guide before implementation.

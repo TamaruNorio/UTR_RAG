@@ -1,33 +1,15 @@
-# UTR-S201 AI Assistant Documentation
+# UTR_RAG Documents
 
-## 1. 位置づけ
+Current clean RAG set:
 
-docs配下は v007 final minimal package 向けの最新版ドキュメントである。v006 Release後に、社外レビュー候補として読みやすい構成へ整理した。
+- `docs/current/00_OVERVIEW.md`
+- `docs/current/09_COMMAND_MASTER_V117.md`
+- `docs/current/10_RESPONSE_AND_NACK_MASTER.md`
+- `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+- `docs/current/12_RAM_FLASH_IMPACT_MATRIX.md`
+- `docs/current/13_RF_SAFETY_AND_CARRIER_RULES.md`
+- `docs/current/14_AI_IMPLEMENTATION_GUARDRAILS.md`
+- `docs/current/15_PARAMETER_CONFIRMATION_GUIDE.md`
+- `docs/current/commands/cards/`
 
-過去のR8/R9作業履歴文書はmain上から整理済みである。過去履歴はGit履歴、Release tag、v006 ZIPで確認できる。
-
-## 2. 現在読むべき順番
-
-1. `docs/current/00_OVERVIEW.md`
-2. `docs/current/01_SCOPE_AND_POSITIONING.md`
-3. `docs/current/02_SAFETY_AND_HOLD_ITEMS.md`
-4. `docs/current/03_AI_USAGE_GUIDE.md`
-5. `docs/current/04_REQUIREMENT_CLARIFICATION.md`
-6. `docs/current/05_MULTI_LANGUAGE_IMPLEMENTATION.md`
-7. `docs/current/06_COMMAND_INDEX.md`
-8. `docs/current/07_RELEASE_AND_ARTIFACTS.md`
-9. `docs/current/08_INTERNAL_SHARE_AND_EXTERNAL_REVIEW.md`
-
-## 3. 成果物
-
-- v007 ZIP: `artifacts/utr_s201_ai_v007/utr_s201_ai_v007_final_minimal_no_pdf.zip`
-- v006 Release: https://github.com/TamaruNorio/UTR_RAG/releases/tag/utr-s201-ai-v006-r9-7-external-review-candidate.1
-
-## 4. 注意
-
-- 正式社外公開版ではない
-- 正式RCではない
-- 顧客提供版ではない
-- PDF正本の代替ではない
-- 海外販売・海外運用向けではない
-- HOLD事項付きである
+The current set is based on UTR-S201 series communication protocol manual Ver.1.17 and contains 54 command cards. It is no-PDF and is not a replacement for the official PDF.

@@ -1,53 +1,115 @@
 # UHF_SetExpandSelectParam
 
-## 1. Basic Information
+## 1. Command identity
+
+- PDF section: 7.4.19
 - Command name: UHF_SetExpandSelectParam
-- Command category: uhf_parameter_write
-- Command identifier: 55/32
-- Source catalog: docs/current/06_COMMAND_INDEX.md
-- Existing RAG document: あり
-- Safety matrix status: あり
-- Source traceability status: あり
-- PDF reference: あり。PDF原本との再照合が必要
-- Japan domestic scope: 日本国内仕様前提
-- Current coverage status: COVERED
+- Category: リーダライタ設定
+- Command byte: 55h
+- Detail command byte: 32h
+- Subcommand byte: -
+- Command family: リーダライタ設定
+- Read / Write / Control / RF tag / Mode: Write
+- Source PDF: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17 (TDR-MNL-PRC-UTR-S201-117.pdf, 2025-06-16)
+- Verification status: PDF Ver.1.17 desk review
+
 ## 2. Purpose
-拡張Select条件を設定する。
-## 3. Operation Summary
-読み取り条件変更を伴うLevel 4操作。
-## 4. Expected Use Cases
-- 拡張Select条件を検討したい
-## 5. Safety Classification
-- Safety class: DEVICE_SETTING_RESTRICTED
-- Operation level: Level 4
-- Requires explicit confirmation: 必須
-- Requires recovery procedure: 必須
-- Can AI implement without confirmation: 不可
-- Can be used in external review candidate: 文書参照のみ
-- Notes: Select条件変更
-## 6. Device Impact
-- 読み取り専用か: いいえ
-- 電波送信を伴うか: 条件による
-- タグメモリ変更を伴うか: いいえ
-- リーダ設定変更を伴うか: はい
-- FLASHまたは永続設定に関係するか: 保存時は要確認
-- 周波数または送信出力に関係するか: 直接ではない
-- 日本国内仕様から外れる可能性があるか: 要確認
-## 7. Parameters and Response Structure
-- Request fields: Expand Select Param。要仕様確認
-- Response fields: ACK/NACK等
-- Required parameters: 要仕様確認
-- Optional parameters: 要仕様確認
-- Unknown / needs confirmation: PDF原本との再照合
-## 8. Implementation Guidance
-Level 4として承認、復旧、ログを事前定義する。
-## 9. Real Device Test Status
-PROHIBITED。
-## 10. AI Behavior Rules
-AIが勝手に実装しない。
-## 11. Prohibited or Restricted Usage
-自動送信、完成Hex、SUM計算済みコマンド生成禁止。
-## 12. References
-- docs/current/06_COMMAND_INDEX.md
-## 13. Current Decision
-PROHIBITED_DOCUMENT_ONLY
+
+拡張Selectパラメータを設定する。
+
+## 3. Usage status
+
+- Status: SUPPORTED_WITH_PARAMETERS
+- Reason: PDF Ver.1.17 lists this command in section 7.4.19. AI/RAG organizes device, ROM, parameter, impact, response, and recovery conditions instead of deciding arbitrary non-use.
+
+## 4. Safety / impact classification
+
+- RF emission: No or indirect
+- Setting change: Yes
+- RAM change: Possible
+- FLASH change: Depends on write target
+- Tag memory change: No
+- External I/O change: No
+- Persistent effect: Check whether the target field is RAM-only, FLASH-backed, or tag-memory persistent.
+- Recovery note required: As needed
+- Parameter confirmation required: Target device series, ROM version, connection address, timeout policy, exact value, RAM or FLASH target, recovery method
+
+## 5. Device / ROM support
+
+- UTR-S201: Supported
+- UTR-SUN02-4CH: Supported
+- UTR-SHR201: Supported
+- UTR-SUN02V-8CH: Supported
+- UTR-SUN02-8CH: Supported
+- ROM/version notes: Use the rightmost applicable ROM column in the support table.
+- How to identify device:
+  - Read ROM version first
+  - Parse series name
+  - Map USM01/USM02/USM05/USM06/USM08 to product type
+- Unsupported cases: Treat as unsupported only when the PDF support table or ROM/version notes say so.
+
+## 6. Required parameters
+
+- Parameters: Target device series, ROM version, connection address, timeout policy, exact value, RAM or FLASH target, recovery method
+- Parameter constraints: Follow the field definitions in PDF section 7.4.19.
+- Parameters that should be asked from user: Field conditions and values not obtainable from ROM.
+- Parameters that can be read from device: ROM version number, series name, and applicable readable settings.
+- Parameters that can be inferred from ROM/series: Product type, 4CH/8CH class, and ROM-dependent support.
+
+## 7. Command format summary
+
+- Command format overview: Use the common frame from chapter 5 and the command/detail/subcommand identifiers above.
+- Do not include completed Hex: This card intentionally avoids a ready-to-send full frame.
+- Do not include SUM-calculated command: This card intentionally avoids a SUM-calculated command.
+
+## 8. ACK response
+
+- ACK exists: Yes, unless the PDF section defines asynchronous, multiple-response, completion-response, or no-response behavior.
+- ACK command: Use the command-specific ACK structure described in PDF section 7.4.19.
+- Data length: See PDF section 7.4.19.
+- Data fields: Parse the fields documented in the command section.
+- Multiple responses: RF tag and automatic-reading related commands may require a receive loop.
+- Completion response: Required when the command section defines an end/completion response.
+- No response: Treat only as specified by the command section or timeout policy.
+- Notes: Always distinguish ACK, NACK, multiple response, completion response, and timeout.
+
+## 9. NACK response
+
+- NACK uses common 7.6 format: Yes.
+- Error code 1 relevance: Check CRC, time-over, receive, RF tag no response, internal command error, UHF IC error, LBT, hardware, antenna, SUM, and format errors.
+- Error code 2 relevance: Used mainly when Error code 1 is CMD_UHF_IC_ERROR.
+- Error code 3 relevance: Important for UHF_Encode and UHF_BlockWrite2 partial-failure diagnostics.
+- Error code 4 relevance: Important for UHF_BlockWrite2 when the code indicates RF tag access error.
+- Command-specific NACK notes: Check PDF section 7.4.19 and section 7.6 together.
+- Partial success risk: Relevant for write, erase, lock, kill, encode, and multi-word tag operations.
+- Notes: Reserved bytes in NACK should be ignored unless the PDF assigns meaning.
+
+## 10. Important errors and diagnostics
+
+- CMD_LBT_ERROR
+- CMD_ANT_ERROR
+- CMD_RXBUSY_ERROR
+- FORMAT_ERROR
+- SUM_ERROR
+- CMD_UHF_IC_ERROR
+- Access password error
+- Memory lock
+- Tag not detected
+
+## 11. Implementation notes for AI
+
+- まずROMバージョン読み取りで機種とROMを自動判定する。
+- AIが勝手に使用不可と決めない。
+- 実行に必要なパラメータを整理する。
+- 実機確認が必要な点と机上確認で可能な点を分ける。
+- ログには送信目的、パラメータ、ACK/NACK、エラーコード、タイムアウト、復旧判断を残す。
+- タイムアウト、受信ループ、複数レスポンス、完了レスポンス、無応答を区別する。
+
+## 12. Current RAG decision
+
+- Decision: SUPPORTED_WITH_PARAMETERS
+- Reason: Listed in PDF Ver.1.17 command master and classified by impact and required confirmation.
+- Required parameter confirmation: Target device series, ROM version, connection address, timeout policy, exact value, RAM or FLASH target, recovery method
+- Required device/ROM check: Read ROM version first and consult the support table.
+- Required recovery note: As needed
+- Next action: Use this card with the command master, response/NACK master, ROM support document, and parameter confirmation guide before implementation.
