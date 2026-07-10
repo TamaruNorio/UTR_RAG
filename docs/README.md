@@ -10,7 +10,8 @@ Current clean RAG set:
 - `docs/current/13_RF_SAFETY_AND_CARRIER_RULES.md`
 - `docs/current/14_AI_IMPLEMENTATION_GUARDRAILS.md`
 - `docs/current/15_PARAMETER_CONFIRMATION_GUIDE.md`
+- `docs/current/16_TRACEABILITY_INDEX_V117.md`
 - `docs/current/commands/cards/`
 - v008 review materials: `docs/review/v008/`
 
-The current set is based on UTR-S201 series communication protocol manual Ver.1.17 and contains 54 command cards. It is no-PDF and is not a replacement for the official PDF.
+The current set is based on UTR-S201 series communication protocol manual Ver.1.17 and contains 54 command cards. v009 adds AI-assisted traceability completion and is no-PDF. It is not a replacement for the official PDF.

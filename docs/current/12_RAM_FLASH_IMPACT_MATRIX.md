@@ -17,3 +17,11 @@
 ## 2. Impact handling
 
 Protocol-defined commands are organized by impact and recovery requirements. Setting changes, FLASH persistence, RF output, antenna switching, tag memory writes, Lock, Kill, and external I/O changes should include before/after confirmation and a recovery note where applicable.
+
+
+## 3. Traceability use
+
+- Each command card should link to the RAM/FLASH impact category.
+- If impact is not explicit, use NEEDS_RAM_FLASH_TRACE.
+- Setting write commands should distinguish RAM-only effect and FLASH/persistent effect where possible.
+- FLASH initialization and FLASH one-byte write require recovery notes.

@@ -32,3 +32,17 @@ v008の各コマンドカードについて、PDF Ver.1.17との対応情報を�
 | 8 | Setting commands | RAM/FLASH impact reference | Medium | Link to relevant setting and persistence notes | TBD | RAM-only / FLASH / persistent |
 | 9 | RF and tag commands | RF/tag memory impact reference | Medium | Link to RF safety, carrier, tag memory, Lock/Kill/Encode notes | TBD | Include recovery notes |
 | 10 | Automatic reading behavior | Async response reference | Medium | Separate 7.1/7.2 behavior from normal host commands | TBD | Mode/asynchronous response |
+
+
+## 4. v009 migration
+
+v009でtraceability completionを実施する。
+v009完了後は、v008のtraceability補完計画はv009へ移行済みとする。
+
+残るHOLDは以下に限定する。
+
+- 正式公開承認
+- ライセンス/IP
+- 顧客提供可否
+- 海外判断
+- 実機送信確認

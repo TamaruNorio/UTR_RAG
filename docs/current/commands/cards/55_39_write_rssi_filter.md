@@ -113,3 +113,26 @@ RSSIフィルタ設定を書き込む。
 - Required device/ROM check: Read ROM version first and consult the support table.
 - Required recovery note: As needed
 - Next action: Use this card with the command master, response/NACK master, ROM support document, and parameter confirmation guide before implementation.
+
+## Traceability
+
+- Command list source:
+  - PDF 6.1.2
+- Command format source:
+  - PDF 7.4.30
+- ACK response source:
+  - PDF 7.4.30 ACK response
+- NACK response source:
+  - PDF 7.6 common NACK; PDF 7.4.30 NACK response
+- Device/ROM support source:
+  - PDF 6.2.2
+- RAM/FLASH impact source:
+  - PDF 7.4.30; docs/current/12_RAM_FLASH_IMPACT_MATRIX.md
+- RF / carrier / antenna safety source:
+  - NEEDS_RF_SAFETY_TRACE
+- Traceability status:
+  - TRACE_COMPLETE_WITH_NOTES
+- Notes:
+  - No completed Hex
+  - No SUM-calculated command
+  - No device-sendable code

@@ -57,3 +57,6 @@ V008_CHATGPT_SPEC_REVIEW_PASS_WITH_NOTES
 - 全54コマンドの実機送信確認
 
 ChatGPT AI specification review completed.
+
+
+Note: v009 traceability completion supersedes the v008 traceability plan.

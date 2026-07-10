@@ -67,3 +67,6 @@ This command master follows PDF chapter 6.1:
 | 52 | 7.5.9 | UHF_BlockWrite2 | RFタグ通信 | 55h | 1Dh | RF tag | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_1d_uhf_block_write2.md | PDF Ver.1.17 desk review | No completed Hex or SUM-calculated command |
 | 53 | 7.5.10 | UHF_Encode | RFタグ通信 | 55h | 1Eh | RF tag | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_1e_uhf_encode.md | PDF Ver.1.17 desk review | No completed Hex or SUM-calculated command |
 | 54 | 7.5.11 | UHF_ThroughCmd | RFタグ通信 | 55h | FFh | RF tag | NEEDS_DEVICE_OR_ROM_CHECK | Yes | docs/current/commands/cards/55_ff_uhf_through_cmd.md | PDF Ver.1.17 desk review | No completed Hex or SUM-calculated command |
+
+
+Traceability index reference: `docs/current/16_TRACEABILITY_INDEX_V117.md`

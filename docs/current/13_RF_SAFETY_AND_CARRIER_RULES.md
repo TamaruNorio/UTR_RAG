@@ -28,3 +28,10 @@ UHF_CheckAntenna and antenna-related settings are normal protocol functions. Con
 ## 6. Multiple reader/writer operation
 
 When multiple reader/writers use the same frequency, carrier output timing, carrier pause, carrier sense time, and scan mode must be coordinated to reduce collision and LBT errors.
+
+
+## 7. Traceability use
+
+- RF carrier, frequency, output power, antenna switching, LBT, and antenna error references should be traceable from relevant command cards.
+- Antenna switching is a supported function, not a prohibited function.
+- RF-impact commands should carry impact notes and response/error references.

@@ -49,3 +49,12 @@ For UHF_Encode, error code 3 identifies the failed internal operation, including
 - Lock and Kill can have irreversible effects on the tag.
 - UHF_ThroughCmd requires ROM support and command-specific receive handling.
 - RF carrier and antenna errors must be logged separately from tag memory errors.
+
+
+## 8. Traceability use
+
+- PDF 7.6 common NACK is the master reference for NACK response.
+- Command cards should point to 7.6 plus command-specific NACK section where applicable.
+- Timeout is not NACK.
+- No-response behavior must be recorded separately.
+- RF tag commands may require receive-loop handling.
