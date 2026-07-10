@@ -1,26 +1,5 @@
-# 07 Release and Artifacts
+# Release And Artifacts
 
-## 1. 成果物の位置づけ
+Current package: `artifacts/utr_s201_ai_v008/utr_s201_ai_v008_v117_full_coverage_no_pdf.zip`.
 
-| Version | 位置づけ | 扱い |
-|---|---|---|
-| v004 | R7-5A no-PDF成果物 | 履歴保持用 |
-| v005 | full-command internal release | 内部確認・履歴保持用 |
-| v006 | External Review Candidate Release済み | Release assetとして固定 |
-| v007 | final minimal package | 現在の最終整理版 |
-
-## 2. v007
-
-- ZIP: `artifacts/utr_s201_ai_v007/utr_s201_ai_v007_final_minimal_no_pdf.zip`
-- no-PDF
-- v006から不要な作業履歴文書を除外した整理版
-
-## 3. v006 Release
-
-https://github.com/TamaruNorio/UTR_RAG/releases/tag/utr-s201-ai-v006-r9-7-external-review-candidate.1
-
-v006 ZIPは作り直さない。Release済みZIPは削除、上書き、再作成しない。次に更新する場合は新versionを作る。
-
-## 4. artifact inventory
-
-成果物一覧と扱い方針は `artifacts/README.md` を参照する。
+The package contains current clean Ver.1.17 RAG files only and excludes PDF files, nested ZIPs, work logs, release history documents, completed Hex, SUM-calculated commands, and device-sendable code.

@@ -1,46 +1,5 @@
-# 00 Overview
+# Overview
 
-## 1. UTR_RAGの目的
+This is the current clean RAG set for UTR-S201 series protocol manual Ver.1.17. It covers 54 command cards, ACK/NACK handling, error codes, ROM-based product identification, device/ROM support, RAM/FLASH impact, RF safety, antenna switching, and AI implementation guardrails.
 
-UTR_RAGは、タカヤ製UTR-S201シリーズに関する通信仕様、安全ルール、根拠資料、RAG成果物を管理するための保管庫である。API実装リポジトリではなく、実機送信用コードを配布する場所でもない。
-
-## 2. v007 final minimal package の位置づけ
-
-v007は、v006 External Review Candidate の後続整理版である。不要なR8/R9作業履歴文書を除外し、現在読むべき最終版ドキュメントを `docs/current/` に集約した no-PDF package である。
-
-## 3. v006からの整理点
-
-- docs配下をcurrent docs中心に整理
-- 古い作業履歴文書をGit履歴とv006 ZIPへ退避
-- コマンドカード38件と5インデックスを維持
-- v007 ZIPには必要最小限の最終版ドキュメントのみを含める
-
-## 4. 対象者
-
-- 日本国内の技術者
-- 日本語利用者
-- UTR-S201シリーズを扱う開発者
-- AIを利用して読み取りプログラムの要件整理や実装検討を行う担当者
-
-## 5. 想定生成AI
-
-ChatGPT、Codex、Gemini、Claude、Copilot、Cursor、社内AIを想定する。
-
-## 6. 想定言語
-
-Python、C#、C++、JavaScript / Node.js、PowerShellを想定する。
-
-## 7. 何ができる資料か
-
-- 要件確認の観点を整理する
-- 安全分類とHOLD事項を確認する
-- コマンドカードから仕様・影響・実機確認状態を検索する
-- 多言語実装を検討する前の前提整理を行う
-
-## 8. 何はできない資料か
-
-- PDF正本の代替
-- 実機送信用コードの提供
-- 全コマンド実機確認済みの保証
-- 正式社外公開版、正式RC、顧客提供版、本番利用保証版としての利用
-- 海外販売・海外運用向け資料としての利用
+It is no-PDF, Japan domestic scope, Japanese-user oriented, not a formal external release, not a customer release, not a production guarantee, and not a replacement for the official PDF.

@@ -1,71 +1,115 @@
-# UHF_Lock Command Card
+# UHF_Lock
 
-## 1. Command Identity
+## 1. Command identity
 
+- PDF section: 7.5.6
 - Command name: UHF_Lock
-- Command group: UHF tag access control
-- Command code reference: 55/18
-- R8-7 catalog source: `docs/current/06_COMMAND_INDEX.md`
+- Category: RFタグ通信
+- Command byte: 55h
+- Detail command byte: 18h
+- Subcommand byte: -
+- Command family: RFタグ通信
+- Read / Write / Control / RF tag / Mode: RF tag
+- Source PDF: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17 (TDR-MNL-PRC-UTR-S201-117.pdf, 2025-06-16)
+- Verification status: PDF Ver.1.17 desk review
 
 ## 2. Purpose
 
-タグメモリまたはアクセス制御のロックに関する整理用カードである。タグ運用状態を不可逆または復旧困難に変更し得るため、実施対象外とする。
+RFタグメモリをLockする。
 
-## 3. Safety Classification
+## 3. Usage status
 
-- Safety class: `PROHIBITED`
-- Risk: タグアクセス制御の変更、復旧困難なロック
-- Default handling: 実行禁止
+- Status: SUPPORTED_WITH_RECOVERY_NOTE
+- Reason: PDF Ver.1.17 lists this command in section 7.5.6. AI/RAG organizes device, ROM, parameter, impact, response, and recovery conditions instead of deciding arbitrary non-use.
 
-## 4. Operation Level
+## 4. Safety / impact classification
 
-- Operation level: Level 4
-- Approval: 個別承認、対象タグ、解除可否、復旧方針が必要
+- RF emission: Yes
+- Setting change: No
+- RAM change: No
+- FLASH change: Depends on write target
+- Tag memory change: Yes
+- External I/O change: No
+- Persistent effect: Check whether the target field is RAM-only, FLASH-backed, or tag-memory persistent.
+- Recovery note required: Yes
+- Parameter confirmation required: Target device series, ROM version, connection address, timeout policy, target tag, memory bank, word address, word count, Access password if required
 
-## 5. Parameters Overview
+## 5. Device / ROM support
 
-ロック対象や権限に関わるパラメータは文書化しない。完成Hex、SUM計算済みコマンド、実機送信用コードは記載しない。
+- UTR-S201: Supported
+- UTR-SUN02-4CH: Supported
+- UTR-SHR201: Supported
+- UTR-SUN02V-8CH: Supported
+- UTR-SUN02-8CH: Supported
+- ROM/version notes: Use the rightmost applicable ROM column in the support table.
+- How to identify device:
+  - Read ROM version first
+  - Parse series name
+  - Map USM01/USM02/USM05/USM06/USM08 to product type
+- Unsupported cases: Treat as unsupported only when the PDF support table or ROM/version notes say so.
 
-## 6. Expected Response Overview
+## 6. Required parameters
 
-レスポンス仕様はPDF原本との照合対象である。応答確認のための送信も行わない。
+- Parameters: Target device series, ROM version, connection address, timeout policy, target tag, memory bank, word address, word count, Access password if required
+- Parameter constraints: Follow the field definitions in PDF section 7.5.6.
+- Parameters that should be asked from user: Field conditions and values not obtainable from ROM.
+- Parameters that can be read from device: ROM version number, series name, and applicable readable settings.
+- Parameters that can be inferred from ROM/series: Product type, 4CH/8CH class, and ROM-dependent support.
 
-## 7. Real-device Test Status
+## 7. Command format summary
 
-- Status: `PROHIBITED`
-- R8-8A: 未実施
-- Reason: タグアクセス制御を変更する可能性があるため
+- Command format overview: Use the common frame from chapter 5 and the command/detail/subcommand identifiers above.
+- Do not include completed Hex: This card intentionally avoids a ready-to-send full frame.
+- Do not include SUM-calculated command: This card intentionally avoids a SUM-calculated command.
 
-## 8. Preconditions
+## 8. ACK response
 
-- 通常検証では実施不可
-- 実施にはタグ所有者、対象、影響範囲、復旧方法の明示が必要
+- ACK exists: Yes, unless the PDF section defines asynchronous, multiple-response, completion-response, or no-response behavior.
+- ACK command: Use the command-specific ACK structure described in PDF section 7.5.6.
+- Data length: See PDF section 7.5.6.
+- Data fields: Parse the fields documented in the command section.
+- Multiple responses: RF tag and automatic-reading related commands may require a receive loop.
+- Completion response: Required when the command section defines an end/completion response.
+- No response: Treat only as specified by the command section or timeout policy.
+- Notes: Always distinguish ACK, NACK, multiple response, completion response, and timeout.
 
-## 9. Prohibited Use
+## 9. NACK response
 
-- 自動送信
-- 実行例生成
-- 顧客タグまたは本番タグでの実行
-- 読み取り確認の代替としての使用
+- NACK uses common 7.6 format: Yes.
+- Error code 1 relevance: Check CRC, time-over, receive, RF tag no response, internal command error, UHF IC error, LBT, hardware, antenna, SUM, and format errors.
+- Error code 2 relevance: Used mainly when Error code 1 is CMD_UHF_IC_ERROR.
+- Error code 3 relevance: Important for UHF_Encode and UHF_BlockWrite2 partial-failure diagnostics.
+- Error code 4 relevance: Important for UHF_BlockWrite2 when the code indicates RF tag access error.
+- Command-specific NACK notes: Check PDF section 7.5.6 and section 7.6 together.
+- Partial success risk: Relevant for write, erase, lock, kill, encode, and multi-word tag operations.
+- Notes: Reserved bytes in NACK should be ignored unless the PDF assigns meaning.
 
-## 10. Related Documents
+## 10. Important errors and diagnostics
 
-- `docs/current/06_COMMAND_INDEX.md`
-- `docs/current/06_COMMAND_INDEX.md`
-- `docs/current/02_SAFETY_AND_HOLD_ITEMS.md`
+- CMD_LBT_ERROR
+- CMD_ANT_ERROR
+- CMD_RXBUSY_ERROR
+- FORMAT_ERROR
+- SUM_ERROR
+- CMD_UHF_IC_ERROR
+- Access password error
+- Memory lock
+- Tag not detected
 
-## 11. AI Retrieval Tags
+## 11. Implementation notes for AI
 
-- command: UHF_Lock
-- category: tag_access_control
-- safety: prohibited
-- operation_level: 4
-- test_status: prohibited
+- まずROMバージョン読み取りで機種とROMを自動判定する。
+- AIが勝手に使用不可と決めない。
+- 実行に必要なパラメータを整理する。
+- 実機確認が必要な点と机上確認で可能な点を分ける。
+- ログには送信目的、パラメータ、ACK/NACK、エラーコード、タイムアウト、復旧判断を残す。
+- タイムアウト、受信ループ、複数レスポンス、完了レスポンス、無応答を区別する。
 
-## 12. AI Handling Notes
+## 12. Current RAG decision
 
-AIはこのコマンドを安全な読み取り系として扱わない。承認がない限り、候補化せずHOLDまたは禁止として返す。
-
-## 13. Current Decision
-
-`PROHIBITED_DOCUMENT_ONLY`
+- Decision: SUPPORTED_WITH_RECOVERY_NOTE
+- Reason: Listed in PDF Ver.1.17 command master and classified by impact and required confirmation.
+- Required parameter confirmation: Target device series, ROM version, connection address, timeout policy, target tag, memory bank, word address, word count, Access password if required
+- Required device/ROM check: Read ROM version first and consult the support table.
+- Required recovery note: Yes
+- Next action: Use this card with the command master, response/NACK master, ROM support document, and parameter confirmation guide before implementation.
