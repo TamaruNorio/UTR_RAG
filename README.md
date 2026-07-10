@@ -28,4 +28,5 @@ Main references:
 - `docs/current/00_OVERVIEW.md`
 - `docs/current/09_COMMAND_MASTER_V117.md`
 - `docs/current/commands/cards/`
+- v008 review materials: `docs/review/v008/`
 - `artifacts/README.md`
