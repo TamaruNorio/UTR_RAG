@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-v008 pre-releaseを、社内レビューおよび限定的な外部レビュー候補として共有するための補助資料である。
+v008 pre-releaseを、ChatGPTによるAI仕様レビュー結果および社内/外部レビュー候補として共有するための補助資料である。
 
 ## 2. Related release
 
@@ -31,8 +31,8 @@ v008 pre-releaseを、社内レビューおよび限定的な外部レビュー�
 
 ## 4. Documents
 
+- V008_CHATGPT_SPEC_REVIEW_RESULT.md
 - V008_INTERNAL_SHARE_MESSAGE.md
 - V008_EXTERNAL_REVIEW_REQUEST.md
-- V008_HUMAN_REVIEW_CHECKLIST.md
-- V008_TRACEABILITY_REVIEW_PLAN.md
+- V008_TRACEABILITY_COMPLETION_PLAN.md
 - V008_REAL_DEVICE_TEST_PLAN.md
