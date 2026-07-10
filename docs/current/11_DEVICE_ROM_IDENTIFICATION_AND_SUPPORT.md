@@ -38,3 +38,11 @@ ROM can provide the series and ROM version when connected. Ask the user for cond
 ## 5. 4CH and 8CH handling
 
 UTR-SUN02-4CH and 8CH series differ in antenna and external-port handling. Do not infer 8CH support from a 4CH model. Do not treat antenna switching as unavailable in general; choose the command and parameter set that matches the product and ROM.
+
+
+## 6. Traceability use
+
+- ROM version read is the standard first traceability anchor for device identification.
+- Series name to product mapping is used before applying device/ROM support.
+- PDF 6.2 device support table should be referenced by command cards.
+- 8CH-specific commands must identify USM06/USM08 handling where applicable.

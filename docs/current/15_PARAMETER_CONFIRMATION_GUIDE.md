@@ -34,3 +34,13 @@
 ## 4. Missing parameter response
 
 If a required parameter is missing, return a parameter checklist instead of producing a completed frame or device-sendable code.
+
+
+## 5. Traceability use
+
+- Parameters from ROM read.
+- Parameters from device support table.
+- Parameters from command card.
+- Parameters from field condition.
+- Parameters that require user input.
+- Parameters that require traceability check before implementation.

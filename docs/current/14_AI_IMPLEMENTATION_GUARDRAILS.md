@@ -25,3 +25,11 @@ Implementation guidance must distinguish ACK, NACK, multiple responses, completi
 ## 5. Positioning
 
 This package is an AI-ready no-PDF RAG package for Ver.1.17 desk use. It is not a replacement for the official PDF and is not a formal external release or production guarantee.
+
+
+## 6. Traceability use
+
+- AI must not treat missing traceability as permission to guess.
+- AI should cite command-card traceability fields before implementation guidance.
+- When traceability is NEEDS_*_TRACE, implementation guidance should state the missing trace explicitly.
+- AI should not generate executable code directly from incomplete traceability.

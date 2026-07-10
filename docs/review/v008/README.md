@@ -36,3 +36,6 @@ v008 pre-releaseを、ChatGPTによるAI仕様レビュー結果および社内/
 - V008_EXTERNAL_REVIEW_REQUEST.md
 - V008_TRACEABILITY_COMPLETION_PLAN.md
 - V008_REAL_DEVICE_TEST_PLAN.md
+
+
+Note: v008 traceability completion planning has moved to the v009 traceability completion package.

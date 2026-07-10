@@ -1,5 +1,7 @@
 # Overview
 
-This is the current clean RAG set for UTR-S201 series protocol manual Ver.1.17. It covers 54 command cards, ACK/NACK handling, error codes, ROM-based product identification, device/ROM support, RAM/FLASH impact, RF safety, antenna switching, and AI implementation guardrails.
+Current package: v009 Ver.1.17 traceability completed no-PDF package.
 
-It is no-PDF, Japan domestic scope, Japanese-user oriented, not a formal external release, not a customer release, not a production guarantee, and not a replacement for the official PDF.
+This current clean RAG set covers 54 command cards, ACK/NACK handling, error codes, ROM-based product identification, device/ROM support, RAM/FLASH impact, RF safety, antenna switching, AI implementation guardrails, and AI-assisted traceability completion.
+
+ChatGPT AI specification review completed. This package is not a formal external release, not a customer release, not production-ready, and not a replacement for the official PDF.

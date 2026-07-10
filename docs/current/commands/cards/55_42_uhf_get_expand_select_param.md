@@ -113,3 +113,26 @@
 - Required device/ROM check: Read ROM version first and consult the support table.
 - Required recovery note: As needed
 - Next action: Use this card with the command master, response/NACK master, ROM support document, and parameter confirmation guide before implementation.
+
+## Traceability
+
+- Command list source:
+  - PDF 6.1.2
+- Command format source:
+  - PDF 7.4.4
+- ACK response source:
+  - PDF 7.4.4 ACK response
+- NACK response source:
+  - PDF 7.6 common NACK; PDF 7.4.4 NACK response
+- Device/ROM support source:
+  - PDF 6.2.2
+- RAM/FLASH impact source:
+  - PDF 7.4.4; docs/current/12_RAM_FLASH_IMPACT_MATRIX.md
+- RF / carrier / antenna safety source:
+  - PDF 3.1; PDF 7.4.4; docs/current/13_RF_SAFETY_AND_CARRIER_RULES.md
+- Traceability status:
+  - TRACE_COMPLETE
+- Notes:
+  - No completed Hex
+  - No SUM-calculated command
+  - No device-sendable code

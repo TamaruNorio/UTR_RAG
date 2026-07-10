@@ -113,3 +113,26 @@ RFタグメモリを読み取る。
 - Required device/ROM check: Read ROM version first and consult the support table.
 - Required recovery note: As needed
 - Next action: Use this card with the command master, response/NACK master, ROM support document, and parameter confirmation guide before implementation.
+
+## Traceability
+
+- Command list source:
+  - PDF 6.1.3
+- Command format source:
+  - PDF 7.5.3
+- ACK response source:
+  - PDF 7.5.3 ACK response
+- NACK response source:
+  - PDF 7.6 common NACK; PDF 7.5.3 NACK response
+- Device/ROM support source:
+  - PDF 6.2.3
+- RAM/FLASH impact source:
+  - NEEDS_RAM_FLASH_TRACE
+- RF / carrier / antenna safety source:
+  - PDF 3.1; PDF 7.5.3; docs/current/13_RF_SAFETY_AND_CARRIER_RULES.md
+- Traceability status:
+  - TRACE_COMPLETE_WITH_NOTES
+- Notes:
+  - No completed Hex
+  - No SUM-calculated command
+  - No device-sendable code
