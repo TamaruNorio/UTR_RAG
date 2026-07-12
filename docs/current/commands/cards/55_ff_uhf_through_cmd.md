@@ -136,3 +136,40 @@ RFタグへThroughコマンドを送る。
   - No completed Hex
   - No SUM-calculated command
   - No device-sendable code
+
+
+## Real-device verification
+
+- Verification stage:
+  - Stage 7: Irreversible or advanced tag operations
+- Initial status:
+  - BLOCKED_BY_RECOVERY_PLAN
+- Required prior checks:
+  - Stage 0-2完了、対象タグ、アクセス権限、不可逆影響、復旧不可条件、承認
+- Required parameters:
+  - ROM version, device/ROM support, connection condition, timeout policy, command-specific parameters, and field conditions not readable from ROM
+- Required log fields:
+  - target_tag_count, target_memory_bank, tag_memory_impact, recovery_required, expected_response_type, actual_response_type
+- Expected response type:
+  - ACK/NACK with RF tag access error and timeout/no-response handling
+- Recovery note:
+  - Lock/Kill/Through系は影響が大きい。不可逆性、復旧不可条件、承認を記録する。
+- Result status values:
+  - NOT_TESTED
+  - DESK_REVIEWED
+  - AI_TRACE_REVIEWED
+  - READY_FOR_REAL_DEVICE_TEST
+  - REAL_DEVICE_PASS
+  - REAL_DEVICE_PASS_WITH_NOTES
+  - REAL_DEVICE_FAIL
+  - NEEDS_RETEST
+  - BLOCKED_BY_DEVICE_OR_ROM
+  - BLOCKED_BY_PARAMETER
+  - BLOCKED_BY_SITE_CONDITION
+  - BLOCKED_BY_RECOVERY_PLAN
+  - NOT_APPLICABLE_TO_TARGET
+- Related documents:
+  - docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md
+  - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
+  - docs/current/19_VERIFICATION_STAGE_PLAN.md
+  - docs/current/20_VERIFICATION_RESULT_STATUS.md

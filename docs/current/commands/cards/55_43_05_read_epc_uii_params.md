@@ -136,3 +136,40 @@ EPC(UII)関連パラメータを読み取る。
   - No completed Hex
   - No SUM-calculated command
   - No device-sendable code
+
+
+## Real-device verification
+
+- Verification stage:
+  - Stage 1: Read-only configuration
+- Initial status:
+  - READY_FOR_REAL_DEVICE_TEST
+- Required prior checks:
+  - Stage 0完了、対象機種/ROM、読み取り対象設定、ログ保存先
+- Required parameters:
+  - ROM version, device/ROM support, connection condition, timeout policy, command-specific parameters, and field conditions not readable from ROM
+- Required log fields:
+  - device_series, product_type, rom_version, parameter_summary, actual_response_type, ack_summary, timeout_ms, elapsed_ms
+- Expected response type:
+  - ACK/NACK/timeout/no-response
+- Recovery note:
+  - 読み取り専用。復旧操作は原則不要だが、timeout/no-responseは接続条件を見直す。
+- Result status values:
+  - NOT_TESTED
+  - DESK_REVIEWED
+  - AI_TRACE_REVIEWED
+  - READY_FOR_REAL_DEVICE_TEST
+  - REAL_DEVICE_PASS
+  - REAL_DEVICE_PASS_WITH_NOTES
+  - REAL_DEVICE_FAIL
+  - NEEDS_RETEST
+  - BLOCKED_BY_DEVICE_OR_ROM
+  - BLOCKED_BY_PARAMETER
+  - BLOCKED_BY_SITE_CONDITION
+  - BLOCKED_BY_RECOVERY_PLAN
+  - NOT_APPLICABLE_TO_TARGET
+- Related documents:
+  - docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md
+  - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
+  - docs/current/19_VERIFICATION_STAGE_PLAN.md
+  - docs/current/20_VERIFICATION_RESULT_STATUS.md

@@ -136,3 +136,40 @@ Selectパラメータを設定する。
   - No completed Hex
   - No SUM-calculated command
   - No device-sendable code
+
+
+## Real-device verification
+
+- Verification stage:
+  - Stage 3: Antenna and runtime parameter operations
+- Initial status:
+  - BLOCKED_BY_PARAMETER
+- Required prior checks:
+  - Stage 0-2の該当確認、対象ROM、設定前値、設定値、戻し手順、アンテナ/タグ条件
+- Required parameters:
+  - ROM version, device/ROM support, connection condition, timeout policy, command-specific parameters, and field conditions not readable from ROM
+- Required log fields:
+  - parameter_summary, ram_flash_impact, rf_impact, recovery_required, pre_read_required, ack_summary, nack_error_code_1-4
+- Expected response type:
+  - ACK/NACK/timeout/no-response
+- Recovery note:
+  - 設定前値を記録し、必要に応じて設定戻しを行う。アンテナ切替は使用可能機能として扱う。
+- Result status values:
+  - NOT_TESTED
+  - DESK_REVIEWED
+  - AI_TRACE_REVIEWED
+  - READY_FOR_REAL_DEVICE_TEST
+  - REAL_DEVICE_PASS
+  - REAL_DEVICE_PASS_WITH_NOTES
+  - REAL_DEVICE_FAIL
+  - NEEDS_RETEST
+  - BLOCKED_BY_DEVICE_OR_ROM
+  - BLOCKED_BY_PARAMETER
+  - BLOCKED_BY_SITE_CONDITION
+  - BLOCKED_BY_RECOVERY_PLAN
+  - NOT_APPLICABLE_TO_TARGET
+- Related documents:
+  - docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md
+  - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
+  - docs/current/19_VERIFICATION_STAGE_PLAN.md
+  - docs/current/20_VERIFICATION_RESULT_STATUS.md

@@ -136,3 +136,40 @@ RFタグの複数領域書き込みやLockをまとめて行う。
   - No completed Hex
   - No SUM-calculated command
   - No device-sendable code
+
+
+## Real-device verification
+
+- Verification stage:
+  - Stage 6: Tag memory operations
+- Initial status:
+  - BLOCKED_BY_PARAMETER
+- Required prior checks:
+  - Stage 0-2完了、対象タグ、メモリバンク、アドレス、長さ、書き込み値、復旧可否
+- Required parameters:
+  - ROM version, device/ROM support, connection condition, timeout policy, command-specific parameters, and field conditions not readable from ROM
+- Required log fields:
+  - target_tag_count, target_memory_bank, tag_memory_impact, parameter_summary, actual_response_type, raw_log_file
+- Expected response type:
+  - ACK/NACK with RF tag access error and timeout/no-response handling
+- Recovery note:
+  - タグメモリ変更を伴う。タグ固有IDはマスクし、変更前後の扱いと復旧可否を記録する。
+- Result status values:
+  - NOT_TESTED
+  - DESK_REVIEWED
+  - AI_TRACE_REVIEWED
+  - READY_FOR_REAL_DEVICE_TEST
+  - REAL_DEVICE_PASS
+  - REAL_DEVICE_PASS_WITH_NOTES
+  - REAL_DEVICE_FAIL
+  - NEEDS_RETEST
+  - BLOCKED_BY_DEVICE_OR_ROM
+  - BLOCKED_BY_PARAMETER
+  - BLOCKED_BY_SITE_CONDITION
+  - BLOCKED_BY_RECOVERY_PLAN
+  - NOT_APPLICABLE_TO_TARGET
+- Related documents:
+  - docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md
+  - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
+  - docs/current/19_VERIFICATION_STAGE_PLAN.md
+  - docs/current/20_VERIFICATION_RESULT_STATUS.md

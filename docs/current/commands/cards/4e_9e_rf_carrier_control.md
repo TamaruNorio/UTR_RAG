@@ -136,3 +136,40 @@ RF送信信号を制御する。
   - No completed Hex
   - No SUM-calculated command
   - No device-sendable code
+
+
+## Real-device verification
+
+- Verification stage:
+  - Stage 4: RF condition and reader operation settings
+- Initial status:
+  - BLOCKED_BY_SITE_CONDITION
+- Required prior checks:
+  - Stage 0完了、現場RF条件、設定前値、設定値、復旧/戻し手順、外部I/O影響
+- Required parameters:
+  - ROM version, device/ROM support, connection condition, timeout policy, command-specific parameters, and field conditions not readable from ROM
+- Required log fields:
+  - rf_impact, ram_flash_impact, parameter_summary, recovery_required, expected_response_type, actual_response_type, raw_log_file
+- Expected response type:
+  - ACK/NACK/timeout/no-response
+- Recovery note:
+  - RF条件、動作モード、外部I/Oへの影響を記録し、戻し手順を先に確認する。
+- Result status values:
+  - NOT_TESTED
+  - DESK_REVIEWED
+  - AI_TRACE_REVIEWED
+  - READY_FOR_REAL_DEVICE_TEST
+  - REAL_DEVICE_PASS
+  - REAL_DEVICE_PASS_WITH_NOTES
+  - REAL_DEVICE_FAIL
+  - NEEDS_RETEST
+  - BLOCKED_BY_DEVICE_OR_ROM
+  - BLOCKED_BY_PARAMETER
+  - BLOCKED_BY_SITE_CONDITION
+  - BLOCKED_BY_RECOVERY_PLAN
+  - NOT_APPLICABLE_TO_TARGET
+- Related documents:
+  - docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md
+  - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
+  - docs/current/19_VERIFICATION_STAGE_PLAN.md
+  - docs/current/20_VERIFICATION_RESULT_STATUS.md
