@@ -74,3 +74,14 @@ v009 is the Ver.1.17 traceability completed package with AI-assisted traceabilit
 - v015 records ROM read plus Stage 1 read-only configuration results.
 - Runtime logs under `runtime_logs/` are not committed.
 - Success, failure, NOT_APPLICABLE, BLOCKED, or HOLD must be recorded honestly.
+
+## v016 Stage 2 RF read preflight package
+
+- Latest package: v016 Stage 2 RF read preflight no-PDF package
+- ZIP: `artifacts/utr_s201_ai_v016/utr_s201_ai_v016_stage2_rf_read_preflight_no_pdf.zip`
+- v015 remains the Stage 1 read-only configuration result history.
+- v016 is not a formal external release, not a formal RC, not a customer release, and not production-ready.
+- v016 is not a replacement for the official PDF.
+- v016 does not execute Stage 2 RF read commands.
+- v016 defines the Stage 2 RF read execution prerequisites, command plan, log template, and stop conditions.
+- Runtime logs under `runtime_logs/` are not committed.
