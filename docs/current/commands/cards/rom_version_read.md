@@ -175,3 +175,10 @@ ROMバージョン番号とシリーズ名を読み取る。
   - docs/current/21_STAGE01_READONLY_VERIFICATION_KIT.md
   - docs/current/22_STAGE01_READONLY_COMMAND_LIST.md
   - docs/current/23_STAGE01_READONLY_LOGGING_GUIDE.md
+
+- v012 Stage 0 execution summary:
+  - docs/current/24_STAGE0_READONLY_REAL_DEVICE_RESULT.md
+- Latest result status:
+  - BLOCKED_BY_PARAMETER
+- Latest result notes:
+  - v012 Stage 0 run did not obtain ROM. The v011 execution adapter stopped before device-send due common frame not encoded.

@@ -175,3 +175,10 @@
   - docs/current/21_STAGE01_READONLY_VERIFICATION_KIT.md
   - docs/current/22_STAGE01_READONLY_COMMAND_LIST.md
   - docs/current/23_STAGE01_READONLY_LOGGING_GUIDE.md
+
+- v012 Stage 0 execution summary:
+  - docs/current/24_STAGE0_READONLY_REAL_DEVICE_RESULT.md
+- Latest result status:
+  - NEEDS_RETEST
+- Latest result notes:
+  - v012 Stage 0 chip version read was not sent because the Stage 0 adapter stopped before real-device communication.
