@@ -95,3 +95,11 @@ V013_STAGE0_ROM_READ_REAL_DEVICE_PASS_WITH_NOTES
 - Stage 0のチップバージョン読み取り・エラー情報読み取りへ進む。
 - Stage 1 read-onlyへ進む前にROM判定結果を確認する。
 - Runtime logs remain outside Git.
+
+## 10. v014 follow-up
+
+v014 proceeds to the remaining Stage 0 read-only commands and records the masked result in:
+
+- `docs/current/26_STAGE0_REMAINING_READONLY_RESULT.md`
+
+This does not rewrite the v013 result. v013 remains the ROM read frame adapter result; v014 records the follow-up Stage 0 remaining read-only verification.

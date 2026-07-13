@@ -81,3 +81,11 @@ v013 adds a ROMバージョン読み取り専用フレームアダプタ and rec
 - `docs/current/25_STAGE0_ROM_READ_FRAME_ADAPTER_RESULT.md`
 
 This does not rewrite the v012 result. v012 remains a HOLD result because the v011 tool stopped before real-device command send. v013 narrows the execution scope to ROMバージョン読み取り only; チップバージョン読み取り and エラー情報の読み取り are not executed in v013.
+
+## 10. v014 follow-up
+
+v014 uses the v013 ROM result as the first device-identification step and proceeds to the remaining Stage 0 read-only commands. The masked result is recorded in:
+
+- `docs/current/26_STAGE0_REMAINING_READONLY_RESULT.md`
+
+This does not rewrite the v012 result. v012 remains the original HOLD record for the pre-adapter execution attempt.
