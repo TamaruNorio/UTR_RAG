@@ -175,3 +175,10 @@ FLASH設定値を読み取る。
   - docs/current/21_STAGE01_READONLY_VERIFICATION_KIT.md
   - docs/current/22_STAGE01_READONLY_COMMAND_LIST.md
   - docs/current/23_STAGE01_READONLY_LOGGING_GUIDE.md
+
+- v015 Stage 1 read-only configuration result:
+  - docs/current/27_STAGE1_READONLY_CONFIGURATION_RESULT.md
+- Latest result status:
+  - BLOCKED_BY_PARAMETER
+- Latest result notes:
+  - v015 did not send this command because the FLASH read address was not specified.

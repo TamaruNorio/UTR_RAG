@@ -175,3 +175,10 @@ Inventoryパラメータを読み取る。
   - docs/current/21_STAGE01_READONLY_VERIFICATION_KIT.md
   - docs/current/22_STAGE01_READONLY_COMMAND_LIST.md
   - docs/current/23_STAGE01_READONLY_LOGGING_GUIDE.md
+
+- v015 Stage 1 read-only configuration result:
+  - docs/current/27_STAGE1_READONLY_CONFIGURATION_RESULT.md
+- Latest result status:
+  - REAL_DEVICE_PASS_WITH_NOTES
+- Latest result notes:
+  - v015 returned ACK using command-mode parameter kind 00h; data_length=11.

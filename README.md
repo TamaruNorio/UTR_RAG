@@ -95,3 +95,14 @@ Main references:
 - v014 records Stage 0 read-only 3-command confirmation results.
 - Runtime logs under `runtime_logs/` are not committed.
 - Success, failure, or HOLD must be recorded honestly.
+
+## v015 Stage 1 read-only configuration result package
+
+- Latest package: v015 Stage 1 read-only configuration result no-PDF package
+- ZIP: `artifacts/utr_s201_ai_v015/utr_s201_ai_v015_stage1_readonly_configuration_result_no_pdf.zip`
+- v014 remains the Stage 0 read-only result history.
+- v015 is not a formal external release, not a formal RC, not a customer release, and not production-ready.
+- v015 is not a replacement for the official PDF.
+- v015 records ROM read plus Stage 1 read-only configuration results.
+- Runtime logs under `runtime_logs/` are not committed.
+- Success, failure, NOT_APPLICABLE, BLOCKED, or HOLD must be recorded honestly.
