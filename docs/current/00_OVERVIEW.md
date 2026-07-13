@@ -29,3 +29,14 @@ ChatGPT AI specification review completed. This package is not a formal external
 - Real-device communication requires `--execute`.
 - Default mode is dry-run.
 - Write commands and setting-change commands are outside v011 scope.
+
+## v012 Stage 0 read-only real-device result package
+
+- Latest package: v012 Stage 0 read-only real-device result no-PDF package
+- ZIP: `artifacts/utr_s201_ai_v012/utr_s201_ai_v012_stage0_readonly_real_device_result_no_pdf.zip`
+- v011 remains the Stage 0/1 read-only verification kit history.
+- v012 is not a formal external release, not a formal RC, not a customer release, and not production-ready.
+- v012 is not a replacement for the official PDF.
+- v012 records a masked Stage 0 read-only real-device result summary.
+- Raw runtime logs under `runtime_logs/` are not committed.
+- If execution cannot complete, v012 records the HOLD result honestly.

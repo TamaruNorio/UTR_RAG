@@ -43,3 +43,11 @@ v011 Stage 0/1では、以下のstatusを主に使う。
 - BLOCKED_BY_DEVICE_OR_ROM
 - BLOCKED_BY_PARAMETER
 - NOT_APPLICABLE_TO_TARGET
+
+## 5. v012 Stage 0 result summary reference
+
+v012 Stage 0 read-only real-device result summary:
+
+- docs/current/24_STAGE0_READONLY_REAL_DEVICE_RESULT.md
+
+The v012 attempt did not record REAL_DEVICE_PASS. Runtime logs are not committed.
