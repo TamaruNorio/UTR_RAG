@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Stage 0/1 read-only verification helper for UTR-S201 RAG v015.
+"""Stage 0/1 read-only and Stage 2 minimal RF-read verification helper.
 
 Dry-run is the default. Real-device communication requires --execute and
-an explicit connection target. This tool intentionally defines only Stage 0/1
-read-only commands. v015 enables real-device sending for ROM read and Stage 1
-read-only commands only.
+an explicit connection target. The Stage 2 minimal command set intentionally
+enables only ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory.
 """
 
 from __future__ import annotations
@@ -17,7 +16,7 @@ import time
 from pathlib import Path
 
 
-PACKAGE_VERSION = "v015"
+PACKAGE_VERSION = "v017"
 ROM_READ_PDF_SECTION = "7.3.8"
 ROM_READ_COMMAND_BYTE = 0x4F
 ROM_READ_DETAIL_BYTE = 0x90
@@ -42,6 +41,11 @@ STAGE1_READABLE_PDF_SECTIONS = {
     "7.4.9",
     "7.4.11",
 }
+STAGE2_MINIMAL_PDF_SECTIONS = {
+    "7.3.5",
+    "7.3.12",
+    "7.5.1",
+}
 EIGHT_CHANNEL_ONLY_PDF_SECTIONS = {"7.4.10", "7.4.12"}
 ROM_2100_OR_LATER_PDF_SECTIONS = {"7.4.14", "7.4.15"}
 PARAMETER_BLOCKED_PDF_SECTIONS = {"7.4.13"}
@@ -55,6 +59,44 @@ SERIES_TO_PRODUCT = {
 
 
 COMMANDS = [{'stage': 'stage0', 'pdf_section': '7.3.1', 'name': 'エラー情報の読み取り', 'command_byte': '4Fh', 'detail_command': '80h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_80_read_error_info.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '低影響の状態確認'}, {'stage': 'stage0', 'pdf_section': '7.3.8', 'name': 'ROMバージョンの読み取り', 'command_byte': '4Fh', 'detail_command': '90h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/rom_version_read.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '最初に実行し機種/シリーズ/ROMを判定', 'notes': '標準フローの起点'}, {'stage': 'stage0', 'pdf_section': '7.3.9', 'name': 'チップバージョンの読み取り', 'command_byte': '55h', 'detail_command': '90h', 'subcommand': '00h', 'card_path': 'docs/current/commands/cards/55_90_chip_version_read.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'v014 executes firmware-version subcommand 00h only; serial-number subcommand 01h is not executed'}, {'stage': 'stage1', 'pdf_section': '7.4.1', 'name': 'リーダライタ動作モードの読み取り', 'command_byte': '4Fh', 'detail_command': '00h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_00_read_reader_mode.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '設定変更は行わない'}, {'stage': 'stage1', 'pdf_section': '7.4.2', 'name': 'UHF_GetSelectParam', 'command_byte': '55h', 'detail_command': '40h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_40_uhf_get_select_param.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.3', 'name': 'UHF_GetInventoryParam', 'command_byte': '55h', 'detail_command': '41h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_41_uhf_get_inventory_param.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'SetInventoryParamは対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.4', 'name': 'UHF_GetExpandSelectParam', 'command_byte': '55h', 'detail_command': '42h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_42_uhf_get_expand_select_param.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.5', 'name': 'アンテナ切替設定の読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '00h', 'card_path': 'docs/current/commands/cards/55_43_00_read_antenna_switching.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。切替設定変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.6', 'name': '出力設定の読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '01h', 'card_path': 'docs/current/commands/cards/55_43_01_read_output_power.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。出力変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.7', 'name': '周波数設定の読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '02h', 'card_path': 'docs/current/commands/cards/55_43_02_read_frequency.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。周波数変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.8', 'name': 'RFタグ通信関連パラメータの読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '04h', 'card_path': 'docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.9', 'name': 'EPC(UII)関連パラメータの読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '05h', 'card_path': 'docs/current/commands/cards/55_43_05_read_epc_uii_params.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.10', 'name': '外部アンテナ自動切替設定の読み取り', 'command_byte': '55h', 'detail_command': '47h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_47_read_external_antenna_auto_switch.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '8CH系のみ対象の可能性。対象機種非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': '読み取りのみ。自動切替設定変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.11', 'name': '汎用ポート値の読み取り', 'command_byte': '4Fh', 'detail_command': '9Fh', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_9f_read_general_port.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '外部I/O状態読み取り'}, {'stage': 'stage1', 'pdf_section': '7.4.12', 'name': '拡張ポート値の読み取り', 'command_byte': '4Fh', 'detail_command': 'A0h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_a0_read_extended_port.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '8CH系のみ対象の可能性。対象機種非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': '外部I/O状態読み取り'}, {'stage': 'stage1', 'pdf_section': '7.4.13', 'name': 'FLASH設定値の読み取り(1バイトアクセス)', 'command_byte': '4Fh', 'detail_command': 'B4h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_b4_read_flash_settings.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。FLASH書き込みは対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.14', 'name': 'RSSIフィルタ設定の読み取り', 'command_byte': '55h', 'detail_command': '49h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_49_read_rssi_filter.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM 2.100以降対象の可能性。非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.15', 'name': 'アンテナ個別送信出力設定の読み取り', 'command_byte': '55h', 'detail_command': '4Ah', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_4a_read_antenna_output_power.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '8CH系またはROM条件依存の可能性。非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': '読み取りのみ。出力変更は対象外'}]
+STAGE2_MINIMAL_COMMANDS = [
+    {
+        "stage": "stage2-minimal",
+        "pdf_section": "7.3.5",
+        "name": "UHF_CheckAntenna",
+        "command_byte": "55h",
+        "detail_command": "44h",
+        "subcommand": "-",
+        "card_path": "docs/current/commands/cards/55_44_uhf_check_antenna.md",
+        "expected_response": "ACK/NACK/timeout/antenna-error/LBT-error",
+        "device_rom_condition": "ROM読み取りでUSM02 / ROM 2.052を確認後に実行",
+        "notes": "v017 minimal target. No antenna setting change.",
+    },
+    {
+        "stage": "stage2-minimal",
+        "pdf_section": "7.3.12",
+        "name": "UHF_GetHandle",
+        "command_byte": "55h",
+        "detail_command": "46h",
+        "subcommand": "-",
+        "card_path": "docs/current/commands/cards/55_46_uhf_get_handle.md",
+        "expected_response": "ACK/NACK/timeout/no-tag",
+        "device_rom_condition": "ROM 2.050以降。対象ROM 2.052で実行対象",
+        "notes": "v017 minimal target. Tag not detected is recorded honestly, not forced to PASS.",
+    },
+    {
+        "stage": "stage2-minimal",
+        "pdf_section": "7.5.1",
+        "name": "UHF_Inventory",
+        "command_byte": "55h",
+        "detail_command": "10h",
+        "subcommand": "-",
+        "card_path": "docs/current/commands/cards/55_10_uhf_inventory.md",
+        "expected_response": "ACK/NACK/timeout/no-tag/multiple-response",
+        "device_rom_condition": "ROM読み取りで機種判定後に実行",
+        "notes": "v017 minimal target. InventoryRead and UHF_Read are outside v017 scope.",
+    },
+]
 
 LOG_FIELDS = ['log_id', 'date_time', 'operator', 'repository_version', 'package_version', 'command_card', 'pdf_section', 'command_name', 'command_byte', 'detail_command', 'subcommand', 'device_series', 'product_type', 'rom_version', 'connection_type', 'port_or_ip', 'baudrate_or_socket', 'antenna_count', 'active_antenna', 'antenna_switching_mode', 'target_tag_count', 'target_memory_bank', 'parameter_summary', 'ram_flash_impact', 'rf_impact', 'tag_memory_impact', 'recovery_required', 'pre_read_required', 'expected_response_type', 'actual_response_type', 'ack_summary', 'nack_error_code_1', 'nack_error_code_2', 'nack_error_code_3', 'nack_error_code_4', 'timeout_ms', 'elapsed_ms', 'raw_log_file', 'result_status', 'notes']
 
@@ -92,12 +134,24 @@ def is_v015_sendable(command: dict[str, str]) -> bool:
     return command["pdf_section"] == ROM_READ_PDF_SECTION or command["stage"] == "stage1"
 
 
+def is_v017_stage2_minimal_sendable(command: dict[str, str]) -> bool:
+    return command["pdf_section"] == ROM_READ_PDF_SECTION or command["pdf_section"] in STAGE2_MINIMAL_PDF_SECTIONS
+
+
 def v015_scope_label(command: dict[str, str]) -> str:
     if command["pdf_section"] == ROM_READ_PDF_SECTION or command["pdf_section"] in STAGE1_READABLE_PDF_SECTIONS:
         return "sendable-in-v015"
     if command["stage"] == "stage1":
         return "gated-in-v015"
     return "not-executed-in-v015"
+
+
+def command_scope_label(command: dict[str, str], command_set: str) -> str:
+    if command_set == "stage2-minimal":
+        if is_v017_stage2_minimal_sendable(command):
+            return "sendable-in-v017-stage2-minimal"
+        return "not-executed-in-v017"
+    return v015_scope_label(command)
 
 
 def build_rom_version_read_frame(address: int = 0x00) -> bytes:
@@ -139,6 +193,17 @@ def build_stage1_readonly_frame(command: dict[str, str], address: int = 0x00) ->
     if section == "7.4.11":
         return build_common_frame(address, 0x4F, bytes([0x9F]))
     raise ValueError("Stage 1 command requires device/ROM/parameter gating before send")
+
+
+def build_stage2_minimal_frame(command: dict[str, str], address: int = 0x00) -> bytes:
+    section = command["pdf_section"]
+    if section == "7.3.5":
+        return build_common_frame(address, 0x55, bytes([0x44]))
+    if section == "7.3.12":
+        return build_common_frame(address, 0x55, bytes([0x46]))
+    if section == "7.5.1":
+        return build_common_frame(address, 0x55, bytes([0x10]))
+    raise ValueError("command is outside v017 Stage 2 minimal execution scope")
 
 
 def parse_common_response(raw_response: bytes) -> dict[str, object]:
@@ -261,6 +326,20 @@ def parse_stage1_ack_summary(command: dict[str, str], parsed: dict[str, object])
     return f"ACK; data_length={parsed.get('data_length')}"
 
 
+def parse_stage2_minimal_ack_summary(command: dict[str, str], parsed: dict[str, object]) -> str:
+    data = parsed.get("data", b"")
+    if not isinstance(data, (bytes, bytearray)):
+        return "ACK data unavailable"
+    section = command["pdf_section"]
+    if section == "7.3.5":
+        return f"antenna check ACK; data_length={parsed.get('data_length')}"
+    if section == "7.3.12":
+        return f"handle response ACK; data_length={parsed.get('data_length')}"
+    if section == "7.5.1":
+        return f"inventory response ACK; data_length={parsed.get('data_length')}"
+    return f"ACK; data_length={parsed.get('data_length')}"
+
+
 def rom_version_to_number(rom_version: str) -> int | None:
     digits = "".join(ch for ch in rom_version if ch.isdigit())
     if len(digits) == 4:
@@ -330,6 +409,9 @@ def select_commands(command_set: str) -> list[dict[str, str]]:
     if command_set == "stage1":
         rom_command = next(command for command in COMMANDS if command["pdf_section"] == ROM_READ_PDF_SECTION)
         return [rom_command, *commands]
+    if command_set == "stage2-minimal":
+        rom_command = next(command for command in COMMANDS if command["pdf_section"] == ROM_READ_PDF_SECTION)
+        return [rom_command, *STAGE2_MINIMAL_COMMANDS]
     return commands
 
 
@@ -363,9 +445,17 @@ def write_logs(
     rom_rows = [row for row in rows if row["pdf_section"] == ROM_READ_PDF_SECTION]
     rom_summary = rom_rows[0]["ack_summary"] if rom_rows else "TBD"
     product_summary = rom_rows[0]["product_type"] if rom_rows else "TBD"
+    if args.command_set == "stage2-minimal":
+        title = "# Stage 2 RF Read Minimal Verification Result"
+        scope_note = "- v017 real-device send target is limited to ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory."
+        rom_gate_note = "- ROM version read is executed first. If it fails, Stage 2 minimal commands are not sent."
+    else:
+        title = "# Stage 0/1 Read-only Verification Result"
+        scope_note = "- v015 real-device send target is limited to ROM read plus Stage 1 read-only commands."
+        rom_gate_note = "- ROM version read is executed first. If it fails, Stage 1 commands are not sent."
     md_path.write_text(
         "\n".join([
-            "# Stage 0/1 Read-only Verification Result",
+            title,
             "",
             f"- 実行日時: {dt.datetime.now().isoformat(timespec='seconds')}",
             f"- 実行者: {args.operator}",
@@ -397,8 +487,8 @@ def write_logs(
             "",
             "## 備考",
             "- Dry-run rows use READY_FOR_REAL_DEVICE_TEST and do not indicate real-device pass.",
-            "- v015 real-device send target is limited to ROM read plus Stage 1 read-only commands.",
-            "- ROM version read is executed first. If it fails, Stage 1 commands are not sent.",
+            scope_note,
+            rom_gate_note,
             "- Runtime CSV may contain raw response details and must not be committed.",
         ]),
         encoding="utf-8",
@@ -432,12 +522,12 @@ def dry_run_rows(commands: list[dict[str, str]], args: argparse.Namespace) -> li
             "antenna_count": "TBD",
             "active_antenna": "TBD",
             "antenna_switching_mode": "read-only",
-            "target_tag_count": "not-applicable",
+            "target_tag_count": "TBD" if command["stage"] == "stage2-minimal" else "not-applicable",
             "target_memory_bank": "not-applicable",
             "parameter_summary": command["device_rom_condition"],
             "ram_flash_impact": "read-only",
-            "rf_impact": "no setting change",
-            "tag_memory_impact": "none",
+            "rf_impact": "RF emission possible" if command["stage"] == "stage2-minimal" else "no setting change",
+            "tag_memory_impact": "read-only RF access" if command["stage"] == "stage2-minimal" else "none",
             "recovery_required": "no",
             "pre_read_required": "ROM read first",
             "expected_response_type": command["expected_response"],
@@ -450,8 +540,20 @@ def dry_run_rows(commands: list[dict[str, str]], args: argparse.Namespace) -> li
             "timeout_ms": str(args.timeout_ms),
             "elapsed_ms": "",
             "raw_log_file": "",
-            "result_status": "READY_FOR_REAL_DEVICE_TEST" if (is_v014_sendable(command) or command["stage"] == "stage1") else "NOT_EXECUTED_IN_V015",
-            "notes": command["notes"] if (is_v014_sendable(command) or command["stage"] == "stage1") else "v015 execution scope is ROM read plus Stage 1 read-only only.",
+            "result_status": "READY_FOR_REAL_DEVICE_TEST"
+            if (
+                is_v014_sendable(command)
+                or command["stage"] == "stage1"
+                or (args.command_set == "stage2-minimal" and is_v017_stage2_minimal_sendable(command))
+            )
+            else "NOT_EXECUTED_IN_V015",
+            "notes": command["notes"]
+            if (
+                is_v014_sendable(command)
+                or command["stage"] == "stage1"
+                or (args.command_set == "stage2-minimal" and is_v017_stage2_minimal_sendable(command))
+            )
+            else "v015 execution scope is ROM read plus Stage 1 read-only only.",
         })
     return rows
 
@@ -472,19 +574,28 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
     rom_context: dict[str, str] = {}
     with serial.Serial(args.port, args.baudrate, timeout=timeout_sec) as ser:
         for command, row in zip(commands, rows):
-            # v015はROM読み取りとStage 1 read-onlyだけを送信対象にする。設定変更や書き込み系に広げないため。
-            if not is_v015_sendable(command):
+            # Execution scope is deliberately narrow. Do not expand into writes or setting changes.
+            if args.command_set == "stage2-minimal":
+                sendable = is_v017_stage2_minimal_sendable(command)
+                not_executed_status = "NOT_EXECUTED_IN_V017"
+                not_executed_note = "v017 sends only ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory."
+            else:
+                sendable = is_v015_sendable(command)
+                not_executed_status = "NOT_EXECUTED_IN_V015"
+                not_executed_note = "v015 sends only ROM read plus Stage 1 read-only commands."
+            if not sendable:
                 row["actual_response_type"] = "not-sent"
-                row["result_status"] = "NOT_EXECUTED_IN_V015"
-                row["notes"] = "v015 sends only ROM read plus Stage 1 read-only commands."
+                row["result_status"] = not_executed_status
+                row["notes"] = not_executed_note
                 continue
-            # ROM読み取りで機種/ROMを先に確定し、対象条件が不明なまま後続確認を進めない。
             if command["pdf_section"] != ROM_READ_PDF_SECTION and not rom_ok:
                 row["actual_response_type"] = "not-sent"
                 row["result_status"] = "BLOCKED_BY_DEVICE_OR_ROM"
-                row["notes"] = "ROM version read did not pass; v015 does not proceed to Stage 1 commands."
+                row["notes"] = "ROM version read did not pass; later commands are not sent."
                 continue
-            block_status, block_note = stage1_block_reason(command, rom_context)
+            block_status, block_note = (None, None)
+            if command["stage"] == "stage1":
+                block_status, block_note = stage1_block_reason(command, rom_context)
             if block_status:
                 row.update(rom_context)
                 row["actual_response_type"] = "not-sent"
@@ -497,8 +608,10 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
                     frame = build_rom_version_read_frame()
                 elif command["stage"] == "stage1":
                     frame = build_stage1_readonly_frame(command)
+                elif command["stage"] == "stage2-minimal":
+                    frame = build_stage2_minimal_frame(command)
                 else:
-                    raise ValueError("command is outside v015 execution scope")
+                    raise ValueError("command is outside execution scope")
                 ser.write(frame)
                 response = read_until_cr(ser, timeout_sec)
                 row["elapsed_ms"] = str(int((time.perf_counter() - started) * 1000))
@@ -523,8 +636,11 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
                     elif command["stage"] == "stage1":
                         row.update(rom_context)
                         row["ack_summary"] = parse_stage1_ack_summary(command, parsed)
+                    elif command["stage"] == "stage2-minimal":
+                        row.update(rom_context)
+                        row["ack_summary"] = parse_stage2_minimal_ack_summary(command, parsed)
                     row["result_status"] = "REAL_DEVICE_PASS_WITH_NOTES"
-                    row["notes"] = "Read-only command completed. Raw response is retained only in runtime CSV."
+                    row["notes"] = "Command completed within the selected narrow execution scope. Raw response is retained only in runtime CSV."
                     row["raw_log_file"] = "runtime_logs only; not committed"
                 elif parsed["type"] == "NACK" and parsed["valid"]:
                     nack = parse_nack_errors(parsed)
@@ -533,7 +649,7 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
                     row["nack_error_code_3"] = nack["error_code_3"]
                     row["nack_error_code_4"] = nack["error_code_4"]
                     row["result_status"] = "REAL_DEVICE_FAIL"
-                    row["notes"] = "Stage 0 read-only command returned NACK."
+                    row["notes"] = "Command returned NACK. Record error codes and do not force PASS."
                 elif parsed["type"] == "timeout":
                     row["result_status"] = "NEEDS_RETEST"
                     row["notes"] = "No response before timeout."
@@ -553,14 +669,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true", default=True, help="Dry-run mode; default behavior.")
     parser.add_argument("--execute", action="store_true", help="Enable real-device communication.")
     parser.add_argument("--port", help="Serial port such as COM6.")
-    parser.add_argument("--host", help="TCP host. Execution adapter is not enabled in v015.")
+    parser.add_argument("--host", help="TCP host. Execution adapter is not enabled.")
     parser.add_argument("--socket-port", type=int, default=None)
     parser.add_argument("--baudrate", type=int, default=115200)
     parser.add_argument("--timeout-ms", type=int, default=1000)
     parser.add_argument("--read-size", type=int, default=256)
     parser.add_argument("--output-dir", default="runtime_logs/stage01_readonly")
     parser.add_argument("--mask-sensitive", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--command-set", choices=["stage0", "stage1", "all"], default="all")
+    parser.add_argument("--command-set", choices=["stage0", "stage1", "stage2-minimal", "all"], default="all")
     parser.add_argument("--operator", default="TBD")
     parser.add_argument("--repository-version", default="main")
     parser.add_argument("--connection-type", default="USB")
@@ -575,16 +691,20 @@ def main(argv: list[str] | None = None) -> int:
     connection_label = mask_value(target, args.mask_sensitive).replace(".", "_")
     csv_path, md_path = output_paths(Path(args.output_dir), connection_label)
 
-    print("Stage 0/1 read-only command targets:")
+    print("UTR-S201 verification command targets:")
     for command in commands:
-        scope = v015_scope_label(command)
+        scope = command_scope_label(command, args.command_set)
         print(f"- {command['stage']} {command['pdf_section']} {command['name']} [{scope}]")
-    print("v015 Stage 1 read-only adapter:")
+    print("Verification adapter:")
     print("- common frame: STX/address/command/data-length/data/ETX/SUM/CR")
-    print("- real-device send target: ROM read plus Stage 1 read-only commands only")
-    print("- ROM version read runs first; Stage 1 commands are skipped if ROM read fails")
-    print("- 8CH-only or ROM-unsupported commands are recorded without sending")
-    print("- commands requiring unspecified parameters are recorded without sending")
+    if args.command_set == "stage2-minimal":
+        print("- real-device send target: ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory only")
+        print("- InventoryRead, UHF_Read, writes, FLASH, frequency, output, antenna setting, and tag memory operations are not sent")
+    else:
+        print("- real-device send target: ROM read plus Stage 1 read-only commands only")
+        print("- 8CH-only or ROM-unsupported commands are recorded without sending")
+        print("- commands requiring unspecified parameters are recorded without sending")
+    print("- ROM version read runs first; later commands are skipped if ROM read fails")
     print("- dry-run does not send a frame.")
     print(f"CSV log: {csv_path}")
     print(f"Markdown result: {md_path}")

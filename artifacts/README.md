@@ -98,3 +98,14 @@ Earlier artifacts remain preserved and are not modified by the v009 package.
 - v016 does not execute Stage 2 RF read commands.
 - v016 defines the Stage 2 RF read execution prerequisites, command plan, log template, and stop conditions.
 - Runtime logs under `runtime_logs/` are not committed.
+
+## v017 Stage 2 RF read minimal result
+
+- Latest result: v017 Stage 2 RF read minimal result
+- Result document: `docs/current/32_STAGE2_RF_READ_MINIMAL_RESULT.md`
+- v016 remains the Stage 2 RF read preflight package history.
+- v017 does not create a ZIP or GitHub Release.
+- v017 executed ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory only.
+- UHF_InventoryRead and UHF_Read were not executed.
+- Runtime logs under `runtime_logs/` are not committed.
+- Write commands, FLASH, frequency changes, output changes, antenna setting changes, and tag memory operations were not executed.
