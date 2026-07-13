@@ -201,3 +201,16 @@ RFタグのハンドル情報を取得する。
   handle response ACK; data_length=3
 - Safety note:
   No write, memory read, or tag memory operation was performed.
+
+## v018 Stage 2 RF read operations result
+
+- Result document:
+  docs/current/33_STAGE2_RF_READ_OPERATIONS_RESULT.md
+- v018 status:
+  REAL_DEVICE_PASS_WITH_NOTES
+- Actual response type:
+  ACK
+- Summary:
+  handle response ACK; data_length=3
+- Safety note:
+  Tag-specific values are retained only in runtime logs when present.
