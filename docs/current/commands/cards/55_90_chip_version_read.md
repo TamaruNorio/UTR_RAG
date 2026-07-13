@@ -179,6 +179,9 @@
 - v012 Stage 0 execution summary:
   - docs/current/24_STAGE0_READONLY_REAL_DEVICE_RESULT.md
 - Latest result status:
-  - NEEDS_RETEST
+  - NOT_EXECUTED_IN_V013
 - Latest result notes:
-  - v012 Stage 0 chip version read was not sent because the Stage 0 adapter stopped before real-device communication.
+  - v013 executes only ROM version read. Chip version read remains supported by specification but was not executed in v013.
+
+- v013 status:
+  - NOT_EXECUTED_IN_V013

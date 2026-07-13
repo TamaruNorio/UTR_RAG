@@ -73,3 +73,11 @@ V012_STAGE0_REAL_DEVICE_HOLD_BY_CONNECTION
 - Re-run only Stage 0 read-only commands after adapter confirmation.
 - Keep runtime logs outside Git.
 - Do not proceed to Stage 1 until ROM version read is actually completed or a reviewed equivalent identification path is available.
+
+## 9. v013 follow-up
+
+v013 adds a ROMバージョン読み取り専用フレームアダプタ and records the masked result in:
+
+- `docs/current/25_STAGE0_ROM_READ_FRAME_ADAPTER_RESULT.md`
+
+This does not rewrite the v012 result. v012 remains a HOLD result because the v011 tool stopped before real-device command send. v013 narrows the execution scope to ROMバージョン読み取り only; チップバージョン読み取り and エラー情報の読み取り are not executed in v013.

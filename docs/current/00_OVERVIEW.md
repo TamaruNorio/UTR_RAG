@@ -40,3 +40,15 @@ ChatGPT AI specification review completed. This package is not a formal external
 - v012 records a masked Stage 0 read-only real-device result summary.
 - Raw runtime logs under `runtime_logs/` are not committed.
 - If execution cannot complete, v012 records the HOLD result honestly.
+
+## v013 Stage 0 ROM read frame adapter package
+
+- Latest package: v013 Stage 0 ROM read frame adapter no-PDF package
+- ZIP: `artifacts/utr_s201_ai_v013/utr_s201_ai_v013_stage0_rom_read_frame_adapter_no_pdf.zip`
+- v012 remains the Stage 0 read-only result HOLD history.
+- v013 is not a formal external release, not a formal RC, not a customer release, and not production-ready.
+- v013 is not a replacement for the official PDF.
+- v013 confirms the frame adapter for ROM version read only.
+- v013 records ROM 2.052 / USM02 / UTR-SUN02-4CH from COMx / 115200bps as a masked summary.
+- Runtime logs under `runtime_logs/` are not committed.
+- Success, failure, or HOLD must be recorded honestly.
