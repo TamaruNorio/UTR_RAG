@@ -52,6 +52,7 @@ v016 does not execute Stage 2 RF read commands and does not commit runtime logs.
 ## 3. Masking policy
 
 - EPC/UII is masked by default.
+- TID/read data is masked or omitted from Git-managed summaries by default.
 - Customer names are not recorded.
 - Real IP addresses are not recorded.
 - COM ports are recorded as COMx.
@@ -59,3 +60,16 @@ v016 does not execute Stage 2 RF read commands and does not commit runtime logs.
 - Do not record completed Hex.
 - Do not record SUM-calculated command examples.
 - Do not commit runtime logs or actual CSV logs.
+
+## 4. v019 read profile fields
+
+When using the v019 `safe-tid` profile, record the following fields in masked summaries.
+
+- read_profile: `safe-tid`
+- memory_bank: `TID(2)`
+- word_address: `0`
+- word_count: `2`
+- access_password_policy: `default-zero`
+- max_tags: `1`
+
+Do not record raw EPC/UII/TID/read-data values in Git-managed documents.

@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 
-PACKAGE_VERSION = "v018"
+PACKAGE_VERSION = "v019"
 ROM_READ_PDF_SECTION = "7.3.8"
 ROM_READ_COMMAND_BYTE = 0x4F
 ROM_READ_DETAIL_BYTE = 0x90
@@ -62,6 +62,19 @@ SERIES_TO_PRODUCT = {
     "USM05": "UTR-SHR201",
     "USM06": "UTR-SUN02V-8CH",
     "USM08": "UTR-SUN02-8CH",
+}
+MEMORY_BANKS = {
+    "reserved": 0x00,
+    "epc": 0x01,
+    "tid": 0x02,
+    "user": 0x03,
+}
+MEMORY_BANK_LABELS = {value: name.upper() for name, value in MEMORY_BANKS.items()}
+SAFE_TID_PROFILE = {
+    "memory_bank": MEMORY_BANKS["tid"],
+    "read_address": 0,
+    "read_word_count": 2,
+    "access_password": "00000000",
 }
 
 
@@ -155,6 +168,16 @@ def mask_epc(hex_value: str, enabled: bool = True) -> str:
     return f"EPC_{visible}{'x' * max(len(cleaned) - len(visible), 0)}"
 
 
+def mask_tag_identifier(hex_value: str, enabled: bool = True, prefix: str = "TAG") -> str:
+    cleaned = "".join(ch for ch in hex_value.upper() if ch in "0123456789ABCDEF")
+    if not cleaned:
+        return ""
+    if not enabled:
+        return f"{prefix}_{cleaned}"
+    visible = cleaned[:4] if len(cleaned) >= 4 else cleaned
+    return f"{prefix}_{visible}{'x' * max(len(cleaned) - len(visible), 0)}"
+
+
 def calculate_sum(frame_without_sum: bytes) -> int:
     """Return lower one byte of the byte-wise sum from STX through ETX."""
     return sum(frame_without_sum) & 0xFF
@@ -200,8 +223,8 @@ def command_scope_label(command: dict[str, str], command_set: str) -> str:
         return "not-executed-in-v017"
     if command_set == "stage2-read":
         if is_v018_stage2_read_sendable(command):
-            return "sendable-or-gated-in-v018-stage2-read"
-        return "not-executed-in-v018"
+            return "sendable-or-gated-in-v019-stage2-read"
+        return "not-executed-in-v019"
     return v015_scope_label(command)
 
 
@@ -257,6 +280,42 @@ def build_stage2_minimal_frame(command: dict[str, str], address: int = 0x00) -> 
     raise ValueError("command is outside v017 Stage 2 minimal execution scope")
 
 
+def memory_bank_label(value: int | None) -> str:
+    if value is None:
+        return "not-specified"
+    return f"{MEMORY_BANK_LABELS.get(value, 'UNKNOWN')}({value})"
+
+
+def resolve_read_profile(args: argparse.Namespace) -> argparse.Namespace:
+    if args.read_profile in (None, "none"):
+        return args
+    if args.read_profile != "safe-tid":
+        raise ValueError(f"unsupported read profile: {args.read_profile}")
+    if args.read_memory_bank is None:
+        args.read_memory_bank = SAFE_TID_PROFILE["memory_bank"]
+    if args.read_address is None:
+        args.read_address = SAFE_TID_PROFILE["read_address"]
+    if args.read_word_count is None:
+        args.read_word_count = SAFE_TID_PROFILE["read_word_count"]
+    if args.access_password is None:
+        args.access_password = SAFE_TID_PROFILE["access_password"]
+    return args
+
+
+def read_parameter_summary(args: argparse.Namespace) -> str:
+    if args.read_memory_bank is None or args.read_address is None or args.read_word_count is None:
+        return "read parameters: not fully specified"
+    password_policy = "default-zero" if args.access_password == "00000000" else "specified-or-not-used"
+    return (
+        f"read_profile={args.read_profile or 'none'}; "
+        f"memory_bank={memory_bank_label(args.read_memory_bank)}; "
+        f"word_address={args.read_address}; "
+        f"word_count={args.read_word_count}; "
+        f"access_password_policy={password_policy}; "
+        f"max_tags={args.max_tags}"
+    )
+
+
 def read_parameter_bytes(args: argparse.Namespace) -> bytes | None:
     if args.read_memory_bank is None or args.read_address is None or args.read_word_count is None:
         return None
@@ -269,17 +328,28 @@ def read_parameter_bytes(args: argparse.Namespace) -> bytes | None:
     return bytes([args.read_memory_bank]) + int(args.read_address).to_bytes(4, "big") + bytes([args.read_word_count])
 
 
+def build_inventory_read_frame(args: argparse.Namespace, address: int = 0x00) -> bytes:
+    params = read_parameter_bytes(args)
+    if params is None:
+        raise ValueError("read parameters are not fully specified")
+    return build_common_frame(address, 0x55, bytes([0x14]) + params)
+
+
+def build_uhf_read_frame(args: argparse.Namespace, address: int = 0x00) -> bytes:
+    params = read_parameter_bytes(args)
+    if params is None:
+        raise ValueError("read parameters are not fully specified")
+    return build_common_frame(address, 0x55, bytes([0x15]) + params)
+
+
 def build_stage2_read_frame(command: dict[str, str], args: argparse.Namespace, address: int = 0x00) -> bytes:
     section = command["pdf_section"]
     if section in {"7.3.5", "7.3.12", "7.5.1"}:
         return build_stage2_minimal_frame(command, address)
-    params = read_parameter_bytes(args)
-    if params is None:
-        raise ValueError("read parameters are not fully specified")
     if section == "7.5.2":
-        return build_common_frame(address, 0x55, bytes([0x14]) + params)
+        return build_inventory_read_frame(args, address)
     if section == "7.5.3":
-        return build_common_frame(address, 0x55, bytes([0x15]) + params)
+        return build_uhf_read_frame(args, address)
     raise ValueError("command is outside v018 Stage 2 read execution scope")
 
 
@@ -374,7 +444,7 @@ def inventory_completion_seen(frames: list[bytes]) -> bool:
     return False
 
 
-def parse_inventory_response(raw_response: bytes, mask_sensitive: bool = True) -> dict[str, str]:
+def parse_inventory_response(raw_response: bytes, mask_sensitive: bool = True, max_tags: int = 3) -> dict[str, str]:
     frames = parsed_frames(raw_response)
     valid_frames = [frame for frame in frames if frame.get("valid")]
     nacks = [frame for frame in valid_frames if frame.get("type") == "NACK"]
@@ -394,7 +464,8 @@ def parse_inventory_response(raw_response: bytes, mask_sensitive: bool = True) -
         elif frame.get("type") != "NACK":
             tag_frames.append(frame)
             if len(data) > 7:
-                masked_epcs.append(mask_epc(bytes(data[7:]).hex(), mask_sensitive))
+                if len(masked_epcs) < max_tags:
+                    masked_epcs.append(mask_tag_identifier(bytes(data[7:]).hex(), mask_sensitive, "EPC"))
     completion_count = completions[-1] if completions else None
     parsed_tag_count = completion_count if completion_count is not None else len(tag_frames)
     return {
@@ -408,8 +479,8 @@ def parse_inventory_response(raw_response: bytes, mask_sensitive: bool = True) -
     }
 
 
-def parse_inventory_read_response(raw_response: bytes, mask_sensitive: bool = True) -> dict[str, str]:
-    summary = parse_inventory_response(raw_response, mask_sensitive)
+def parse_inventory_read_response(raw_response: bytes, mask_sensitive: bool = True, max_tags: int = 3) -> dict[str, str]:
+    summary = parse_inventory_response(raw_response, mask_sensitive, max_tags)
     summary["operation"] = "InventoryRead"
     return summary
 
@@ -633,7 +704,7 @@ def write_logs(
         title = "# Stage 2 RF Read Minimal Verification Result"
         if args.command_set == "stage2-read":
             title = "# Stage 2 RF Read Operations Result"
-            scope_note = "- v018 real-device send target is limited to ROM read and Stage 2 RF read operations."
+            scope_note = "- v019 real-device send target is limited to ROM read and Stage 2 RF read operations."
             rom_gate_note = "- ROM version read is executed first. If it fails, Stage 2 commands are not sent."
         else:
             scope_note = "- v017 real-device send target is limited to ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory."
@@ -711,12 +782,16 @@ def dry_run_rows(commands: list[dict[str, str]], args: argparse.Namespace) -> li
             "antenna_count": "TBD",
             "active_antenna": "TBD",
             "antenna_switching_mode": "read-only",
-            "target_tag_count": "TBD" if command["stage"] == "stage2-minimal" else "not-applicable",
-            "target_memory_bank": str(args.read_memory_bank) if getattr(args, "read_memory_bank", None) is not None else "not-applicable",
-            "parameter_summary": command["device_rom_condition"],
+            "target_tag_count": "TBD" if command["stage"] in {"stage2-minimal", "stage2-read"} else "not-applicable",
+            "target_memory_bank": memory_bank_label(getattr(args, "read_memory_bank", None))
+            if command["pdf_section"] in {"7.5.2", "7.5.3"}
+            else "not-applicable",
+            "parameter_summary": read_parameter_summary(args)
+            if command["pdf_section"] in {"7.5.2", "7.5.3"}
+            else command["device_rom_condition"],
             "ram_flash_impact": "read-only",
-            "rf_impact": "RF emission possible" if command["stage"] == "stage2-minimal" else "no setting change",
-            "tag_memory_impact": "read-only RF access" if command["stage"] == "stage2-minimal" else "none",
+            "rf_impact": "RF emission possible" if command["stage"] in {"stage2-minimal", "stage2-read"} else "no setting change",
+            "tag_memory_impact": "read-only RF access" if command["stage"] in {"stage2-minimal", "stage2-read"} else "none",
             "recovery_required": "no",
             "pre_read_required": "ROM read first",
             "expected_response_type": command["expected_response"],
@@ -868,15 +943,16 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
                 elif args.command_set == "stage2-read" and command["pdf_section"] in {"7.5.1", "7.5.2"} and frames:
                     row.update(rom_context)
                     if command["pdf_section"] == "7.5.1":
-                        inv = parse_inventory_response(response, args.mask_sensitive)
+                        inv = parse_inventory_response(response, args.mask_sensitive, args.max_tags)
                     else:
-                        inv = parse_inventory_read_response(response, args.mask_sensitive)
+                        inv = parse_inventory_read_response(response, args.mask_sensitive, args.max_tags)
                     inventory_tag_count = int(inv.get("parsed_tag_count") or "0") if command["pdf_section"] == "7.5.1" else inventory_tag_count
                     row["target_tag_count"] = inv.get("parsed_tag_count", "")
                     row["ack_summary"] = "; ".join(
                         item for item in [
                             inv.get("raw_summary", ""),
                             f"masked_epc={inv.get('masked_epc_summary', '')}" if inv.get("masked_epc_summary") else "",
+                            read_parameter_summary(args) if command["pdf_section"] == "7.5.2" else "",
                         ] if item
                     )
                     row["result_status"] = "REAL_DEVICE_PASS_WITH_NOTES" if inventory_tag_count > 0 or command["pdf_section"] == "7.5.2" else "REAL_DEVICE_PASS_WITH_NOTES"
@@ -885,7 +961,12 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
                 elif args.command_set == "stage2-read" and command["pdf_section"] == "7.5.3" and frames and parsed["valid"]:
                     row.update(rom_context)
                     read_summary = parse_uhf_read_response(response, args.mask_sensitive)
-                    row["ack_summary"] = read_summary["raw_summary"]
+                    row["ack_summary"] = "; ".join(
+                        item for item in [
+                            read_summary["raw_summary"],
+                            read_parameter_summary(args),
+                        ] if item
+                    )
                     row["result_status"] = "REAL_DEVICE_PASS_WITH_NOTES" if parsed["type"] == "ACK" else "REAL_DEVICE_FAIL"
                     row["notes"] = "UHF_Read response parsed conservatively. Raw response is retained only in runtime CSV."
                     row["raw_log_file"] = "runtime_logs only; not committed"
@@ -924,14 +1005,34 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--output-dir", default="runtime_logs/stage01_readonly")
     parser.add_argument("--mask-sensitive", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--command-set", choices=["stage0", "stage1", "stage2-minimal", "stage2-read", "all"], default="all")
+    parser.add_argument("--read-profile", choices=["none", "safe-tid"], default="none")
+    parser.add_argument("--memory-bank", choices=sorted(MEMORY_BANKS.keys()), default=None)
     parser.add_argument("--read-memory-bank", type=lambda value: int(value, 0), default=None)
+    parser.add_argument("--word-address", dest="read_address_alias", type=lambda value: int(value, 0), default=None)
     parser.add_argument("--read-address", type=lambda value: int(value, 0), default=None)
     parser.add_argument("--read-word-count", type=int, default=None)
+    parser.add_argument("--word-count", dest="read_word_count_alias", type=int, default=None)
+    parser.add_argument("--access-password", default=None)
+    parser.add_argument("--max-tags", type=int, default=1)
     parser.add_argument("--operator", default="TBD")
     parser.add_argument("--repository-version", default="main")
     parser.add_argument("--connection-type", default="USB")
     parser.add_argument("--sample-log", help="Optional CSV log to parse for row count only.")
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.memory_bank is not None:
+        args.read_memory_bank = MEMORY_BANKS[args.memory_bank]
+    if args.read_address_alias is not None:
+        args.read_address = args.read_address_alias
+    if args.read_word_count_alias is not None:
+        args.read_word_count = args.read_word_count_alias
+    if args.access_password is not None:
+        cleaned = "".join(ch for ch in args.access_password.upper() if ch in "0123456789ABCDEF")
+        if len(cleaned) != 8:
+            raise SystemExit("--access-password must be 8 hexadecimal characters.")
+        args.access_password = cleaned
+    if args.max_tags < 1:
+        raise SystemExit("--max-tags must be 1 or greater.")
+    return resolve_read_profile(args)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -950,6 +1051,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command_set == "stage2-read":
         print("- real-device send target: ROM read, UHF_CheckAntenna, UHF_GetHandle, UHF_Inventory, UHF_InventoryRead, and UHF_Read")
         print("- InventoryRead and UHF_Read are sent only when Inventory detects tags and read parameters are specified")
+        print(f"- read profile: {args.read_profile}")
+        print(f"- read parameters: {read_parameter_summary(args)}")
         print("- writes, FLASH, frequency, output, antenna setting, and tag memory write operations are not sent")
     elif args.command_set == "stage2-minimal":
         print("- real-device send target: ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory only")

@@ -129,3 +129,14 @@ V018_STAGE2_RF_READ_OPERATIONS_PARTIAL
 - Decide explicit read parameters before executing UHF_InventoryRead or UHF_Read.
 - Suggested required inputs: memory bank, read start word address, read word count, and access password policy.
 - Keep write, setting-change, FLASH, Lock, Kill, Encode, and ThroughCmd operations outside the next read-only execution unless a separate reviewed scope is created.
+
+## 15. v019 follow-up
+
+v019 selected an explicit `safe-tid` read-only profile and completed `UHF_InventoryRead` and `UHF_Read` with notes.
+
+- Result document: `docs/current/34_STAGE2_READ_COMPLETION_RESULT.md`
+- Memory bank: TID(2)
+- Start word address: 0
+- Word count: 2
+- Access password policy: default-zero
+- Runtime logs: not committed
