@@ -173,3 +173,18 @@ Inventoryと読み取りを組み合わせる。
   - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
   - docs/current/19_VERIFICATION_STAGE_PLAN.md
   - docs/current/20_VERIFICATION_RESULT_STATUS.md
+
+## Stage 2 RF read preflight
+
+- Preflight document:
+  docs/current/28_STAGE2_RF_READ_PREFLIGHT.md
+- Command plan:
+  docs/current/29_STAGE2_RF_READ_COMMAND_PLAN.md
+- Log template:
+  docs/current/30_STAGE2_RF_READ_LOG_TEMPLATE.md
+- Stop conditions:
+  docs/current/31_STAGE2_STOP_CONDITIONS.md
+- v016 status:
+  READY_FOR_PREFLIGHT_REVIEW
+- Real-device execution:
+  NOT_EXECUTED_IN_V016
