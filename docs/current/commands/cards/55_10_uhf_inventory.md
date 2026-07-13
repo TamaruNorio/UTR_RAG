@@ -216,3 +216,16 @@ RFタグのEPC(UII)をInventoryする。
   v017 unknown-response was resolved as RF tag response plus completion response.
 - Safety note:
   EPC/UII is masked in Git-managed documents. Raw response is retained only in runtime logs.
+
+## v019 Stage 2 read completion result
+
+- Result document:
+  docs/current/34_STAGE2_READ_COMPLETION_RESULT.md
+- v019 status:
+  REAL_DEVICE_PASS_WITH_NOTES
+- Actual response type:
+  multi-frame
+- Summary:
+  frames=2; valid=2; completion=1; tag_frames=1; masked_epc=EPC_00B0xxxxxxxxxxxxxxxxxxxx
+- Safety note:
+  EPC/UII is masked in Git-managed documents. Raw response is retained only in runtime logs.

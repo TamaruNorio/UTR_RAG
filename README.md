@@ -2,7 +2,13 @@
 
 UTR_RAG manages AI-ready RAG documents and no-PDF artifacts for UTR-S201 series protocol assistance.
 
-Current package:
+Latest package:
+
+- `artifacts/utr_s201_ai_v019/utr_s201_ai_v019_stage2_read_completion_no_pdf.zip`
+- Stage 2 read completion package
+- Result document: `docs/current/34_STAGE2_READ_COMPLETION_RESULT.md`
+
+Current clean RAG baseline:
 
 - `artifacts/utr_s201_ai_v009/utr_s201_ai_v009_v117_traceability_completed_no_pdf.zip`
 - Source specification: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17
@@ -139,3 +145,14 @@ Main references:
 - UHF_InventoryRead and UHF_Read were not sent because read parameters were not specified.
 - Runtime logs under `runtime_logs/` are not committed.
 - Write commands, FLASH, frequency changes, output changes, antenna setting changes, and tag memory writes were not executed.
+
+## v019 Stage 2 read completion package
+
+- Latest package: v019 Stage 2 read completion no-PDF package
+- ZIP: `artifacts/utr_s201_ai_v019/utr_s201_ai_v019_stage2_read_completion_no_pdf.zip`
+- Result document: `docs/current/34_STAGE2_READ_COMPLETION_RESULT.md`
+- v019 uses the explicit `safe-tid` read-only profile for UHF_InventoryRead and UHF_Read.
+- v019 completed ROM read, UHF_CheckAntenna, UHF_GetHandle, UHF_Inventory, UHF_InventoryRead, and UHF_Read with notes.
+- Runtime logs under `runtime_logs/` are not committed.
+- Write commands, FLASH, frequency changes, output changes, antenna setting changes, InventoryParam/SelectParam/ExpandSelectParam changes, tag memory writes, Lock, Kill, Encode, and ThroughCmd were not executed.
+- v019 is not a formal external release, not a formal RC, not a customer release, and not production-ready.

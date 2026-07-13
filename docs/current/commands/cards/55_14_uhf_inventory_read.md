@@ -201,3 +201,20 @@ Inventoryと読み取りを組み合わせる。
   Read memory bank, read start word address, and read word count were not specified.
 - Safety note:
   The command was not sent. The tool does not guess read parameters.
+
+## v019 Stage 2 read completion result
+
+- Result document:
+  docs/current/34_STAGE2_READ_COMPLETION_RESULT.md
+- v019 status:
+  REAL_DEVICE_PASS_WITH_NOTES
+- Actual response type:
+  ACK
+- Read profile:
+  safe-tid
+- Read parameters:
+  memory_bank=TID(2); word_address=0; word_count=2; access_password_policy=default-zero; max_tags=1
+- Summary:
+  ACK; data_length=5
+- Safety note:
+  Executed only after Inventory detected a tag. No write, setting change, FLASH operation, Lock, Kill, Encode, or ThroughCmd was performed.

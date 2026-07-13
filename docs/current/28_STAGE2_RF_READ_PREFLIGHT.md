@@ -61,3 +61,15 @@ The following items are outside the v016 execution scope.
 
 Out of scope does not mean prohibited by the protocol specification.
 It means the operation is not executed in v016.
+
+## 6. v019 completion note
+
+v019 executed the Stage 2 read target set after v016 preflight and v018 response-loop preparation.
+
+- Result document: `docs/current/34_STAGE2_READ_COMPLETION_RESULT.md`
+- Read profile: `safe-tid`
+- Memory bank: TID(2)
+- Start word address: 0
+- Word count: 2
+- ROM read, UHF_CheckAntenna, UHF_GetHandle, UHF_Inventory, UHF_InventoryRead, and UHF_Read completed with notes.
+- Runtime logs remain outside Git management.

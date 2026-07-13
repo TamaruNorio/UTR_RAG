@@ -34,3 +34,18 @@ v016 does not execute these commands on a real device.
 - UHF_Read requires the target tag, memory bank, address, word count, and access password policy before execution.
 - If an access password is required, ask the user for the policy and do not guess.
 - Execute with the current settings only. Do not change frequency, output power, antenna settings, or InventoryParam as part of Stage 2.
+
+## 5. v019 selected execution profile
+
+v019 used the following explicit safe read-only profile for the Stage 2 completion run.
+
+- Profile: `safe-tid`
+- Target tag: first tag detected by `UHF_Inventory`
+- Memory bank: TID(2)
+- Start word address: 0
+- Word count: 2
+- Access password policy: default-zero
+- Max tags summarized in Git-managed documents: 1
+- Result document: `docs/current/34_STAGE2_READ_COMPLETION_RESULT.md`
+
+The profile does not change InventoryParam, SelectParam, ExpandSelectParam, antenna settings, frequency, output power, FLASH, or tag memory.

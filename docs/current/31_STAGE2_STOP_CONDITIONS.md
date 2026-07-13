@@ -40,3 +40,9 @@ Do not continue into the next Stage 2 command when any of the following are true
 - v016 does not execute Stage 2 RF read commands.
 - Frequency, output power, antenna settings, and InventoryParam are not changed as part of v016.
 - Stop decisions must be logged as masked summaries.
+
+## 5. v019 completion note
+
+v019 proceeded through `UHF_InventoryRead` and `UHF_Read` only because the explicit `safe-tid` profile was selected and `UHF_Inventory` detected a tag.
+
+If a future run lacks the read profile, tag detection, memory bank, word address, or word count, `UHF_InventoryRead` and `UHF_Read` must remain `BLOCKED_BY_PARAMETER` or `BLOCKED_BY_SITE_CONDITION`.
