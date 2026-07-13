@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Stage 0/1 read-only and Stage 2 minimal RF-read verification helper.
+"""Stage 0/1 read-only and Stage 2 RF-read verification helper.
 
 Dry-run is the default. Real-device communication requires --execute and
-an explicit connection target. The Stage 2 minimal command set intentionally
-enables only ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory.
+an explicit connection target. Stage 2 command sets intentionally avoid writes,
+setting changes, FLASH operations, and tag memory writes.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 
-PACKAGE_VERSION = "v017"
+PACKAGE_VERSION = "v018"
 ROM_READ_PDF_SECTION = "7.3.8"
 ROM_READ_COMMAND_BYTE = 0x4F
 ROM_READ_DETAIL_BYTE = 0x90
@@ -45,6 +45,13 @@ STAGE2_MINIMAL_PDF_SECTIONS = {
     "7.3.5",
     "7.3.12",
     "7.5.1",
+}
+STAGE2_READ_PDF_SECTIONS = {
+    "7.3.5",
+    "7.3.12",
+    "7.5.1",
+    "7.5.2",
+    "7.5.3",
 }
 EIGHT_CHANNEL_ONLY_PDF_SECTIONS = {"7.4.10", "7.4.12"}
 ROM_2100_OR_LATER_PDF_SECTIONS = {"7.4.14", "7.4.15"}
@@ -97,8 +104,34 @@ STAGE2_MINIMAL_COMMANDS = [
         "notes": "v017 minimal target. InventoryRead and UHF_Read are outside v017 scope.",
     },
 ]
+STAGE2_READ_EXTRA_COMMANDS = [
+    {
+        "stage": "stage2-read",
+        "pdf_section": "7.5.2",
+        "name": "UHF_InventoryRead",
+        "command_byte": "55h",
+        "detail_command": "14h",
+        "subcommand": "-",
+        "card_path": "docs/current/commands/cards/55_14_uhf_inventory_read.md",
+        "expected_response": "ACK/NACK/timeout/multiple-response/completion-response",
+        "device_rom_condition": "Inventoryでタグを検出し、MemBank/address/word countが確定した場合のみ実行",
+        "notes": "v018 target only when read parameters are explicitly confirmed.",
+    },
+    {
+        "stage": "stage2-read",
+        "pdf_section": "7.5.3",
+        "name": "UHF_Read",
+        "command_byte": "55h",
+        "detail_command": "15h",
+        "subcommand": "-",
+        "card_path": "docs/current/commands/cards/55_15_uhf_read.md",
+        "expected_response": "ACK/NACK/timeout",
+        "device_rom_condition": "Inventoryでタグを検出し、MemBank/address/word countが確定した場合のみ実行",
+        "notes": "v018 target only when read parameters are explicitly confirmed.",
+    },
+]
 
-LOG_FIELDS = ['log_id', 'date_time', 'operator', 'repository_version', 'package_version', 'command_card', 'pdf_section', 'command_name', 'command_byte', 'detail_command', 'subcommand', 'device_series', 'product_type', 'rom_version', 'connection_type', 'port_or_ip', 'baudrate_or_socket', 'antenna_count', 'active_antenna', 'antenna_switching_mode', 'target_tag_count', 'target_memory_bank', 'parameter_summary', 'ram_flash_impact', 'rf_impact', 'tag_memory_impact', 'recovery_required', 'pre_read_required', 'expected_response_type', 'actual_response_type', 'ack_summary', 'nack_error_code_1', 'nack_error_code_2', 'nack_error_code_3', 'nack_error_code_4', 'timeout_ms', 'elapsed_ms', 'raw_log_file', 'result_status', 'notes']
+LOG_FIELDS = ['log_id', 'date_time', 'operator', 'repository_version', 'package_version', 'command_card', 'pdf_section', 'command_name', 'command_byte', 'detail_command', 'subcommand', 'device_series', 'product_type', 'rom_version', 'connection_type', 'port_or_ip', 'baudrate_or_socket', 'antenna_count', 'active_antenna', 'antenna_switching_mode', 'target_tag_count', 'target_memory_bank', 'parameter_summary', 'ram_flash_impact', 'rf_impact', 'tag_memory_impact', 'recovery_required', 'pre_read_required', 'expected_response_type', 'actual_response_type', 'ack_summary', 'nack_error_code_1', 'nack_error_code_2', 'nack_error_code_3', 'nack_error_code_4', 'timeout_ms', 'elapsed_ms', 'raw_response_hex', 'raw_log_file', 'result_status', 'notes']
 
 
 def mask_value(value: str, enabled: bool = True) -> str:
@@ -110,6 +143,16 @@ def mask_value(value: str, enabled: bool = True) -> str:
     if len(parts) == 4 and all(part.isdigit() for part in parts):
         return f"{parts[0]}.{parts[1]}.xxx.xxx"
     return value
+
+
+def mask_epc(hex_value: str, enabled: bool = True) -> str:
+    cleaned = "".join(ch for ch in hex_value.upper() if ch in "0123456789ABCDEF")
+    if not cleaned:
+        return ""
+    if not enabled:
+        return cleaned
+    visible = cleaned[:4] if len(cleaned) >= 4 else cleaned
+    return f"EPC_{visible}{'x' * max(len(cleaned) - len(visible), 0)}"
 
 
 def calculate_sum(frame_without_sum: bytes) -> int:
@@ -138,6 +181,10 @@ def is_v017_stage2_minimal_sendable(command: dict[str, str]) -> bool:
     return command["pdf_section"] == ROM_READ_PDF_SECTION or command["pdf_section"] in STAGE2_MINIMAL_PDF_SECTIONS
 
 
+def is_v018_stage2_read_sendable(command: dict[str, str]) -> bool:
+    return command["pdf_section"] == ROM_READ_PDF_SECTION or command["pdf_section"] in STAGE2_READ_PDF_SECTIONS
+
+
 def v015_scope_label(command: dict[str, str]) -> str:
     if command["pdf_section"] == ROM_READ_PDF_SECTION or command["pdf_section"] in STAGE1_READABLE_PDF_SECTIONS:
         return "sendable-in-v015"
@@ -151,6 +198,10 @@ def command_scope_label(command: dict[str, str], command_set: str) -> str:
         if is_v017_stage2_minimal_sendable(command):
             return "sendable-in-v017-stage2-minimal"
         return "not-executed-in-v017"
+    if command_set == "stage2-read":
+        if is_v018_stage2_read_sendable(command):
+            return "sendable-or-gated-in-v018-stage2-read"
+        return "not-executed-in-v018"
     return v015_scope_label(command)
 
 
@@ -206,6 +257,32 @@ def build_stage2_minimal_frame(command: dict[str, str], address: int = 0x00) -> 
     raise ValueError("command is outside v017 Stage 2 minimal execution scope")
 
 
+def read_parameter_bytes(args: argparse.Namespace) -> bytes | None:
+    if args.read_memory_bank is None or args.read_address is None or args.read_word_count is None:
+        return None
+    if not 0 <= args.read_memory_bank <= 0x03:
+        raise ValueError("--read-memory-bank must be between 0 and 3")
+    if not 0 <= args.read_address <= 0xFFFFFFFF:
+        raise ValueError("--read-address must be between 0 and 0xFFFFFFFF")
+    if not 1 <= args.read_word_count <= 32:
+        raise ValueError("--read-word-count must be between 1 and 32")
+    return bytes([args.read_memory_bank]) + int(args.read_address).to_bytes(4, "big") + bytes([args.read_word_count])
+
+
+def build_stage2_read_frame(command: dict[str, str], args: argparse.Namespace, address: int = 0x00) -> bytes:
+    section = command["pdf_section"]
+    if section in {"7.3.5", "7.3.12", "7.5.1"}:
+        return build_stage2_minimal_frame(command, address)
+    params = read_parameter_bytes(args)
+    if params is None:
+        raise ValueError("read parameters are not fully specified")
+    if section == "7.5.2":
+        return build_common_frame(address, 0x55, bytes([0x14]) + params)
+    if section == "7.5.3":
+        return build_common_frame(address, 0x55, bytes([0x15]) + params)
+    raise ValueError("command is outside v018 Stage 2 read execution scope")
+
+
 def parse_common_response(raw_response: bytes) -> dict[str, object]:
     if not raw_response:
         return {"type": "timeout", "valid": False, "error": "no response"}
@@ -244,6 +321,110 @@ def parse_common_response(raw_response: bytes) -> dict[str, object]:
         "data_length": data_length,
         "data": frame[4:etx_index],
         "frame_length": expected_length,
+    }
+
+
+def split_common_frames(raw_response: bytes) -> list[bytes]:
+    frames: list[bytes] = []
+    index = 0
+    while index < len(raw_response):
+        try:
+            stx_index = raw_response.index(0x02, index)
+        except ValueError:
+            break
+        if stx_index + 4 > len(raw_response):
+            break
+        data_length = raw_response[stx_index + 3]
+        expected_length = data_length + 7
+        frame = raw_response[stx_index : stx_index + expected_length]
+        if len(frame) < expected_length:
+            break
+        frames.append(frame)
+        index = stx_index + expected_length
+    return frames
+
+
+def receive_until_completion(ser: object, timeout_sec: float, command: dict[str, str]) -> bytes:
+    deadline = time.perf_counter() + timeout_sec
+    chunks = bytearray()
+    while time.perf_counter() < deadline:
+        chunk = ser.read(1)
+        if chunk:
+            chunks.extend(chunk)
+            frames = split_common_frames(bytes(chunks))
+            if command["pdf_section"] not in {"7.5.1", "7.5.2"} and chunk == b"\x0d":
+                break
+            if command["pdf_section"] in {"7.5.1", "7.5.2"} and inventory_completion_seen(frames):
+                break
+    return bytes(chunks)
+
+
+def parsed_frames(raw_response: bytes) -> list[dict[str, object]]:
+    return [parse_common_response(frame) for frame in split_common_frames(raw_response)]
+
+
+def inventory_completion_seen(frames: list[bytes]) -> bool:
+    for frame in frames:
+        parsed = parse_common_response(frame)
+        if parsed.get("type") == "NACK":
+            return True
+        data = parsed.get("data", b"")
+        if isinstance(data, (bytes, bytearray)) and len(data) >= 3 and data and data[0] in {0x10, 0x14}:
+            return True
+    return False
+
+
+def parse_inventory_response(raw_response: bytes, mask_sensitive: bool = True) -> dict[str, str]:
+    frames = parsed_frames(raw_response)
+    valid_frames = [frame for frame in frames if frame.get("valid")]
+    nacks = [frame for frame in valid_frames if frame.get("type") == "NACK"]
+    completions = []
+    tag_frames = []
+    masked_epcs = []
+    for frame in valid_frames:
+        data = frame.get("data", b"")
+        if not isinstance(data, (bytes, bytearray)) or not data:
+            continue
+        if len(data) >= 3 and data[0] in {0x10, 0x14} and frame.get("type") == "ACK":
+            if len(data) >= 4:
+                count = data[2] + (data[3] << 8)
+            else:
+                count = data[1] + (data[2] << 8)
+            completions.append(count)
+        elif frame.get("type") != "NACK":
+            tag_frames.append(frame)
+            if len(data) > 7:
+                masked_epcs.append(mask_epc(bytes(data[7:]).hex(), mask_sensitive))
+    completion_count = completions[-1] if completions else None
+    parsed_tag_count = completion_count if completion_count is not None else len(tag_frames)
+    return {
+        "frame_count": str(len(frames)),
+        "valid_frame_count": str(len(valid_frames)),
+        "nack_count": str(len(nacks)),
+        "completion_count": "" if completion_count is None else str(completion_count),
+        "parsed_tag_count": str(parsed_tag_count),
+        "masked_epc_summary": ",".join(masked_epcs[:3]),
+        "raw_summary": f"frames={len(frames)}; valid={len(valid_frames)}; completion={completion_count}; tag_frames={len(tag_frames)}",
+    }
+
+
+def parse_inventory_read_response(raw_response: bytes, mask_sensitive: bool = True) -> dict[str, str]:
+    summary = parse_inventory_response(raw_response, mask_sensitive)
+    summary["operation"] = "InventoryRead"
+    return summary
+
+
+def parse_uhf_read_response(raw_response: bytes, mask_sensitive: bool = True) -> dict[str, str]:
+    frames = parsed_frames(raw_response)
+    valid_frames = [frame for frame in frames if frame.get("valid")]
+    nacks = [frame for frame in valid_frames if frame.get("type") == "NACK"]
+    ack_frames = [frame for frame in valid_frames if frame.get("type") == "ACK"]
+    return {
+        "frame_count": str(len(frames)),
+        "valid_frame_count": str(len(valid_frames)),
+        "nack_count": str(len(nacks)),
+        "ack_count": str(len(ack_frames)),
+        "raw_summary": f"frames={len(frames)}; valid={len(valid_frames)}; ack={len(ack_frames)}; nack={len(nacks)}",
     }
 
 
@@ -412,6 +593,9 @@ def select_commands(command_set: str) -> list[dict[str, str]]:
     if command_set == "stage2-minimal":
         rom_command = next(command for command in COMMANDS if command["pdf_section"] == ROM_READ_PDF_SECTION)
         return [rom_command, *STAGE2_MINIMAL_COMMANDS]
+    if command_set == "stage2-read":
+        rom_command = next(command for command in COMMANDS if command["pdf_section"] == ROM_READ_PDF_SECTION)
+        return [rom_command, *STAGE2_MINIMAL_COMMANDS, *STAGE2_READ_EXTRA_COMMANDS]
     return commands
 
 
@@ -445,10 +629,15 @@ def write_logs(
     rom_rows = [row for row in rows if row["pdf_section"] == ROM_READ_PDF_SECTION]
     rom_summary = rom_rows[0]["ack_summary"] if rom_rows else "TBD"
     product_summary = rom_rows[0]["product_type"] if rom_rows else "TBD"
-    if args.command_set == "stage2-minimal":
+    if args.command_set in {"stage2-minimal", "stage2-read"}:
         title = "# Stage 2 RF Read Minimal Verification Result"
-        scope_note = "- v017 real-device send target is limited to ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory."
-        rom_gate_note = "- ROM version read is executed first. If it fails, Stage 2 minimal commands are not sent."
+        if args.command_set == "stage2-read":
+            title = "# Stage 2 RF Read Operations Result"
+            scope_note = "- v018 real-device send target is limited to ROM read and Stage 2 RF read operations."
+            rom_gate_note = "- ROM version read is executed first. If it fails, Stage 2 commands are not sent."
+        else:
+            scope_note = "- v017 real-device send target is limited to ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory."
+            rom_gate_note = "- ROM version read is executed first. If it fails, Stage 2 minimal commands are not sent."
     else:
         title = "# Stage 0/1 Read-only Verification Result"
         scope_note = "- v015 real-device send target is limited to ROM read plus Stage 1 read-only commands."
@@ -523,7 +712,7 @@ def dry_run_rows(commands: list[dict[str, str]], args: argparse.Namespace) -> li
             "active_antenna": "TBD",
             "antenna_switching_mode": "read-only",
             "target_tag_count": "TBD" if command["stage"] == "stage2-minimal" else "not-applicable",
-            "target_memory_bank": "not-applicable",
+            "target_memory_bank": str(args.read_memory_bank) if getattr(args, "read_memory_bank", None) is not None else "not-applicable",
             "parameter_summary": command["device_rom_condition"],
             "ram_flash_impact": "read-only",
             "rf_impact": "RF emission possible" if command["stage"] == "stage2-minimal" else "no setting change",
@@ -539,12 +728,14 @@ def dry_run_rows(commands: list[dict[str, str]], args: argparse.Namespace) -> li
             "nack_error_code_4": "",
             "timeout_ms": str(args.timeout_ms),
             "elapsed_ms": "",
+            "raw_response_hex": "",
             "raw_log_file": "",
             "result_status": "READY_FOR_REAL_DEVICE_TEST"
             if (
                 is_v014_sendable(command)
                 or command["stage"] == "stage1"
                 or (args.command_set == "stage2-minimal" and is_v017_stage2_minimal_sendable(command))
+                or (args.command_set == "stage2-read" and is_v018_stage2_read_sendable(command))
             )
             else "NOT_EXECUTED_IN_V015",
             "notes": command["notes"]
@@ -552,6 +743,7 @@ def dry_run_rows(commands: list[dict[str, str]], args: argparse.Namespace) -> li
                 is_v014_sendable(command)
                 or command["stage"] == "stage1"
                 or (args.command_set == "stage2-minimal" and is_v017_stage2_minimal_sendable(command))
+                or (args.command_set == "stage2-read" and is_v018_stage2_read_sendable(command))
             )
             else "v015 execution scope is ROM read plus Stage 1 read-only only.",
         })
@@ -572,10 +764,15 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
     timeout_sec = args.timeout_ms / 1000.0
     rom_ok = False
     rom_context: dict[str, str] = {}
+    inventory_tag_count = 0
     with serial.Serial(args.port, args.baudrate, timeout=timeout_sec) as ser:
         for command, row in zip(commands, rows):
             # Execution scope is deliberately narrow. Do not expand into writes or setting changes.
-            if args.command_set == "stage2-minimal":
+            if args.command_set == "stage2-read":
+                sendable = is_v018_stage2_read_sendable(command)
+                not_executed_status = "NOT_EXECUTED_IN_V018"
+                not_executed_note = "v018 sends only ROM read and Stage 2 RF read operations; no writes or setting changes."
+            elif args.command_set == "stage2-minimal":
                 sendable = is_v017_stage2_minimal_sendable(command)
                 not_executed_status = "NOT_EXECUTED_IN_V017"
                 not_executed_note = "v017 sends only ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory."
@@ -593,6 +790,19 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
                 row["result_status"] = "BLOCKED_BY_DEVICE_OR_ROM"
                 row["notes"] = "ROM version read did not pass; later commands are not sent."
                 continue
+            if args.command_set == "stage2-read" and command["pdf_section"] in {"7.5.2", "7.5.3"}:
+                if inventory_tag_count < 1:
+                    row.update(rom_context)
+                    row["actual_response_type"] = "not-sent"
+                    row["result_status"] = "BLOCKED_BY_SITE_CONDITION"
+                    row["notes"] = "No parsed Inventory tag count; InventoryRead/UHF_Read are not sent."
+                    continue
+                if read_parameter_bytes(args) is None:
+                    row.update(rom_context)
+                    row["actual_response_type"] = "not-sent"
+                    row["result_status"] = "BLOCKED_BY_PARAMETER"
+                    row["notes"] = "Read memory bank, address, and word count are not fully specified."
+                    continue
             block_status, block_note = (None, None)
             if command["stage"] == "stage1":
                 block_status, block_note = stage1_block_reason(command, rom_context)
@@ -610,13 +820,23 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
                     frame = build_stage1_readonly_frame(command)
                 elif command["stage"] == "stage2-minimal":
                     frame = build_stage2_minimal_frame(command)
+                elif command["stage"] == "stage2-read":
+                    frame = build_stage2_read_frame(command, args)
                 else:
                     raise ValueError("command is outside execution scope")
                 ser.write(frame)
-                response = read_until_cr(ser, timeout_sec)
+                if args.command_set == "stage2-read" and command["pdf_section"] in {"7.5.1", "7.5.2"}:
+                    response = receive_until_completion(ser, timeout_sec, command)
+                else:
+                    response = read_until_cr(ser, timeout_sec)
+                row["raw_response_hex"] = response.hex().upper()
                 row["elapsed_ms"] = str(int((time.perf_counter() - started) * 1000))
                 parsed = parse_common_response(response)
-                row["actual_response_type"] = str(parsed["type"])
+                frames = parsed_frames(response)
+                if args.command_set == "stage2-read" and command["pdf_section"] in {"7.5.1", "7.5.2"}:
+                    row["actual_response_type"] = "multi-frame" if len(frames) > 1 else str(parsed["type"])
+                else:
+                    row["actual_response_type"] = str(parsed["type"])
                 if parsed["type"] == "ACK" and parsed["valid"]:
                     if command["pdf_section"] == ROM_READ_PDF_SECTION:
                         rom_info = parse_rom_version_ack(parsed)
@@ -639,8 +859,35 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
                     elif command["stage"] == "stage2-minimal":
                         row.update(rom_context)
                         row["ack_summary"] = parse_stage2_minimal_ack_summary(command, parsed)
+                    elif command["stage"] == "stage2-read":
+                        row.update(rom_context)
+                        row["ack_summary"] = parse_stage2_minimal_ack_summary(command, parsed)
                     row["result_status"] = "REAL_DEVICE_PASS_WITH_NOTES"
                     row["notes"] = "Command completed within the selected narrow execution scope. Raw response is retained only in runtime CSV."
+                    row["raw_log_file"] = "runtime_logs only; not committed"
+                elif args.command_set == "stage2-read" and command["pdf_section"] in {"7.5.1", "7.5.2"} and frames:
+                    row.update(rom_context)
+                    if command["pdf_section"] == "7.5.1":
+                        inv = parse_inventory_response(response, args.mask_sensitive)
+                    else:
+                        inv = parse_inventory_read_response(response, args.mask_sensitive)
+                    inventory_tag_count = int(inv.get("parsed_tag_count") or "0") if command["pdf_section"] == "7.5.1" else inventory_tag_count
+                    row["target_tag_count"] = inv.get("parsed_tag_count", "")
+                    row["ack_summary"] = "; ".join(
+                        item for item in [
+                            inv.get("raw_summary", ""),
+                            f"masked_epc={inv.get('masked_epc_summary', '')}" if inv.get("masked_epc_summary") else "",
+                        ] if item
+                    )
+                    row["result_status"] = "REAL_DEVICE_PASS_WITH_NOTES" if inventory_tag_count > 0 or command["pdf_section"] == "7.5.2" else "REAL_DEVICE_PASS_WITH_NOTES"
+                    row["notes"] = "RF response loop completed. Raw frames are retained only in runtime CSV."
+                    row["raw_log_file"] = "runtime_logs only; not committed"
+                elif args.command_set == "stage2-read" and command["pdf_section"] == "7.5.3" and frames and parsed["valid"]:
+                    row.update(rom_context)
+                    read_summary = parse_uhf_read_response(response, args.mask_sensitive)
+                    row["ack_summary"] = read_summary["raw_summary"]
+                    row["result_status"] = "REAL_DEVICE_PASS_WITH_NOTES" if parsed["type"] == "ACK" else "REAL_DEVICE_FAIL"
+                    row["notes"] = "UHF_Read response parsed conservatively. Raw response is retained only in runtime CSV."
                     row["raw_log_file"] = "runtime_logs only; not committed"
                 elif parsed["type"] == "NACK" and parsed["valid"]:
                     nack = parse_nack_errors(parsed)
@@ -676,7 +923,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--read-size", type=int, default=256)
     parser.add_argument("--output-dir", default="runtime_logs/stage01_readonly")
     parser.add_argument("--mask-sensitive", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--command-set", choices=["stage0", "stage1", "stage2-minimal", "all"], default="all")
+    parser.add_argument("--command-set", choices=["stage0", "stage1", "stage2-minimal", "stage2-read", "all"], default="all")
+    parser.add_argument("--read-memory-bank", type=lambda value: int(value, 0), default=None)
+    parser.add_argument("--read-address", type=lambda value: int(value, 0), default=None)
+    parser.add_argument("--read-word-count", type=int, default=None)
     parser.add_argument("--operator", default="TBD")
     parser.add_argument("--repository-version", default="main")
     parser.add_argument("--connection-type", default="USB")
@@ -697,7 +947,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"- {command['stage']} {command['pdf_section']} {command['name']} [{scope}]")
     print("Verification adapter:")
     print("- common frame: STX/address/command/data-length/data/ETX/SUM/CR")
-    if args.command_set == "stage2-minimal":
+    if args.command_set == "stage2-read":
+        print("- real-device send target: ROM read, UHF_CheckAntenna, UHF_GetHandle, UHF_Inventory, UHF_InventoryRead, and UHF_Read")
+        print("- InventoryRead and UHF_Read are sent only when Inventory detects tags and read parameters are specified")
+        print("- writes, FLASH, frequency, output, antenna setting, and tag memory write operations are not sent")
+    elif args.command_set == "stage2-minimal":
         print("- real-device send target: ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory only")
         print("- InventoryRead, UHF_Read, writes, FLASH, frequency, output, antenna setting, and tag memory operations are not sent")
     else:

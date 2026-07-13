@@ -188,3 +188,16 @@ Inventoryと読み取りを組み合わせる。
   READY_FOR_PREFLIGHT_REVIEW
 - Real-device execution:
   NOT_EXECUTED_IN_V016
+
+## v018 Stage 2 RF read operations result
+
+- Result document:
+  docs/current/33_STAGE2_RF_READ_OPERATIONS_RESULT.md
+- v018 status:
+  BLOCKED_BY_PARAMETER
+- Actual response type:
+  not-sent
+- Reason:
+  Read memory bank, read start word address, and read word count were not specified.
+- Safety note:
+  The command was not sent. The tool does not guess read parameters.

@@ -96,3 +96,14 @@ ChatGPT AI specification review completed. This package is not a formal external
 - UHF_InventoryRead and UHF_Read were not executed.
 - Runtime logs under `runtime_logs/` are not committed.
 - Write commands, FLASH, frequency changes, output changes, antenna setting changes, and tag memory operations were not executed.
+
+## v018 Stage 2 RF read operations result
+
+- Latest result: v018 Stage 2 RF read operations result
+- Result document: `docs/current/33_STAGE2_RF_READ_OPERATIONS_RESULT.md`
+- v018 does not create a ZIP or GitHub Release.
+- v018 resolved the v017 UHF_Inventory unknown-response as RF tag response plus completion response.
+- v018 executed ROM read, UHF_CheckAntenna, UHF_GetHandle, and UHF_Inventory.
+- UHF_InventoryRead and UHF_Read were not sent because read parameters were not specified.
+- Runtime logs under `runtime_logs/` are not committed.
+- Write commands, FLASH, frequency changes, output changes, antenna setting changes, and tag memory writes were not executed.

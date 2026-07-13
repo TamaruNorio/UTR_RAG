@@ -201,3 +201,18 @@ RFタグのEPC(UII)をInventoryする。
   Unexpected response category was returned by the current parser.
 - Safety note:
   This result is not recorded as PASS. InventoryRead and UHF_Read remain outside v017 execution scope.
+
+## v018 Stage 2 RF read operations result
+
+- Result document:
+  docs/current/33_STAGE2_RF_READ_OPERATIONS_RESULT.md
+- v018 status:
+  REAL_DEVICE_PASS_WITH_NOTES
+- Actual response type:
+  multi-frame
+- Summary:
+  frames=2; valid=2; completion=1; tag_frames=1; masked_epc=EPC_00B0xxxxxxxxxxxxxxxxxxxx
+- Unknown-response analysis:
+  v017 unknown-response was resolved as RF tag response plus completion response.
+- Safety note:
+  EPC/UII is masked in Git-managed documents. Raw response is retained only in runtime logs.

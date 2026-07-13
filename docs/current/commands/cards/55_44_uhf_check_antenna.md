@@ -201,3 +201,16 @@
   antenna check ACK; data_length=3
 - Safety note:
   No antenna setting change was performed.
+
+## v018 Stage 2 RF read operations result
+
+- Result document:
+  docs/current/33_STAGE2_RF_READ_OPERATIONS_RESULT.md
+- v018 status:
+  REAL_DEVICE_PASS_WITH_NOTES
+- Actual response type:
+  ACK
+- Summary:
+  antenna check ACK; data_length=3
+- Safety note:
+  No antenna setting change was performed.
