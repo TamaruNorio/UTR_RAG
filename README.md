@@ -49,3 +49,15 @@ Main references:
 - v010 defines the framework for real-device verification.
 - ChatGPT AI specification review completed.
 - AI-assisted traceability completion completed.
+
+## v011 Stage 0/1 read-only verification kit
+
+- Latest package: v011 Stage 0/1 read-only verification kit no-PDF package
+- ZIP: `artifacts/utr_s201_ai_v011/utr_s201_ai_v011_stage01_readonly_verification_kit_no_pdf.zip`
+- v010 remains the real-device verification framework history.
+- v011 is not a formal external release, not a formal RC, not a customer release, and not production-ready.
+- v011 is not a replacement for the official PDF.
+- v011 is a Stage 0/1 read-only verification kit.
+- Real-device communication requires `--execute`.
+- Default mode is dry-run.
+- Write commands and setting-change commands are outside v011 scope.
