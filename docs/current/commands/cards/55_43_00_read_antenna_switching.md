@@ -138,26 +138,24 @@
   - No device-sendable code
 
 
+
 ## Real-device verification
 
 - Verification stage:
-  - Stage 1: Read-only configuration
+  - Stage 1: Stage 0/1 read-only verification
 - Initial status:
   - READY_FOR_REAL_DEVICE_TEST
 - Required prior checks:
-  - Stage 0完了、対象機種/ROM、読み取り対象設定、ログ保存先
+  - ROM version read first; confirm product/series/ROM and connection target before execution.
 - Required parameters:
-  - ROM version, device/ROM support, connection condition, timeout policy, command-specific parameters, and field conditions not readable from ROM
+  - Explicit connection target, timeout policy, output directory, operator, and device/ROM applicability.
 - Required log fields:
-  - device_series, product_type, rom_version, parameter_summary, actual_response_type, ack_summary, timeout_ms, elapsed_ms
+  - date_time, operator, command_card, pdf_section, command_name, device_series, product_type, rom_version, connection_type, port_or_ip, timeout_ms, elapsed_ms, actual_response_type, ack_summary, nack_error_code_1-4, result_status, notes
 - Expected response type:
   - ACK/NACK/timeout/no-response
 - Recovery note:
-  - 読み取り専用。復旧操作は原則不要だが、timeout/no-responseは接続条件を見直す。
+  - Read-only scope. No setting change is expected. Timeout/no-response requires connection and ROM/applicability review.
 - Result status values:
-  - NOT_TESTED
-  - DESK_REVIEWED
-  - AI_TRACE_REVIEWED
   - READY_FOR_REAL_DEVICE_TEST
   - REAL_DEVICE_PASS
   - REAL_DEVICE_PASS_WITH_NOTES
@@ -165,11 +163,15 @@
   - NEEDS_RETEST
   - BLOCKED_BY_DEVICE_OR_ROM
   - BLOCKED_BY_PARAMETER
-  - BLOCKED_BY_SITE_CONDITION
-  - BLOCKED_BY_RECOVERY_PLAN
   - NOT_APPLICABLE_TO_TARGET
+- v011 notes:
+  - ROM読み取りで機種判定後に実行
+  - 読み取りのみ。切替設定変更は対象外
 - Related documents:
   - docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md
   - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
   - docs/current/19_VERIFICATION_STAGE_PLAN.md
   - docs/current/20_VERIFICATION_RESULT_STATUS.md
+  - docs/current/21_STAGE01_READONLY_VERIFICATION_KIT.md
+  - docs/current/22_STAGE01_READONLY_COMMAND_LIST.md
+  - docs/current/23_STAGE01_READONLY_LOGGING_GUIDE.md

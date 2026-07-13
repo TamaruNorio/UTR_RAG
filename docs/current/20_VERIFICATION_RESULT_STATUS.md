@@ -30,3 +30,16 @@ BLOCKEDは「仕様上禁止」ではない。対象機器、ROM、パラメー�
 - Timeout and no-response must not be recorded as NACK.
 - Multiple responses and completion responses must be recorded separately.
 - Protocol-defined commands remain usable unless target device/ROM applicability says otherwise.
+
+## 4. v011 Stage 0/1 status usage
+
+v011 Stage 0/1では、以下のstatusを主に使う。
+
+- READY_FOR_REAL_DEVICE_TEST
+- REAL_DEVICE_PASS
+- REAL_DEVICE_PASS_WITH_NOTES
+- REAL_DEVICE_FAIL
+- NEEDS_RETEST
+- BLOCKED_BY_DEVICE_OR_ROM
+- BLOCKED_BY_PARAMETER
+- NOT_APPLICABLE_TO_TARGET
