@@ -65,3 +65,14 @@ Earlier artifacts remain preserved and are not modified by the v009 package.
 - v013 records ROM 2.052 / USM02 / UTR-SUN02-4CH from COMx / 115200bps as a masked summary.
 - Runtime logs under `runtime_logs/` are not committed.
 - Success, failure, or HOLD must be recorded honestly.
+
+## v014 Stage 0 remaining read-only result package
+
+- Latest package: v014 Stage 0 remaining read-only result no-PDF package
+- ZIP: `artifacts/utr_s201_ai_v014/utr_s201_ai_v014_stage0_remaining_readonly_result_no_pdf.zip`
+- v013 remains the ROM read frame adapter history.
+- v014 is not a formal external release, not a formal RC, not a customer release, and not production-ready.
+- v014 is not a replacement for the official PDF.
+- v014 records Stage 0 read-only 3-command confirmation results.
+- Runtime logs under `runtime_logs/` are not committed.
+- Success, failure, or HOLD must be recorded honestly.

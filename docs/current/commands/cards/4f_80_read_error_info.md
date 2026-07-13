@@ -178,10 +178,17 @@
 
 - v012 Stage 0 execution summary:
   - docs/current/24_STAGE0_READONLY_REAL_DEVICE_RESULT.md
-- Latest result status:
+- v013 result status:
   - NOT_EXECUTED_IN_V013
-- Latest result notes:
+- v013 result notes:
   - v013 executes only ROM version read. Error information read remains supported by specification but was not executed in v013.
 
 - v013 status:
   - NOT_EXECUTED_IN_V013
+
+- v014 Stage 0 remaining read-only result:
+  - docs/current/26_STAGE0_REMAINING_READONLY_RESULT.md
+- Latest result status:
+  - REAL_DEVICE_PASS_WITH_NOTES
+- Latest result notes:
+  - v014 executed error information read and returned error information 00h / normal.

@@ -186,3 +186,10 @@ ROMバージョン番号とシリーズ名を読み取る。
 
 - v013 Stage 0 ROM read frame adapter result:
   - docs/current/25_STAGE0_ROM_READ_FRAME_ADAPTER_RESULT.md
+
+- v014 Stage 0 remaining read-only result:
+  - docs/current/26_STAGE0_REMAINING_READONLY_RESULT.md
+- v014 result status:
+  - REAL_DEVICE_PASS_WITH_NOTES
+- v014 result notes:
+  - ROM version read was executed first for device identification and returned ROM 2.052 / USM02 / UTR-SUN02-4CH.

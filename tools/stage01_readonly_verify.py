@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Stage 0/1 read-only verification helper for UTR-S201 RAG v013.
+"""Stage 0/1 read-only verification helper for UTR-S201 RAG v014.
 
 Dry-run is the default. Real-device communication requires --execute and
 an explicit connection target. This tool intentionally defines only Stage 0/1
-read-only commands. v013 enables real-device sending for the Stage 0 ROM
-version read command only.
+read-only commands. v014 enables real-device sending for the Stage 0 read-only
+commands only.
 """
 
 from __future__ import annotations
@@ -17,10 +17,17 @@ import time
 from pathlib import Path
 
 
-PACKAGE_VERSION = "v013"
+PACKAGE_VERSION = "v014"
 ROM_READ_PDF_SECTION = "7.3.8"
 ROM_READ_COMMAND_BYTE = 0x4F
 ROM_READ_DETAIL_BYTE = 0x90
+ERROR_INFO_PDF_SECTION = "7.3.1"
+ERROR_INFO_COMMAND_BYTE = 0x4F
+ERROR_INFO_DETAIL_BYTE = 0x80
+CHIP_VERSION_PDF_SECTION = "7.3.9"
+CHIP_VERSION_COMMAND_BYTE = 0x55
+CHIP_VERSION_DETAIL_BYTE = 0x90
+CHIP_FIRMWARE_SUBCOMMAND_BYTE = 0x00
 ACK_COMMAND_BYTE = 0x30
 NACK_COMMAND_BYTE = 0x31
 SERIES_TO_PRODUCT = {
@@ -32,7 +39,7 @@ SERIES_TO_PRODUCT = {
 }
 
 
-COMMANDS = [{'stage': 'stage0', 'pdf_section': '7.3.1', 'name': 'エラー情報の読み取り', 'command_byte': '4Fh', 'detail_command': '80h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_80_read_error_info.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '低影響の状態確認'}, {'stage': 'stage0', 'pdf_section': '7.3.8', 'name': 'ROMバージョンの読み取り', 'command_byte': '4Fh', 'detail_command': '90h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/rom_version_read.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '最初に実行し機種/シリーズ/ROMを判定', 'notes': '標準フローの起点'}, {'stage': 'stage0', 'pdf_section': '7.3.9', 'name': 'チップバージョンの読み取り', 'command_byte': '55h', 'detail_command': '90h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_90_chip_version_read.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '機種/ROM条件を併記'}, {'stage': 'stage1', 'pdf_section': '7.4.1', 'name': 'リーダライタ動作モードの読み取り', 'command_byte': '4Fh', 'detail_command': '00h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_00_read_reader_mode.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '設定変更は行わない'}, {'stage': 'stage1', 'pdf_section': '7.4.2', 'name': 'UHF_GetSelectParam', 'command_byte': '55h', 'detail_command': '40h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_40_uhf_get_select_param.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.3', 'name': 'UHF_GetInventoryParam', 'command_byte': '55h', 'detail_command': '41h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_41_uhf_get_inventory_param.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'SetInventoryParamは対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.4', 'name': 'UHF_GetExpandSelectParam', 'command_byte': '55h', 'detail_command': '42h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_42_uhf_get_expand_select_param.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.5', 'name': 'アンテナ切替設定の読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '00h', 'card_path': 'docs/current/commands/cards/55_43_00_read_antenna_switching.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。切替設定変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.6', 'name': '出力設定の読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '01h', 'card_path': 'docs/current/commands/cards/55_43_01_read_output_power.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。出力変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.7', 'name': '周波数設定の読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '02h', 'card_path': 'docs/current/commands/cards/55_43_02_read_frequency.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。周波数変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.8', 'name': 'RFタグ通信関連パラメータの読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '04h', 'card_path': 'docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.9', 'name': 'EPC(UII)関連パラメータの読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '05h', 'card_path': 'docs/current/commands/cards/55_43_05_read_epc_uii_params.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.10', 'name': '外部アンテナ自動切替設定の読み取り', 'command_byte': '55h', 'detail_command': '47h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_47_read_external_antenna_auto_switch.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '8CH系のみ対象の可能性。対象機種非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': '読み取りのみ。自動切替設定変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.11', 'name': '汎用ポート値の読み取り', 'command_byte': '4Fh', 'detail_command': '9Fh', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_9f_read_general_port.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '外部I/O状態読み取り'}, {'stage': 'stage1', 'pdf_section': '7.4.12', 'name': '拡張ポート値の読み取り', 'command_byte': '4Fh', 'detail_command': 'A0h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_a0_read_extended_port.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '8CH系のみ対象の可能性。対象機種非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': '外部I/O状態読み取り'}, {'stage': 'stage1', 'pdf_section': '7.4.13', 'name': 'FLASH設定値の読み取り(1バイトアクセス)', 'command_byte': '4Fh', 'detail_command': 'B4h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_b4_read_flash_settings.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。FLASH書き込みは対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.14', 'name': 'RSSIフィルタ設定の読み取り', 'command_byte': '55h', 'detail_command': '49h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_49_read_rssi_filter.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM 2.100以降対象の可能性。非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.15', 'name': 'アンテナ個別送信出力設定の読み取り', 'command_byte': '55h', 'detail_command': '4Ah', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_4a_read_antenna_output_power.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '8CH系またはROM条件依存の可能性。非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': '読み取りのみ。出力変更は対象外'}]
+COMMANDS = [{'stage': 'stage0', 'pdf_section': '7.3.1', 'name': 'エラー情報の読み取り', 'command_byte': '4Fh', 'detail_command': '80h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_80_read_error_info.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '低影響の状態確認'}, {'stage': 'stage0', 'pdf_section': '7.3.8', 'name': 'ROMバージョンの読み取り', 'command_byte': '4Fh', 'detail_command': '90h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/rom_version_read.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '最初に実行し機種/シリーズ/ROMを判定', 'notes': '標準フローの起点'}, {'stage': 'stage0', 'pdf_section': '7.3.9', 'name': 'チップバージョンの読み取り', 'command_byte': '55h', 'detail_command': '90h', 'subcommand': '00h', 'card_path': 'docs/current/commands/cards/55_90_chip_version_read.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'v014 executes firmware-version subcommand 00h only; serial-number subcommand 01h is not executed'}, {'stage': 'stage1', 'pdf_section': '7.4.1', 'name': 'リーダライタ動作モードの読み取り', 'command_byte': '4Fh', 'detail_command': '00h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_00_read_reader_mode.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '設定変更は行わない'}, {'stage': 'stage1', 'pdf_section': '7.4.2', 'name': 'UHF_GetSelectParam', 'command_byte': '55h', 'detail_command': '40h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_40_uhf_get_select_param.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.3', 'name': 'UHF_GetInventoryParam', 'command_byte': '55h', 'detail_command': '41h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_41_uhf_get_inventory_param.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'SetInventoryParamは対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.4', 'name': 'UHF_GetExpandSelectParam', 'command_byte': '55h', 'detail_command': '42h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_42_uhf_get_expand_select_param.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.5', 'name': 'アンテナ切替設定の読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '00h', 'card_path': 'docs/current/commands/cards/55_43_00_read_antenna_switching.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。切替設定変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.6', 'name': '出力設定の読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '01h', 'card_path': 'docs/current/commands/cards/55_43_01_read_output_power.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。出力変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.7', 'name': '周波数設定の読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '02h', 'card_path': 'docs/current/commands/cards/55_43_02_read_frequency.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。周波数変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.8', 'name': 'RFタグ通信関連パラメータの読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '04h', 'card_path': 'docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.9', 'name': 'EPC(UII)関連パラメータの読み取り', 'command_byte': '55h', 'detail_command': '43h', 'subcommand': '05h', 'card_path': 'docs/current/commands/cards/55_43_05_read_epc_uii_params.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.10', 'name': '外部アンテナ自動切替設定の読み取り', 'command_byte': '55h', 'detail_command': '47h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_47_read_external_antenna_auto_switch.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '8CH系のみ対象の可能性。対象機種非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': '読み取りのみ。自動切替設定変更は対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.11', 'name': '汎用ポート値の読み取り', 'command_byte': '4Fh', 'detail_command': '9Fh', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_9f_read_general_port.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '外部I/O状態読み取り'}, {'stage': 'stage1', 'pdf_section': '7.4.12', 'name': '拡張ポート値の読み取り', 'command_byte': '4Fh', 'detail_command': 'A0h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_a0_read_extended_port.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '8CH系のみ対象の可能性。対象機種非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': '外部I/O状態読み取り'}, {'stage': 'stage1', 'pdf_section': '7.4.13', 'name': 'FLASH設定値の読み取り(1バイトアクセス)', 'command_byte': '4Fh', 'detail_command': 'B4h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/4f_b4_read_flash_settings.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM読み取りで機種判定後に実行', 'notes': '読み取りのみ。FLASH書き込みは対象外'}, {'stage': 'stage1', 'pdf_section': '7.4.14', 'name': 'RSSIフィルタ設定の読み取り', 'command_byte': '55h', 'detail_command': '49h', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_49_read_rssi_filter.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': 'ROM 2.100以降対象の可能性。非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': 'read-only parameter retrieval'}, {'stage': 'stage1', 'pdf_section': '7.4.15', 'name': 'アンテナ個別送信出力設定の読み取り', 'command_byte': '55h', 'detail_command': '4Ah', 'subcommand': '-', 'card_path': 'docs/current/commands/cards/55_4a_read_antenna_output_power.md', 'expected_response': 'ACK/NACK/timeout/no-response', 'device_rom_condition': '8CH系またはROM条件依存の可能性。非対応なら NOT_APPLICABLE_TO_TARGET', 'notes': '読み取りのみ。出力変更は対象外'}]
 
 LOG_FIELDS = ['log_id', 'date_time', 'operator', 'repository_version', 'package_version', 'command_card', 'pdf_section', 'command_name', 'command_byte', 'detail_command', 'subcommand', 'device_series', 'product_type', 'rom_version', 'connection_type', 'port_or_ip', 'baudrate_or_socket', 'antenna_count', 'active_antenna', 'antenna_switching_mode', 'target_tag_count', 'target_memory_bank', 'parameter_summary', 'ram_flash_impact', 'rf_impact', 'tag_memory_impact', 'recovery_required', 'pre_read_required', 'expected_response_type', 'actual_response_type', 'ack_summary', 'nack_error_code_1', 'nack_error_code_2', 'nack_error_code_3', 'nack_error_code_4', 'timeout_ms', 'elapsed_ms', 'raw_log_file', 'result_status', 'notes']
 
@@ -58,16 +65,28 @@ def build_common_frame(address: int, command_byte: int, data: bytes) -> bytes:
     return prefix + bytes([calculate_sum(prefix), 0x0D])
 
 
-def is_v013_sendable(command: dict[str, str]) -> bool:
-    return (
-        command["pdf_section"] == ROM_READ_PDF_SECTION
-        and command["command_byte"] == "4Fh"
-        and command["detail_command"] == "90h"
-    )
+def is_v014_sendable(command: dict[str, str]) -> bool:
+    return command["pdf_section"] in {
+        ROM_READ_PDF_SECTION,
+        CHIP_VERSION_PDF_SECTION,
+        ERROR_INFO_PDF_SECTION,
+    }
 
 
 def build_rom_version_read_frame(address: int = 0x00) -> bytes:
     return build_common_frame(address, ROM_READ_COMMAND_BYTE, bytes([ROM_READ_DETAIL_BYTE]))
+
+
+def build_chip_version_read_frame(address: int = 0x00) -> bytes:
+    return build_common_frame(
+        address,
+        CHIP_VERSION_COMMAND_BYTE,
+        bytes([CHIP_VERSION_DETAIL_BYTE, CHIP_FIRMWARE_SUBCOMMAND_BYTE]),
+    )
+
+
+def build_error_info_read_frame(address: int = 0x00) -> bytes:
+    return build_common_frame(address, ERROR_INFO_COMMAND_BYTE, bytes([ERROR_INFO_DETAIL_BYTE]))
 
 
 def parse_common_response(raw_response: bytes) -> dict[str, object]:
@@ -135,6 +154,40 @@ def parse_rom_version_ack(parsed: dict[str, object]) -> dict[str, str]:
     }
 
 
+def parse_chip_version_ack(parsed: dict[str, object]) -> dict[str, str]:
+    data = parsed.get("data", b"")
+    if not isinstance(data, (bytes, bytearray)):
+        raise ValueError("ACK data is not bytes")
+    if len(data) != 11:
+        raise ValueError("chip version ACK data length is not 11")
+    if data[0] != CHIP_VERSION_DETAIL_BYTE or data[1] != CHIP_FIRMWARE_SUBCOMMAND_BYTE:
+        raise ValueError("chip version ACK detail/subcommand mismatch")
+    chip_raw = bytes(data[2:6]).decode("ascii", errors="replace")
+    chip_name = bytes(data[6:11]).decode("ascii", errors="replace")
+    return {
+        "chip_raw": chip_raw,
+        "chip_version": format_rom_version(chip_raw),
+        "chip_name": chip_name,
+    }
+
+
+def parse_error_info_ack(parsed: dict[str, object]) -> dict[str, str]:
+    data = parsed.get("data", b"")
+    if not isinstance(data, (bytes, bytearray)):
+        raise ValueError("ACK data is not bytes")
+    if len(data) != 4:
+        raise ValueError("error information ACK data length is not 4")
+    if data[0] != ERROR_INFO_DETAIL_BYTE:
+        raise ValueError("error information ACK detail command mismatch")
+    error_info = data[1]
+    return {
+        "error_info": f"{error_info:02X}h",
+        "error_status": "normal" if error_info == 0 else "abnormal",
+        "reserved_1": f"{data[2]:02X}h",
+        "reserved_2": f"{data[3]:02X}h",
+    }
+
+
 def parse_nack_errors(parsed: dict[str, object]) -> dict[str, str]:
     data = parsed.get("data", b"")
     if not isinstance(data, (bytes, bytearray)) or len(data) < 5:
@@ -169,7 +222,11 @@ def read_until_cr(ser: object, timeout_sec: float) -> bytes:
 def select_commands(command_set: str) -> list[dict[str, str]]:
     if command_set == "all":
         return COMMANDS
-    return [command for command in COMMANDS if command["stage"] == command_set]
+    commands = [command for command in COMMANDS if command["stage"] == command_set]
+    if command_set == "stage0":
+        order = {ROM_READ_PDF_SECTION: 0, CHIP_VERSION_PDF_SECTION: 1, ERROR_INFO_PDF_SECTION: 2}
+        return sorted(commands, key=lambda command: order.get(command["pdf_section"], 99))
+    return commands
 
 
 def output_paths(output_dir: Path, connection_label: str) -> tuple[Path, Path]:
@@ -236,7 +293,8 @@ def write_logs(
             "",
             "## 備考",
             "- Dry-run rows use READY_FOR_REAL_DEVICE_TEST and do not indicate real-device pass.",
-            "- v013 real-device send target is limited to ROM version read only.",
+            "- v014 real-device send target is limited to Stage 0 read-only commands.",
+            "- ROM version read is executed first. If it fails, the remaining Stage 0 commands are not sent.",
             "- Runtime CSV may contain raw response details and must not be committed.",
         ]),
         encoding="utf-8",
@@ -288,8 +346,8 @@ def dry_run_rows(commands: list[dict[str, str]], args: argparse.Namespace) -> li
             "timeout_ms": str(args.timeout_ms),
             "elapsed_ms": "",
             "raw_log_file": "",
-            "result_status": "READY_FOR_REAL_DEVICE_TEST" if is_v013_sendable(command) else "NOT_EXECUTED_IN_V013",
-            "notes": command["notes"] if is_v013_sendable(command) else "v013 execution scope is ROM version read only.",
+            "result_status": "READY_FOR_REAL_DEVICE_TEST" if is_v014_sendable(command) else "NOT_EXECUTED_IN_V014",
+            "notes": command["notes"] if is_v014_sendable(command) else "v014 execution scope is Stage 0 read-only only.",
         })
     return rows
 
@@ -306,34 +364,72 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
 
     rows = dry_run_rows(commands, args)
     timeout_sec = args.timeout_ms / 1000.0
+    rom_ok = False
+    rom_context: dict[str, str] = {}
     with serial.Serial(args.port, args.baudrate, timeout=timeout_sec) as ser:
         for command, row in zip(commands, rows):
-            if not is_v013_sendable(command):
+            # v014はStage 0の読み取り系だけを送信対象にする。設定変更や書き込み系に広げないため。
+            if not is_v014_sendable(command):
                 row["actual_response_type"] = "not-sent"
-                row["result_status"] = "NOT_EXECUTED_IN_V013"
-                row["notes"] = "v013 sends only the ROM version read command."
+                row["result_status"] = "NOT_EXECUTED_IN_V014"
+                row["notes"] = "v014 sends only Stage 0 read-only commands."
+                continue
+            # ROM読み取りで機種/ROMを先に確定し、対象条件が不明なまま後続確認を進めない。
+            if command["pdf_section"] != ROM_READ_PDF_SECTION and not rom_ok:
+                row["actual_response_type"] = "not-sent"
+                row["result_status"] = "BLOCKED_BY_DEVICE_OR_ROM"
+                row["notes"] = "ROM version read did not pass; v014 does not proceed to remaining Stage 0 commands."
                 continue
             started = time.perf_counter()
             try:
-                frame = build_rom_version_read_frame()
+                if command["pdf_section"] == ROM_READ_PDF_SECTION:
+                    frame = build_rom_version_read_frame()
+                elif command["pdf_section"] == CHIP_VERSION_PDF_SECTION:
+                    frame = build_chip_version_read_frame()
+                elif command["pdf_section"] == ERROR_INFO_PDF_SECTION:
+                    frame = build_error_info_read_frame()
+                else:
+                    raise ValueError("command is outside v014 execution scope")
                 ser.write(frame)
                 response = read_until_cr(ser, timeout_sec)
                 row["elapsed_ms"] = str(int((time.perf_counter() - started) * 1000))
                 parsed = parse_common_response(response)
                 row["actual_response_type"] = str(parsed["type"])
                 if parsed["type"] == "ACK" and parsed["valid"]:
-                    rom_info = parse_rom_version_ack(parsed)
-                    row["device_series"] = rom_info["series_name"]
-                    row["product_type"] = rom_info["product_type"]
-                    row["rom_version"] = rom_info["rom_version"]
-                    row["ack_summary"] = (
-                        f"ROM raw={rom_info['rom_raw']}; "
-                        f"ROM={rom_info['rom_version']}; "
-                        f"series={rom_info['series_name']}; "
-                        f"product={rom_info['product_type']}"
-                    )
+                    if command["pdf_section"] == ROM_READ_PDF_SECTION:
+                        rom_info = parse_rom_version_ack(parsed)
+                        rom_context = {
+                            "device_series": rom_info["series_name"],
+                            "product_type": rom_info["product_type"],
+                            "rom_version": rom_info["rom_version"],
+                        }
+                        row.update(rom_context)
+                        row["ack_summary"] = (
+                            f"ROM raw={rom_info['rom_raw']}; "
+                            f"ROM={rom_info['rom_version']}; "
+                            f"series={rom_info['series_name']}; "
+                            f"product={rom_info['product_type']}"
+                        )
+                        rom_ok = True
+                    elif command["pdf_section"] == CHIP_VERSION_PDF_SECTION:
+                        chip_info = parse_chip_version_ack(parsed)
+                        row.update(rom_context)
+                        row["ack_summary"] = (
+                            f"chip raw={chip_info['chip_raw']}; "
+                            f"chip firmware={chip_info['chip_version']}; "
+                            f"chip name={chip_info['chip_name']}; "
+                            "subcommand=00h"
+                        )
+                    elif command["pdf_section"] == ERROR_INFO_PDF_SECTION:
+                        error_info = parse_error_info_ack(parsed)
+                        row.update(rom_context)
+                        row["ack_summary"] = (
+                            f"error information={error_info['error_info']}; "
+                            f"status={error_info['error_status']}; "
+                            f"reserved={error_info['reserved_1']}/{error_info['reserved_2']}"
+                        )
                     row["result_status"] = "REAL_DEVICE_PASS_WITH_NOTES"
-                    row["notes"] = "ROM version read completed. Raw response is retained only in runtime CSV."
+                    row["notes"] = "Stage 0 read-only command completed. Raw response is retained only in runtime CSV."
                     row["raw_log_file"] = "runtime_logs only; not committed"
                 elif parsed["type"] == "NACK" and parsed["valid"]:
                     nack = parse_nack_errors(parsed)
@@ -342,7 +438,7 @@ def execute_commands(commands: list[dict[str, str]], args: argparse.Namespace) -
                     row["nack_error_code_3"] = nack["error_code_3"]
                     row["nack_error_code_4"] = nack["error_code_4"]
                     row["result_status"] = "REAL_DEVICE_FAIL"
-                    row["notes"] = "ROM version read returned NACK."
+                    row["notes"] = "Stage 0 read-only command returned NACK."
                 elif parsed["type"] == "timeout":
                     row["result_status"] = "NEEDS_RETEST"
                     row["notes"] = "No response before timeout."
@@ -362,7 +458,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true", default=True, help="Dry-run mode; default behavior.")
     parser.add_argument("--execute", action="store_true", help="Enable real-device communication.")
     parser.add_argument("--port", help="Serial port such as COM6.")
-    parser.add_argument("--host", help="TCP host. Execution adapter is not enabled in v013.")
+    parser.add_argument("--host", help="TCP host. Execution adapter is not enabled in v014.")
     parser.add_argument("--socket-port", type=int, default=None)
     parser.add_argument("--baudrate", type=int, default=115200)
     parser.add_argument("--timeout-ms", type=int, default=1000)
@@ -386,11 +482,13 @@ def main(argv: list[str] | None = None) -> int:
 
     print("Stage 0/1 read-only command targets:")
     for command in commands:
-        scope = "sendable-in-v013" if is_v013_sendable(command) else "not-executed-in-v013"
+        scope = "sendable-in-v014" if is_v014_sendable(command) else "not-executed-in-v014"
         print(f"- {command['stage']} {command['pdf_section']} {command['name']} [{scope}]")
-    print("v013 frame adapter:")
+    print("v014 Stage 0 read-only adapter:")
     print("- common frame: STX/address/command/data-length/data/ETX/SUM/CR")
-    print("- real-device send target: ROM version read only (PDF 7.3.8, command 4Fh/detail 90h)")
+    print("- real-device send target: Stage 0 read-only commands only")
+    print("- ROM version read runs first; remaining Stage 0 commands are skipped if ROM read fails")
+    print("- chip version read uses firmware-version subcommand 00h; serial-number subcommand 01h is not executed")
     print("- dry-run does not send a frame.")
     print(f"CSV log: {csv_path}")
     print(f"Markdown result: {md_path}")
