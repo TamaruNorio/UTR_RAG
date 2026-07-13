@@ -179,6 +179,10 @@ ROMバージョン番号とシリーズ名を読み取る。
 - v012 Stage 0 execution summary:
   - docs/current/24_STAGE0_READONLY_REAL_DEVICE_RESULT.md
 - Latest result status:
-  - BLOCKED_BY_PARAMETER
+  - REAL_DEVICE_PASS_WITH_NOTES
 - Latest result notes:
-  - v012 Stage 0 run did not obtain ROM. The v011 execution adapter stopped before device-send due common frame not encoded.
+  - v013 Stage 0 ROM read frame adapter executed ROM version read only and obtained ROM 2.052 / USM02 / UTR-SUN02-4CH.
+  - Runtime logs are not committed.
+
+- v013 Stage 0 ROM read frame adapter result:
+  - docs/current/25_STAGE0_ROM_READ_FRAME_ADAPTER_RESULT.md
