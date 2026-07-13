@@ -193,3 +193,10 @@ ROMバージョン番号とシリーズ名を読み取る。
   - REAL_DEVICE_PASS_WITH_NOTES
 - v014 result notes:
   - ROM version read was executed first for device identification and returned ROM 2.052 / USM02 / UTR-SUN02-4CH.
+
+- v015 Stage 1 read-only configuration result:
+  - docs/current/27_STAGE1_READONLY_CONFIGURATION_RESULT.md
+- v015 result status:
+  - REAL_DEVICE_PASS_WITH_NOTES
+- v015 result notes:
+  - ROM version read was executed first before Stage 1 read-only checks and returned ROM 2.052 / USM02 / UTR-SUN02-4CH.
