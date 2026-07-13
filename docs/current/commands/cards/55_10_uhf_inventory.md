@@ -188,3 +188,16 @@ RFタグのEPC(UII)をInventoryする。
   READY_FOR_PREFLIGHT_REVIEW
 - Real-device execution:
   NOT_EXECUTED_IN_V016
+
+## v017 Stage 2 minimal result
+
+- Result document:
+  docs/current/32_STAGE2_RF_READ_MINIMAL_RESULT.md
+- v017 status:
+  REAL_DEVICE_FAIL
+- Actual response type:
+  unknown-response
+- Summary:
+  Unexpected response category was returned by the current parser.
+- Safety note:
+  This result is not recorded as PASS. InventoryRead and UHF_Read remain outside v017 execution scope.

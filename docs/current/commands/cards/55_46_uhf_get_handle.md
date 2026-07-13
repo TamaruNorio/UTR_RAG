@@ -188,3 +188,16 @@ RFタグのハンドル情報を取得する。
   READY_FOR_PREFLIGHT_REVIEW
 - Real-device execution:
   NOT_EXECUTED_IN_V016
+
+## v017 Stage 2 minimal result
+
+- Result document:
+  docs/current/32_STAGE2_RF_READ_MINIMAL_RESULT.md
+- v017 status:
+  REAL_DEVICE_PASS_WITH_NOTES
+- Actual response type:
+  ACK
+- Summary:
+  handle response ACK; data_length=3
+- Safety note:
+  No write, memory read, or tag memory operation was performed.
