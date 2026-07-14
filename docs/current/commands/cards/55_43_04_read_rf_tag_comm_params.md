@@ -39,185 +39,135 @@ tags:
 
 # RFタグ通信関連パラメータの読み取り
 
-## 1. Command identity
+## 1. コマンドの位置づけ
 
-- PDF section: 7.4.8
-- Command name: RFタグ通信関連パラメータの読み取り
-- Category: リーダライタ設定
-- Command byte: 55h
-- Detail command byte: 43h
-- Subcommand byte: 04h
-- Command family: リーダライタ設定
-- Read / Write / Control / RF tag / Mode: Read
-- Source PDF: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17 (TDR-MNL-PRC-UTR-S201-117.pdf, 2025-06-16)
-- Verification status: PDF Ver.1.17 desk review
+このコマンドは、リーダライタに設定されているRFタグ通信関連パラメータを読み取るためのコマンドです。
 
-## 2. Purpose
+- PDF章番号: 7.4.8
+- コマンド分類: リーダライタ設定
+- コマンドバイト: `55h`
+- 詳細コマンド: `43h`
+- サブコマンド: `04h`
+- 操作種別: 読み取り専用
+- 実機確認段階: Stage 1
+- 現在の確認結果: `REAL_DEVICE_PASS_WITH_NOTES`
 
-RFタグ通信関連パラメータを読み取る。
+## 2. 目的
 
-## 3. Usage status
+RFタグ通信に関係するリーダライタ側の現在設定を確認します。
 
-- Status: SUPPORTED
-- Reason: PDF Ver.1.17 lists this command in section 7.4.8. AI/RAG organizes device, ROM, parameter, impact, response, and recovery conditions instead of deciding arbitrary non-use.
+設定を書き換えるコマンドではありません。読み取り専用のため、通常はFLASH、周波数、送信出力、アンテナ設定、タグメモリを変更しません。
 
-## 4. Safety / impact classification
+## 3. 使用可否
 
-- RF emission: No or indirect
-- Setting change: No
-- RAM change: No
-- FLASH change: Depends on write target
-- Tag memory change: No
-- External I/O change: No
-- Persistent effect: Check whether the target field is RAM-only, FLASH-backed, or tag-memory persistent.
-- Recovery note required: As needed
-- Parameter confirmation required: Target device series, ROM version, connection address, timeout policy
+判定: `SUPPORTED`
 
-## 5. Device / ROM support
+理由: UTR-S201シリーズ通信プロトコル説明書 Ver.1.17 の 7.4.8 に定義されているためです。
 
-- UTR-S201: Supported
-- UTR-SUN02-4CH: Supported
-- UTR-SHR201: Supported
-- UTR-SUN02V-8CH: Supported
-- UTR-SUN02-8CH: Supported
-- ROM/version notes: Use the rightmost applicable ROM column in the support table.
-- How to identify device:
-  - Read ROM version first
-  - Parse series name
-  - Map USM01/USM02/USM05/USM06/USM08 to product type
-- Unsupported cases: Treat as unsupported only when the PDF support table or ROM/version notes say so.
+ただし、実装前にはROMバージョン読み取りにより対象機種とROM条件を確認してください。
 
-## 6. Required parameters
+## 4. 安全分類
 
-- Parameters: Target device series, ROM version, connection address, timeout policy
-- Parameter constraints: Follow the field definitions in PDF section 7.4.8.
-- Parameters that should be asked from user: Field conditions and values not obtainable from ROM.
-- Parameters that can be read from device: ROM version number, series name, and applicable readable settings.
-- Parameters that can be inferred from ROM/series: Product type, 4CH/8CH class, and ROM-dependent support.
+| 項目 | 判定 |
+|---|---|
+| RF送信 | なし |
+| 設定変更 | なし |
+| FLASH変更 | なし |
+| タグメモリ変更 | なし |
+| 外部I/O変更 | なし |
+| 明示許可 | 通常不要。ただし実機送信時は対象機と接続条件を確認する |
 
-## 7. Command format summary
+## 5. 対象機種とROM確認
 
-- Command format overview: Use the common frame from chapter 5 and the command/detail/subcommand identifiers above.
-- Do not include completed Hex: This card intentionally avoids a ready-to-send full frame.
-- Do not include SUM-calculated command: This card intentionally avoids a SUM-calculated command.
+実装時は、最初にROMバージョンを読み取ってください。
 
-## 8. ACK response
+確認する内容は以下です。
 
-- ACK exists: Yes, unless the PDF section defines asynchronous, multiple-response, completion-response, or no-response behavior.
-- ACK command: Use the command-specific ACK structure described in PDF section 7.4.8.
-- Data length: See PDF section 7.4.8.
-- Data fields: Parse the fields documented in the command section.
-- Multiple responses: RF tag and automatic-reading related commands may require a receive loop.
-- Completion response: Required when the command section defines an end/completion response.
-- No response: Treat only as specified by the command section or timeout policy.
-- Notes: Always distinguish ACK, NACK, multiple response, completion response, and timeout.
+- ROMバージョン番号
+- シリーズ名
+- 対象機種
+- 4CH / 8CHなどの機種差分
+- PDFの対応表で対象コマンドが利用可能か
 
-## 9. NACK response
+ROMから判断できることはAIや実装側で自動判定し、ROMから判断できない現場条件だけを利用者へ確認します。
 
-- NACK uses common 7.6 format: Yes.
-- Error code 1 relevance: Check CRC, time-over, receive, RF tag no response, internal command error, UHF IC error, LBT, hardware, antenna, SUM, and format errors.
-- Error code 2 relevance: Used mainly when Error code 1 is CMD_UHF_IC_ERROR.
-- Error code 3 relevance: Important for UHF_Encode and UHF_BlockWrite2 partial-failure diagnostics.
-- Error code 4 relevance: Important for UHF_BlockWrite2 when the code indicates RF tag access error.
-- Command-specific NACK notes: Check PDF section 7.4.8 and section 7.6 together.
-- Partial success risk: Relevant for write, erase, lock, kill, encode, and multi-word tag operations.
-- Notes: Reserved bytes in NACK should be ignored unless the PDF assigns meaning.
+## 6. 必要パラメータ
 
-## 10. Important errors and diagnostics
+このカード上では、完成済みの送信用Hexは記載しません。
 
-- CMD_LBT_ERROR
-- CMD_ANT_ERROR
-- CMD_RXBUSY_ERROR
-- FORMAT_ERROR
-- SUM_ERROR
-- CMD_UHF_IC_ERROR
-- Access password error
-- Memory lock
-- Tag not detected
+実装時に確認する条件は以下です。
 
-## 11. Implementation notes for AI
+- 対象機種
+- ROMバージョン
+- 接続方式
+- 接続先アドレスまたはポート
+- timeout値
+- ログ出力先
 
-- まずROMバージョン読み取りで機種とROMを自動判定する。
-- AIが勝手に使用不可と決めない。
-- 実行に必要なパラメータを整理する。
-- 実機確認が必要な点と机上確認で可能な点を分ける。
-- ログには送信目的、パラメータ、ACK/NACK、エラーコード、タイムアウト、復旧判断を残す。
-- タイムアウト、受信ループ、複数レスポンス、完了レスポンス、無応答を区別する。
+## 7. 送信フォーマットの考え方
 
-## 12. Current RAG decision
+第5章の共通フレーム形式を使用します。
 
-- Decision: SUPPORTED
-- Reason: Listed in PDF Ver.1.17 command master and classified by impact and required confirmation.
-- Required parameter confirmation: Target device series, ROM version, connection address, timeout policy
-- Required device/ROM check: Read ROM version first and consult the support table.
-- Required recovery note: As needed
-- Next action: Use this card with the command master, response/NACK master, ROM support document, and parameter confirmation guide before implementation.
+このカードでは以下を明示します。
 
-## Traceability
+- コマンドバイト: `55h`
+- 詳細コマンド: `43h`
+- サブコマンド: `04h`
 
-- Command list source:
-  - PDF 6.1.2
-- Command format source:
-  - PDF 7.4.8
-- ACK response source:
-  - PDF 7.4.8 ACK response
-- NACK response source:
-  - PDF 7.6 common NACK; PDF 7.4.8 NACK response
-- Device/ROM support source:
-  - PDF 6.2.2
-- RAM/FLASH impact source:
-  - PDF 7.4.8; docs/current/12_RAM_FLASH_IMPACT_MATRIX.md
-- RF / carrier / antenna safety source:
-  - PDF 3.1; PDF 7.4.8; docs/current/13_RF_SAFETY_AND_CARRIER_RULES.md
-- Traceability status:
-  - TRACE_COMPLETE
-- Notes:
-  - No completed Hex
-  - No SUM-calculated command
-  - No device-sendable code
+このカードでは、完成Hex、SUM計算済み送信用コマンド、実機送信可能な完成コードは記載しません。
 
+## 8. ACK応答
 
+ACKを受信した場合は、PDF 7.4.8 の応答形式に従ってデータ部を解析します。
 
-## Real-device verification
+実装では以下を区別してください。
 
-- Verification stage:
-  - Stage 1: Stage 0/1 read-only verification
-- Initial status:
-  - READY_FOR_REAL_DEVICE_TEST
-- Required prior checks:
-  - ROM version read first; confirm product/series/ROM and connection target before execution.
-- Required parameters:
-  - Explicit connection target, timeout policy, output directory, operator, and device/ROM applicability.
-- Required log fields:
-  - date_time, operator, command_card, pdf_section, command_name, device_series, product_type, rom_version, connection_type, port_or_ip, timeout_ms, elapsed_ms, actual_response_type, ack_summary, nack_error_code_1-4, result_status, notes
-- Expected response type:
-  - ACK/NACK/timeout/no-response
-- Recovery note:
-  - Read-only scope. No setting change is expected. Timeout/no-response requires connection and ROM/applicability review.
-- Result status values:
-  - READY_FOR_REAL_DEVICE_TEST
-  - REAL_DEVICE_PASS
-  - REAL_DEVICE_PASS_WITH_NOTES
-  - REAL_DEVICE_FAIL
-  - NEEDS_RETEST
-  - BLOCKED_BY_DEVICE_OR_ROM
-  - BLOCKED_BY_PARAMETER
-  - NOT_APPLICABLE_TO_TARGET
-- v011 notes:
-  - ROM読み取りで機種判定後に実行
-  - read-only parameter retrieval
-- Related documents:
-  - docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md
-  - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
-  - docs/current/19_VERIFICATION_STAGE_PLAN.md
-  - docs/current/20_VERIFICATION_RESULT_STATUS.md
-  - docs/current/21_STAGE01_READONLY_VERIFICATION_KIT.md
-  - docs/current/22_STAGE01_READONLY_COMMAND_LIST.md
-  - docs/current/23_STAGE01_READONLY_LOGGING_GUIDE.md
+- ACK
+- NACK
+- timeout
+- 無応答
+- 受信途中の不完全フレーム
 
-- v015 Stage 1 read-only configuration result:
-  - docs/current/27_STAGE1_READONLY_CONFIGURATION_RESULT.md
-- Latest result status:
-  - REAL_DEVICE_PASS_WITH_NOTES
-- Latest result notes:
-  - v015 returned ACK using subcommand 04h and command-mode parameter kind 00h; no RF tag communication was executed.
+## 9. NACK応答
+
+NACKは共通NACK形式を使って解析します。
+
+確認すべき代表例は以下です。
+
+- SUMエラー
+- フォーマットエラー
+- 受信エラー
+- timeout
+- RFタグ無応答
+- UHF ICエラー
+- LBTエラー
+- アンテナエラー
+
+予約バイトは、PDFで意味が定義されていない限り判定に使いません。
+
+## 10. 実装時の注意
+
+AIへ実装を依頼する場合は、以下を守ってください。
+
+- 最初にROMバージョン読み取りを行う。
+- 機種とROMを判定してから本コマンドを実行する。
+- ACK、NACK、timeout、無応答を区別する。
+- ログに送信目的、接続条件、ACK/NACK、結果、所要時間を残す。
+- 読み取り専用コマンドとして扱い、書き込み処理を混在させない。
+
+## 11. 現在のRAG判定
+
+判定: `SUPPORTED`
+
+現在の実機確認結果: `REAL_DEVICE_PASS_WITH_NOTES`
+
+補足: v015のStage 1読み取り確認でACKが返ることを確認済みです。RFタグ通信そのものは実行していません。
+
+## 12. 関連ドキュメント
+
+- `docs/current/09_COMMAND_MASTER_V117.md`
+- `docs/current/10_RESPONSE_AND_NACK_MASTER.md`
+- `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+- `docs/current/16_TRACEABILITY_INDEX_V117.md`
+- `docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md`
+- `docs/current/20_VERIFICATION_RESULT_STATUS.md`
