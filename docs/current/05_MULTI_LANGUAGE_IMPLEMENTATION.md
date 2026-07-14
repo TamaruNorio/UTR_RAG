@@ -1,3 +1,32 @@
-# Multi Language Implementation
+# 複数言語での実装方針
 
-This package supports implementation planning for Python, C#, C++, JavaScript/Node.js, and PowerShell. Language-specific output should be generated only after command purpose, parameters, impact, response parsing, NACK handling, and timeout behavior are clear.
+このリポジトリは、特定の実装言語に限定しません。
+
+Python、C#、C++、JavaScript / Node.js、PowerShell など、対象システムに合わせて利用できます。
+
+## 1. 言語に依存しない共通設計
+
+どの言語でも、次の処理を分けて設計します。
+
+- 接続
+- コマンドフレーム生成
+- SUM計算
+- 送信
+- 受信
+- ACK / NACK解析
+- timeout処理
+- ログ出力
+- 切断
+
+## 2. 言語別コードを作る前に確認すること
+
+- 対象コマンドの目的
+- パラメータ
+- 影響範囲
+- ACKレスポンス
+- NACKレスポンス
+- timeout方針
+- 実機送信の有無
+- 実行環境
+
+これらが曖昧なまま、完成Hexやそのまま実機送信できるコードを作らないでください。

@@ -1,3 +1,20 @@
-# Command Index
+# コマンド索引
 
-The current command index is `docs/current/09_COMMAND_MASTER_V117.md`. Command cards are under `docs/current/commands/cards/` and total 54 command cards plus 5 index files.
+現在のコマンド一覧は、以下を参照してください。
+
+- コマンドマスタ: `docs/current/09_COMMAND_MASTER_V117.md`
+- コマンドカード: `docs/current/commands/cards/`
+
+## 1. コマンド数
+
+UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17 の 6.1 に基づき、通常の上位送信コマンドとして扱うコマンドは54件です。
+
+- リーダライタ制御コマンド: 12件
+- リーダライタ設定コマンド: 31件
+- RFタグ通信コマンド: 11件
+
+## 2. 使い方
+
+対象コマンドが決まっている場合は、コマンドマスタで該当行を確認し、対応するコマンドカードを開きます。
+
+対象範囲が広い場合は、コマンドカード全体をAIに読ませて、分類、影響範囲、実装順序を整理しても構いません。

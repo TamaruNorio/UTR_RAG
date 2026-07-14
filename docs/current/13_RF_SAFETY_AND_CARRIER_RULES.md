@@ -1,51 +1,48 @@
 ---
-title: "RF Safety And Carrier Rules"
+title: "RF・キャリア・アンテナ条件"
 doc_type: "guide"
 package_scope: "UTR-S201"
 manual: "TDR-MNL-PRC-UTR-S201-117"
 manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
-result_status: "N/A"
-related_docs:[]
+result_status: "V100_FINAL_DOCUMENTATION"
+related_docs: []
 tags:
   - "utr-s201"
   - "guide"
+  - "rf"
+  - "antenna"
 ---
 
-# RF Safety And Carrier Rules
+# RF・キャリア・アンテナ条件
 
-## 1. Japan domestic RF timing
+## 1. 目的
 
-The manual describes carrier output constraints for Japan domestic UHF operation:
+この文書は、RF送信、キャリアセンス、LBT、アンテナ設定に関する確認観点を整理します。
 
-- Stop emission within 4 seconds.
-- Keep a transmit pause of at least 50 ms.
-- Use at least 5 ms receive time for carrier sense before transmission.
-- Carrier sense checks the target frequency channel before carrier output.
+公式PDFが一次情報です。実装時は、対象地域、対象機種、ROM、アンテナ構成、現場条件を確認してください。
 
-## 2. Carrier and LBT handling
+## 2. 確認すること
 
-When carrier sense cannot complete within the configured wait time, the reader/writer returns a NACK with CMD_LBT_ERROR. Log the command, target channel or scan mode, carrier sense wait, and received error code.
+- 使用地域
+- 使用周波数またはスキャン方式
+- 送信出力
+- 接続アンテナ本数
+- 使用アンテナ番号
+- 外部アンテナ自動切替の有無
+- LBTエラー時の停止条件
+- アンテナエラー時の停止条件
 
-## 3. RF send signal and tag commands
+## 3. 実機操作の考え方
 
-RF送信信号の制御 can turn carrier state on or off according to command parameters. RF tag communication commands can start carrier output depending on current carrier state, command mode, automatic-reading mode, and antenna state.
+周波数変更、送信出力変更、アンテナ設定変更、RF送信信号制御は、プロトコル仕様書に記載された機能です。
 
-## 4. Antenna diagnostics and switching
+条件が揃っていれば実施対象になります。高影響という理由だけで禁止扱いにはしません。
 
-UHF_CheckAntenna and antenna-related settings are normal protocol functions. Confirm product class, ROM version, connected antenna count, target antenna number, internal/external antenna structure, and auto-switch range before use. Antenna disconnection can return CMD_ANT_ERROR.
+ただし、AIが独断で周波数、送信出力、アンテナ番号、継続判断を決めないようにします。
 
-## 5. 8CH and external antenna auto-switch
+## 4. エラー時の扱い
 
-8CH antenna auto-switch and external antenna auto-switch are specification-defined features for applicable models. Treat them as parameterized functions. Confirm UTR-SUN02V-8CH versus UTR-SUN02-8CH behavior and external antenna numbering.
+LBTエラー、アンテナエラー、timeout、NACKが発生した場合は、ログに残し、作業指示で決めた停止条件に従います。
 
-## 6. Multiple reader/writer operation
-
-When multiple reader/writers use the same frequency, carrier output timing, carrier pause, carrier sense time, and scan mode must be coordinated to reduce collision and LBT errors.
-
-
-## 7. Traceability use
-
-- RF carrier, frequency, output power, antenna switching, LBT, and antenna error references should be traceable from relevant command cards.
-- Antenna switching is a supported function, not a prohibited function.
-- RF-impact commands should carry impact notes and response/error references.
+異常発生後にAI判断だけで再送、継続、別設定への変更を行わないでください。

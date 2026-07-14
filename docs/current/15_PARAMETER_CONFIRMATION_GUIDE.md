@@ -1,46 +1,41 @@
-# Parameter Confirmation Guide
+# パラメータ確認ガイド
 
-## 1. Automatically obtainable by ROM read
+## 1. ROM読み取りで確認できること
 
-- Product series
-- Product type
-- ROM version
+- シリーズ名
+- 対象機種
+- ROMバージョン
 
-## 2. Ask the user
+## 2. 作業者または現場条件として確認すること
 
-- Connected antenna count
-- Antenna number to use
-- Auto-switch target antenna range
-- Target RF tags
-- Memory bank
-- Word address
-- Word count
-- Write data
-- RAM change or FLASH persistence
-- Frequency or scan mode
-- Transmit output level
-- Reader/writer operation mode
-- External I/O purpose
-- Recovery method requirements
+- 接続アンテナ本数
+- 使用するアンテナ番号
+- 外部アンテナ自動切替の対象範囲
+- 対象RFタグ
+- メモリバンク
+- ワードアドレス
+- ワード数
+- 書き込みデータ
+- Accessパスワード条件
+- RAMのみの変更か、FLASHへ保存する変更か
+- 周波数またはスキャン方式
+- 送信出力
+- リーダライタ動作モード
+- 外部I/Oの用途
+- 復旧方法
+- 停止条件
 
-## 3. Question template
+## 3. 不足している場合の扱い
 
-- Target product and ROM were identified as `<series>/<ROM>`. Which antenna ports are physically connected?
-- Which operation do you want: read-only, setting change, RF tag read, RF tag write, Lock/Kill, or external I/O?
-- For tag memory operations, which target tag, memory bank, word address, word count, and password condition should be used?
-- For settings, should the change be RAM-only or persisted to FLASH?
-- What recovery value or rollback procedure should be logged?
+必要パラメータが不足している場合は、完成Hexや実機送信用コードを作らず、確認リストを返します。
 
-## 4. Missing parameter response
+## 4. AIへの依頼例
 
-If a required parameter is missing, return a parameter checklist instead of producing a completed frame or device-sendable code.
+```text
+対象機種、ROM、接続方式、対象コマンド、実装言語、実機送信の有無を確認してください。
+不足しているパラメータがあれば、送信用コードを作らず確認リストを出してください。
+```
 
+## 5. 注意
 
-## 5. Traceability use
-
-- Parameters from ROM read.
-- Parameters from device support table.
-- Parameters from command card.
-- Parameters from field condition.
-- Parameters that require user input.
-- Parameters that require traceability check before implementation.
+プロトコル仕様書に存在するコマンドは、条件が揃えば実施対象になります。ただし、AIが独断でパラメータ値を決めないようにしてください。

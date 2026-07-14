@@ -1,74 +1,80 @@
 ---
-title: "Response And NACK Master"
+title: "レスポンス・NACKマスタ"
 doc_type: "guide"
 package_scope: "UTR-S201"
 manual: "TDR-MNL-PRC-UTR-S201-117"
 manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
-result_status: "N/A"
-related_docs:[]
+result_status: "V100_FINAL_DOCUMENTATION"
+related_docs: []
 tags:
   - "utr-s201"
   - "guide"
+  - "response"
+  - "nack"
 ---
 
-# Response And NACK Master
+# レスポンス・NACKマスタ
 
-Target specification: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17.
+## 1. 目的
 
-## 1. Communication format
+この文書は、UTR-S201シリーズの実装で必要になるレスポンス処理とNACK処理の考え方を整理します。
 
-Chapter 5 defines the common frame. AI assistance must keep frame structure, response type, timeout policy, and SUM calculation concept separate. This package does not include completed Hex or SUM-calculated commands.
+公式PDFが一次情報です。この文書は、AIに実装・レビューを依頼するときの補助資料です。
 
-## 2. Response principles
+## 2. 区別するレスポンス
 
-- Command mode responses must be classified as ACK, NACK, multiple response, completion response, timeout, or command-specific no-response behavior.
-- Automatic-reading mode responses are asynchronous and must be handled with a receive loop.
-- RF tag commands can produce multiple tag responses before an end or timeout condition.
-- Completion responses must be parsed when the command section defines one.
-- Timeout is not the same as NACK; log it separately.
+実装では、少なくとも以下を区別してください。
 
-## 3. Common NACK response
+- ACK
+- NACK
+- timeout
+- 無応答
+- 複数レスポンス
+- 完了レスポンス
+- 自動読み取りやRFタグ応答に伴う非同期レスポンス
 
-Section 7.6 defines common NACK response. The response contains the detail command associated with the error and error code 1 through error code 4. Reserved bytes can contain non-zero values but should be ignored unless the specification assigns meaning.
+RFタグ通信系では、1回の送信に対して複数フレームを受信する場合があります。単純な「1送信1応答」と決め打ちしないでください。
 
-## 4. Error code 1
+## 3. NACK処理
 
-| Code | Symbol | Meaning |
-| --- | --- | --- |
-| 01h | CMD_CRC_ERROR | RF tag receive CRC mismatch |
-| 02h | CMD_TIME_OVER | RF tag receive data interrupted |
-| 03h | CMD_RX_ERROR | Anti-collision processing error |
-| 04h | CMD_RXBUSY_ERROR | No RF tag response |
-| 07h | CMD_ERROR | Internal reader/writer command error |
-| 0Ah | CMD_UHF_IC_ERROR | Built-in UHF IC returned RF tag access error |
-| 60h | CMD_LBT_ERROR | Carrier sense timeout; carrier could not start |
-| 64h | HARDWARE_ERROR | Hardware internal error |
-| 68h | CMD_ANT_ERROR | Antenna disconnection related error |
-| 42h | SUM_ERROR | SUM value invalid |
-| 44h | FORMAT_ERROR | Command format or parameter invalid |
+NACKは、共通NACK形式と各コマンドの該当節を併せて確認します。
 
-## 5. Error code 2 and 4
+確認する代表例は以下です。
 
-Error code 2 is mainly used when error code 1 is CMD_UHF_IC_ERROR. Error code 4 is mainly used for UHF_BlockWrite2 when error code 3 indicates UHF IC error. Important values include unsupported, insufficient privileges, memory overrun, memory lock, cryptographic error, response buffer overflow, insufficient power, write failure, kill failure, lock failure, not detected, handle acquisition failure, Access password error, and CRC error.
+- SUMエラー
+- フォーマットエラー
+- timeout
+- LBTエラー
+- アンテナエラー
+- UHF ICエラー
+- RFタグ無応答
+- Accessパスワード関連エラー
+- メモリロック関連エラー
 
-## 6. Error code 3
+予約バイトは、PDFで意味が定義されていない限り独自解釈しません。
 
-For UHF_Encode, error code 3 identifies the failed internal operation, including Reserved-area write, EPC(UII)-area write, User-area write, and Lock command issuance. For UHF_BlockWrite2, error code 3 participates in partial-failure diagnostics.
+## 4. 実装時の注意
 
-## 7. Command-specific notes
+- timeout値を固定値だけで扱わず、接続方式とコマンド種別に応じて設定する。
+- ACK、NACK、timeout、無応答を同じエラーとして扱わない。
+- NACK時はエラーコードをログに残す。
+- 複数レスポンスがあるコマンドでは受信ループを設計する。
+- 完了レスポンスがあるコマンドでは、完了を受けるまで処理を閉じない。
 
-- UHF_Encode can update multiple memory banks and Lock state; partial completion must be considered.
-- UHF_BlockWrite2 can fail partway through multi-word or multi-area operations.
-- Lock and Kill can have irreversible effects on the tag.
-- UHF_ThroughCmd requires ROM support and command-specific receive handling.
-- RF carrier and antenna errors must be logged separately from tag memory errors.
+## 5. ログに残す情報
 
+- 実行日時
+- 操作者
+- 対象機種
+- ROMバージョン
+- 接続方式
+- 対象コマンド
+- 送信目的
+- ACK / NACK / timeout
+- NACKエラーコード
+- 経過時間
+- 停止判断
+- 復旧判断
 
-## 8. Traceability use
-
-- PDF 7.6 common NACK is the master reference for NACK response.
-- Command cards should point to 7.6 plus command-specific NACK section where applicable.
-- Timeout is not NACK.
-- No-response behavior must be recorded separately.
-- RF tag commands may require receive-loop handling.
+runtime logs、実CSVログ、raw EPC / UII / TID はGitHubにアップロードしないでください。必要な場合はマスク・要約してください。

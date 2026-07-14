@@ -1,3 +1,30 @@
-# Internal Share And External Review
+# 社内共有とレビューでの扱い
 
-This package can be used for internal specification review and AI/RAG quality review. It should not be described as a formal external release, customer release, production-ready package, or replacement for the official PDF.
+この文書は、UTR_RAGを社内共有またはレビューに出すときの説明方針を整理します。
+
+## 1. 共有時の説明
+
+UTR_RAG は、UTR-S201シリーズの通信プロトコル理解、実装支援、レビュー、段階的な実機確認を、AIとのペアプログラミングで進めやすくするためのドキュメントリポジトリです。
+
+公式PDFが一次情報です。このリポジトリは公式PDFの代替ではありません。
+
+## 2. 共有してよい用途
+
+- 社内での仕様確認
+- AIペアプログラミングの前提資料
+- 実装方針の整理
+- コードレビュー観点の整理
+- 実機確認手順の整理
+
+## 3. 別判断が必要な用途
+
+- 顧客提供
+- 社外公開
+- 海外運用
+- 海外販売
+- 量産適用
+- 公式PDFの代替としての利用
+
+## 4. 注意
+
+PDF原本、runtime logs、実CSVログ、顧客情報、実IPアドレス、raw EPC / UII / TID、認証情報はGitHubにアップロードしないでください。
