@@ -11,7 +11,7 @@ AI検索や文書整理で使うタグを分類します。タグ名は機械処
 | 対象範囲 | `utr-s201` | UTR-S201シリーズ関連 |
 | 文書種別 | `command-card`, `guide`, `result-summary` | 文書の種類 |
 | コマンド分類 | `reader-control`, `reader-setting`, `rf-tag` | コマンドの大分類 |
-| 確認段階 | `stage0`, `stage1`, `stage2`, `stage3plus` | 実機確認ステージ |
+| 確認区分 | `read-only`, `rf-read`, `write-operation`, `high-impact` | 実機確認時の操作影響 |
 | 影響分類 | `read-only`, `setting-change`, `tag-memory`, `high-impact` | 操作の影響範囲 |
 
 ## 注意

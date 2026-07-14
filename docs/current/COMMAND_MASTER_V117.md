@@ -51,11 +51,14 @@ PDF 7.1 と 7.2 は自動読み取りや非同期レスポンス動作の説明�
 ## 4. 利用手順
 
 1. 対象機種とROMバージョンを確認する。
-2. このコマンドマスタで対象コマンドの分類を確認する。
-3. 対象コマンドカードを開く。
-4. 応答処理は `RESPONSE_AND_NACK_MASTER.md` を確認する。
-5. 機種・ROM条件は `DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` を確認する。
-6. RAM / FLASH / RF影響は `RAM_FLASH_IMPACT_MATRIX.md` と `RF_SAFETY_AND_CARRIER_RULES.md` を確認する。
+2. 物理アンテナ容量、接続OKアンテナ、リーダライタ動作モード、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答を読戻す。
+3. このコマンドマスタで対象コマンドの分類を確認する。
+4. 対象コマンドカードを開く。
+5. 応答処理は `RESPONSE_AND_NACK_MASTER.md` を確認する。
+6. 機種・ROM条件は `DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` を確認する。
+7. RAM / FLASH / RF影響は `RAM_FLASH_IMPACT_MATRIX.md` と `RF_SAFETY_AND_CARRIER_RULES.md` を確認する。
+
+全54コマンドのACK/NACK処理は、各カードだけで個別に完結させず、共通ルールとして `RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットを参照してください。コマンド番号だけでACK内バイトの意味や後続レスポンス有無を固定しないでください。
 
 ## 5. 実機送信に関する注意
 
