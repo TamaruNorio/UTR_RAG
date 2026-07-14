@@ -227,3 +227,12 @@ Selectパラメータを設定する。
   READY_FOR_EXPLICIT_APPROVAL
 - Real-device execution:
   NOT_EXECUTED_IN_V020
+
+## v021 Stage 3+ first batch planning
+
+- First batch plan: [Stage 3+ First Execution Batch Plan](../../39_STAGE3PLUS_FIRST_EXECUTION_BATCH_PLAN.md)
+- Parameter sheet: [Stage 3+ First Batch Parameter Sheet](../../40_STAGE3PLUS_FIRST_BATCH_PARAMETER_SHEET.md)
+- Approval template: [Stage 3+ Operator Approval Template](../../41_STAGE3PLUS_OPERATOR_APPROVAL_TEMPLATE.md)
+- v021 plan result: [Stage 3+ v021 Plan Result](../../42_STAGE3PLUS_V021_PLAN_RESULT.md)
+- v021 status: READY_FOR_BATCH_SELECTION
+- Real-device execution: NOT_EXECUTED_IN_V021

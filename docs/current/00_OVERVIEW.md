@@ -146,3 +146,13 @@ ChatGPT AI specification review completed. This package is not a formal external
 - Stage 3+ real-device execution requires explicit approval, complete parameters, impact review, recovery plan, runtime logging, and stop conditions.
 - v020 performs no real-device command send.
 - v020 creates no ZIP and no GitHub Release.
+
+## v021 Stage 3+ first batch planning
+
+v021 adds a plan-only package for selecting the first Stage 3+ execution batch.
+
+- Stage 3+ first execution batch plan
+- Stage 3+ parameter sheet
+- Stage 3+ operator approval template
+- No real-device command send
+- No ZIP or Release
