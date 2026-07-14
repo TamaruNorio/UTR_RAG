@@ -1,3 +1,42 @@
+---
+title: "FLASH設定の初期化"
+doc_type: "command_card"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+pdf_section: "7.3.11"
+command_group: "reader_control"
+command_name: "FLASH設定の初期化"
+command_byte: "4Eh"
+detail_command: "6Fh"
+subcommand: null
+operation_stage: "NEEDS_METADATA_CONFIRMATION"
+operation_level: "read-only"
+rf_emission: false
+write_operation: false
+flash_operation: true
+tag_memory_operation: false
+requires_rom_check: true
+requires_antenna: false
+requires_tag: false
+requires_access_password: false
+requires_parameters: false
+verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
+result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+related_docs:
+  - "../../09_COMMAND_MASTER_V117.md"
+  - "../../16_TRACEABILITY_INDEX_V117.md"
+  - "../../10_RESPONSE_AND_NACK_MASTER.md"
+  - "../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+tags:
+  - "utr-s201"
+  - "command-card"
+  - "reader-control"
+  - "read-only"
+  - "flash-operation"
+  - "pass-with-notes"
+---
+
 # FLASH設定の初期化
 
 ## 1. Command identity

@@ -1,3 +1,43 @@
+---
+title: "FLASH設定値の読み取り(1バイトアクセス)"
+doc_type: "command_card"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+pdf_section: "7.4.13"
+command_group: "reader_setting"
+command_name: "FLASH設定値の読み取り(1バイトアクセス)"
+command_byte: "4Fh"
+detail_command: "B4h"
+subcommand: null
+operation_stage: "Stage 1"
+operation_level: "write/configuration"
+rf_emission: false
+write_operation: true
+flash_operation: true
+tag_memory_operation: false
+requires_rom_check: true
+requires_antenna: false
+requires_tag: false
+requires_access_password: false
+requires_parameters: true
+verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
+result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+related_docs:
+  - "../../09_COMMAND_MASTER_V117.md"
+  - "../../16_TRACEABILITY_INDEX_V117.md"
+  - "../../10_RESPONSE_AND_NACK_MASTER.md"
+  - "../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+tags:
+  - "utr-s201"
+  - "command-card"
+  - "reader-setting"
+  - "stage1"
+  - "write-operation"
+  - "flash-operation"
+  - "pass-with-notes"
+---
+
 # FLASH設定値の読み取り(1バイトアクセス)
 
 ## 1. Command identity

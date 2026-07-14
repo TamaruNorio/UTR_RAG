@@ -1,3 +1,41 @@
+---
+title: "使用アンテナ番号の書き込み"
+doc_type: "command_card"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+pdf_section: "7.3.7"
+command_group: "reader_control"
+command_name: "使用アンテナ番号の書き込み"
+command_byte: "55h"
+detail_command: "38h"
+subcommand: null
+operation_stage: "NEEDS_METADATA_CONFIRMATION"
+operation_level: "write/configuration"
+rf_emission: false
+write_operation: true
+flash_operation: false
+tag_memory_operation: false
+requires_rom_check: true
+requires_antenna: false
+requires_tag: false
+requires_access_password: false
+requires_parameters: true
+verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
+result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+related_docs:
+  - "../../09_COMMAND_MASTER_V117.md"
+  - "../../16_TRACEABILITY_INDEX_V117.md"
+  - "../../10_RESPONSE_AND_NACK_MASTER.md"
+  - "../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+tags:
+  - "utr-s201"
+  - "command-card"
+  - "reader-control"
+  - "write-operation"
+  - "pass-with-notes"
+---
+
 # 使用アンテナ番号の書き込み
 
 ## 1. Command identity

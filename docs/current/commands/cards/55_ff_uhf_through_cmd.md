@@ -1,3 +1,45 @@
+---
+title: "UHF_ThroughCmd"
+doc_type: "command_card"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+pdf_section: "7.5.11"
+command_group: "rf_tag_communication"
+command_name: "UHF_ThroughCmd"
+command_byte: "55h"
+detail_command: "FFh"
+subcommand: null
+operation_stage: "Stage 3"
+operation_level: "RF diagnostic"
+rf_emission: true
+write_operation: false
+flash_operation: false
+tag_memory_operation: true
+requires_rom_check: true
+requires_antenna: true
+requires_tag: true
+requires_access_password: false
+requires_parameters: true
+verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
+result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+related_docs:
+  - "../../09_COMMAND_MASTER_V117.md"
+  - "../../16_TRACEABILITY_INDEX_V117.md"
+  - "../../10_RESPONSE_AND_NACK_MASTER.md"
+  - "../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+tags:
+  - "utr-s201"
+  - "command-card"
+  - "rf-tag-communication"
+  - "stage3"
+  - "rf-emission"
+  - "tag-memory"
+  - "requires-antenna"
+  - "requires-tag"
+  - "pass-with-notes"
+---
+
 # UHF_ThroughCmd
 
 ## 1. Command identity

@@ -1,3 +1,42 @@
+---
+title: "アンテナ切替設定の読み取り"
+doc_type: "command_card"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+pdf_section: "7.4.5"
+command_group: "reader_setting"
+command_name: "アンテナ切替設定の読み取り"
+command_byte: "55h"
+detail_command: "43h"
+subcommand: "00h"
+operation_stage: "Stage 1"
+operation_level: "read-only"
+rf_emission: false
+write_operation: false
+flash_operation: false
+tag_memory_operation: false
+requires_rom_check: true
+requires_antenna: false
+requires_tag: false
+requires_access_password: false
+requires_parameters: false
+verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
+result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+related_docs:
+  - "../../09_COMMAND_MASTER_V117.md"
+  - "../../16_TRACEABILITY_INDEX_V117.md"
+  - "../../10_RESPONSE_AND_NACK_MASTER.md"
+  - "../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+tags:
+  - "utr-s201"
+  - "command-card"
+  - "reader-setting"
+  - "stage1"
+  - "read-only"
+  - "pass-with-notes"
+---
+
 # アンテナ切替設定の読み取り
 
 ## 1. Command identity

@@ -1,3 +1,20 @@
+---
+title: "Stage 2 Read Completion Result"
+doc_type: "result_summary"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+verification_status: "DOCUMENTATION_CURRENT"
+result_status: "N/A"
+related_docs:[]
+tags:
+  - "utr-s201"
+  - "result-summary"
+  - "stage2"
+  - "rf-read"
+  - "pass-with-notes"
+---
+
 # Stage 2 Read Completion Result
 
 ## 1. Positioning
