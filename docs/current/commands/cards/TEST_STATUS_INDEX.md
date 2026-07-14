@@ -7,8 +7,9 @@ manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
 result_status: "N/A"
 related_docs:
-  - "../../17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md"
-  - "../../20_VERIFICATION_RESULT_STATUS.md"
+  - "../../COMMAND_MASTER_V117.md"
+  - "../../TRACEABILITY_INDEX_V117.md"
+  - "../../AI_IMPLEMENTATION_GUARDRAILS.md"
 tags:
   - "utr-s201"
   - "guide"
@@ -16,4 +17,6 @@ tags:
 ---
 
 # 実機確認ステータス索引
-This package organizes Ver.1.17 desk-review information for AI-assisted implementation. It is not a record that all 54 commands have been individually sent to real devices.
+
+この索引は、Ver.1.17 に基づくAI補助実装向けの現在有効な確認状態を整理します。
+全54コマンドを個別に実機送信済みであることを示すものではありません。
