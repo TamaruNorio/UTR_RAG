@@ -156,3 +156,15 @@ v021 adds a plan-only package for selecting the first Stage 3+ execution batch.
 - Stage 3+ operator approval template
 - No real-device command send
 - No ZIP or Release
+
+## v022 Final RC package
+
+v022 consolidates the current no-PDF UTR-S201 AI assistant package as a Final RC.
+
+- Stage 2 read completion included
+- Stage 3+ readiness included
+- Stage 3+ first batch planning included
+- AI context / frontmatter metadata included
+- no PDF included
+- no runtime logs included
+- no real-device command sent by package creation
