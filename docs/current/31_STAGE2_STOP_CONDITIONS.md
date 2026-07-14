@@ -1,64 +1,13 @@
----
-title: "Stage 2 Stop Conditions"
-doc_type: "guide"
-package_scope: "UTR-S201"
-manual: "TDR-MNL-PRC-UTR-S201-117"
-manual_version: "1.17"
-verification_status: "DOCUMENTATION_CURRENT"
-result_status: "N/A"
-related_docs:[]
-tags:
-  - "utr-s201"
-  - "guide"
-  - "stage2"
-  - "rf-read"
----
+# Stage 2 停止条件
 
-# Stage 2 Stop Conditions
+## 目的
 
-## 1. Immediate stop conditions
+Stage 2のRFタグ読み取りで、作業を停止する条件を整理します。
 
-Stop Stage 2 execution immediately when any of the following occur.
+## 停止条件
 
-- Consecutive timeout
-- Antenna error
-- LBT-related error
-- NACK error code indicating unsupported command
-- Device/ROM mismatch
-- Unexpected response format
-- Tag memory read precondition missing
-- Access password missing
-- User-specified stop condition
+想定外レスポンス、NACK、timeout連続発生、LBTエラー、アンテナエラー、対象外タグ検出、現場条件不一致が発生した場合は停止して原因を確認します。
 
-## 2. Continue-with-notes conditions
+## 復旧
 
-Continue only with notes when the condition is intentional, controlled, and recorded.
-
-- No tag detected when tag_present=false
-- No tag detected during intentional empty-field test
-- Command returns supported NACK that is expected under test condition
-- Inventory returns zero tags in controlled no-tag test
-
-## 3. Do-not-continue conditions
-
-Do not continue into the next Stage 2 command when any of the following are true.
-
-- ROM読み取り失敗
-- 機種判定不能
-- アンテナ未接続
-- 対象タグ条件未確定
-- Read対象メモリ未指定
-- 復旧条件未定義
-- 実行者が停止判断した場合
-
-## 4. Safety notes
-
-- v016 does not execute Stage 2 RF read commands.
-- Frequency, output power, antenna settings, and InventoryParam are not changed as part of v016.
-- Stop decisions must be logged as masked summaries.
-
-## 5. v019 completion note
-
-v019 proceeded through `UHF_InventoryRead` and `UHF_Read` only because the explicit `safe-tid` profile was selected and `UHF_Inventory` detected a tag.
-
-If a future run lacks the read profile, tag detection, memory bank, word address, or word count, `UHF_InventoryRead` and `UHF_Read` must remain `BLOCKED_BY_PARAMETER` or `BLOCKED_BY_SITE_CONDITION`.
+再送前に、接続、アンテナ、タグ配置、周波数条件、timeout、対象コマンドを確認します。

@@ -1,35 +1,71 @@
-# AI Implementation Guardrails
+﻿# AI実装ガードレール
 
-## 1. Core behavior
+## 1. 目的
 
-- AI does not arbitrarily mark protocol-defined commands as unavailable.
-- Commands listed in the protocol manual are organized as usable when target device, ROM, parameters, impact, response handling, and recovery conditions are understood.
-- When connected, the first standard step is ROM version read to identify product series and ROM version.
-- Ask the user for field conditions and missing parameters that ROM cannot provide.
+この文書は、AIに実装、移植、レビューを依頼するときの基本ルールを整理します。
 
-## 2. Output constraints
+対象は、UTR-S201シリーズの通信プロトコル理解、制御プログラム作成、レビュー、段階的な実機確認です。
 
-- Do not output completed Hex frames.
-- Do not output SUM-calculated commands.
-- Do not immediately generate device-sendable code.
-- Separate desk review from real-device confirmation.
+## 2. 基本方針
 
-## 3. Before implementation
+AIは、対象機種、ROMバージョン、接続方式、対象コマンド、必要パラメータ、影響範囲を確認してから実装案を作ります。
 
-Before assisting implementation, organize purpose, target device/ROM, parameters, RAM/FLASH impact, RF impact, tag-memory impact, ACK response, NACK response, timeout behavior, and recovery method.
+プロトコル仕様書に存在するコマンドを、高影響という理由だけで禁止扱いにはしません。
 
-## 4. Receive handling
+ただし、AIが独断で次のことをしないようにします。
 
-Implementation guidance must distinguish ACK, NACK, multiple responses, completion responses, asynchronous responses, no-response cases, and timeout. NACK error codes 1 through 4 should be parsed according to section 7.6.
+- 作業指示にないコマンドを追加する
+- 周波数、送信出力、アンテナ番号などの値を勝手に決める
+- 対象機種、ROMバージョン、地域条件を確認せずに送信する
+- NACK、timeout、LBT、アンテナエラー後に勝手に継続判断する
 
-## 5. Positioning
+## 3. 出力時の制約
 
-This package is an AI-ready no-PDF RAG package for Ver.1.17 desk use. It is not a replacement for the official PDF and is not a formal external release or production guarantee.
+AIに依頼する場合でも、以下は不用意に出力しません。
 
+- 実機へそのまま送信できる完成Hex
+- SUM計算済み送信用コマンド例
+- 安全ガードを外したコード
+- 顧客情報、実IPアドレス、raw EPC / UII / TID
+- 認証情報
 
-## 6. Traceability use
+必要な場合は、目的、対象機種、ROM、接続方式、パラメータ、影響範囲、復旧方法、停止条件を確認したうえで、段階的に作成します。
 
-- AI must not treat missing traceability as permission to guess.
-- AI should cite command-card traceability fields before implementation guidance.
-- When traceability is NEEDS_*_TRACE, implementation guidance should state the missing trace explicitly.
-- AI should not generate executable code directly from incomplete traceability.
+## 4. 実装前に確認すること
+
+実装前に、少なくとも以下を確認します。
+
+1. 対象機種
+2. ROMバージョン
+3. 接続方式
+4. 対象コマンド
+5. 必要パラメータ
+6. 読み取り、設定変更、タグメモリ操作の分類
+7. ACK / NACK / timeout の扱い
+8. ログ方針
+9. 実機送信の有無
+10. 停止条件と復旧方法
+
+## 5. 受信処理
+
+受信処理では、以下を区別します。
+
+- ACK
+- NACK
+- timeout
+- 無応答
+- 複数レスポンス
+- 完了レスポンス
+- LBTエラー
+- アンテナエラー
+- UHF ICエラー
+
+NACKは、共通NACK形式と対象コマンドのPDF該当節を併せて確認します。
+
+## 6. 実機操作の扱い
+
+周波数変更、送信出力変更、アンテナ設定変更、FLASH、タグメモリ操作などは、仕様、機種、ROM、地域条件、現場条件、作業目的を満たす場合に実施対象にできます。
+
+重要なのは、AIが勝手に判断しないことです。
+
+実機操作を行う場合は、作業者が対象、値、目的、停止条件、復旧方法を明確にします。

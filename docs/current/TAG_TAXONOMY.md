@@ -1,81 +1,19 @@
-# Tag Taxonomy
+# タグ分類
 
-## Scope tags
+## 目的
 
-- utr-s201
-- no-pdf-package
-- japan-domestic-scope
+AI検索や文書整理で使うタグを分類します。タグ名は機械処理用に英数字を含みますが、意味は日本語で管理します。
 
-## Document type tags
+## 分類
 
-- command-card
-- command-master
-- traceability
-- guide
-- preflight
-- result-summary
-- artifact
-- schema
-- taxonomy
+| 分類 | 例 | 意味 |
+| --- | --- | --- |
+| 対象範囲 | `utr-s201` | UTR-S201シリーズ関連 |
+| 文書種別 | `command-card`, `guide`, `result-summary` | 文書の種類 |
+| コマンド分類 | `reader-control`, `reader-setting`, `rf-tag` | コマンドの大分類 |
+| 確認段階 | `stage0`, `stage1`, `stage2`, `stage3plus` | 実機確認ステージ |
+| 影響分類 | `read-only`, `setting-change`, `tag-memory`, `high-impact` | 操作の影響範囲 |
 
-## Command group tags
+## 注意
 
-- reader-control
-- reader-setting
-- rf-tag-communication
-
-## Operation stage tags
-
-- stage0
-- stage1
-- stage2
-- stage3
-- stage4
-- stage5
-- stage6
-- stage7
-
-## Safety / impact tags
-
-- read-only
-- rf-read
-- rf-emission
-- write-operation
-- flash-operation
-- flash-initialize
-- persistent-setting
-- frequency-setting
-- output-power
-- antenna-setting
-- tag-memory
-- access-password
-- lock
-- kill
-- encode
-- through-command
-- high-impact
-- explicit-approval
-- recovery-plan
-
-## Result/status tags
-
-- pass
-- pass-with-notes
-- partial
-- not-applicable
-- blocked-by-parameter
-- blocked-by-device-or-rom
-- blocked-by-site-condition
-- ready-for-explicit-approval
-- not-executed
-- not-executed-in-v020
-- preflight-only
-- needs-review
-- needs-real-device-test
-
-## Device/ROM tags
-
-- usm02
-- utr-sun02-4ch
-- rom-2-052
-- rom-2-100-or-later
+タグは検索補助です。タグだけで実機送信可否を判断せず、公式PDF、対象機種、ROM、地域条件、現場条件を確認してください。

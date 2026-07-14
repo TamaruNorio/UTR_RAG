@@ -16,6 +16,5 @@ tags:
   - "taxonomy"
 ---
 
-# Operation Level Index
-
+# 操作レベル索引
 Classify operations by impact: read-only, control, setting change, RF-emitting, FLASH-persistent, tag-memory-changing, irreversible tag operation, and external I/O operation.

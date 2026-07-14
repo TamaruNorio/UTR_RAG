@@ -37,8 +37,7 @@ tags:
   - "pass-with-notes"
 ---
 
-# UHF_SetExpandSelectParam
-
+# UHF_SetExpandSelectParam（拡張Select条件設定）
 ## 1. コマンドの位置づけ
 
 このカードは、UTR-S201 シリーズ通信プロトコル説明書 Ver.1.17 に記載された **UHF_SetExpandSelectParam** を、AIとの実装・レビュー・検証で参照しやすくするための整理資料です。

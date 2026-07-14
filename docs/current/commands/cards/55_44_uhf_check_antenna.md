@@ -45,8 +45,7 @@ tags:
   - "pass-with-notes"
 ---
 
-# UHF_CheckAntenna
-
+# UHF_CheckAntenna（アンテナ確認）
 ## 1. コマンドの位置づけ
 
 このカードは、UTR-S201 シリーズ通信プロトコル説明書 Ver.1.17 に記載された **UHF_CheckAntenna** を、AIとの実装・レビュー・検証で参照しやすくするための整理資料です。
