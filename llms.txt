@@ -2,38 +2,14 @@
 
 UTR_RAG は、UTR-S201 シリーズの通信プロトコル理解、実装支援、レビュー、段階的検証をAIと進めるためのドキュメントリポジトリです。
 
-現在版は V100 Final documentation package です。
+現在版は **V100 Final documentation package** です。
 
-公式PDFが一次情報です。このリポジトリは公式PDFの代替ではありません。
+公式PDFが一次情報です。このリポジトリは公式PDFの代替ではありません。PDF原本は社内の正式な管理場所から別途準備し、GitHubにはアップロードしないでください。
 
 ## AIが最初に読む順序
 
 1. `README.md`
 2. `docs/current/AI_CONTEXT_INDEX.md`
-3. `docs/current/00_OVERVIEW.md`
-4. `docs/current/45_V100_FINAL_USAGE_GUIDE.md`
-5. `docs/current/09_COMMAND_MASTER_V117.md`
-6. `docs/current/commands/cards/`
-7. `docs/current/10_RESPONSE_AND_NACK_MASTER.md`
-8. `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
-9. `docs/current/20_VERIFICATION_RESULT_STATUS.md`
-
-## 実装支援時の原則
-
-- 実装言語は限定しない。
-- 仕様確認、設計、実装、レビュー、実機確認を分ける。
-- protocol support と execution permission を分ける。
-- 高影響コマンドを、仕様にあるという理由だけで自動実行しない。
-- 高影響コマンドを、高影響という理由だけで仕様上禁止扱いしない。
-- 実機送信には、明示許可、パラメータ、復旧方法、停止条件が必要。
-
-## Gitに含めないもの
-
-- PDF原本
-- runtime logs
-- 実CSVログ
-- 顧客情報
-- 実IPアドレス
-- raw EPC / UII / TID
-- 完成Hex
-- SUM計算済み送信用コマンド例
+3. `docs/current/45_V100_FINAL_USAGE_GUIDE.md`
+4. `docs/current/00_OVERVIEW.md`
+5
