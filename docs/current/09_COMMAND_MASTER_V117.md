@@ -1,87 +1,64 @@
 ---
-title: "Command Master Ver.1.17"
+title: "コマンドマスタ Ver.1.17"
 doc_type: "index"
 package_scope: "UTR-S201"
 manual: "TDR-MNL-PRC-UTR-S201-117"
 manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
-result_status: "N/A"
-related_docs:[]
+result_status: "V100_FINAL_DOCUMENTATION"
+related_docs: []
 tags:
   - "utr-s201"
   - "command-master"
+  - "v100"
 ---
 
-# Command Master Ver.1.17
+# コマンドマスタ Ver.1.17
 
-Target specification: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17 (TDR-MNL-PRC-UTR-S201-117.pdf, 2025-06-16)
+## 1. 対象仕様
 
-This command master follows PDF chapter 6.1:
+対象は `UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17` です。
 
-- Reader/writer control commands: 12
-- Reader/writer setting commands: 31
-- RF tag communication commands: 11
-- Total: 54
+公式PDFが一次情報です。PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。
 
-7.1 UHF continuous inventory mode and 7.2 UHF continuous inventory read mode are treated as operation modes/asynchronous-response behavior, not as ordinary host-sent commands.
+## 2. コマンド件数
 
-| No | PDF section | Command name | Category | Command byte | Detail command byte | Read/Write/Control/RF tag | Usage status | Parameter confirmation required | Card path | Verification status | Real-device verification stage | Initial real-device status | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 7.3.1 | エラー情報の読み取り | リーダライタ制御 | 4Fh | 80h | Read | SUPPORTED | As needed | docs/current/commands/cards/4f_80_read_error_info.md | PDF Ver.1.17 desk review | Stage 0: Connection and identification | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 2 | 7.3.2 | ブザーの制御 | リーダライタ制御 | 42h | - | Control | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/42_buzzer_control.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 3 | 7.3.3 | LED&ブザーの制御 | リーダライタ制御 | 4Eh | 57h | Control | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/4e_57_led_buzzer_control.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 4 | 7.3.4 | RF送信信号の制御 | リーダライタ制御 | 4Eh | 9Eh | Control | SUPPORTED_WITH_IMPACT_NOTICE | Yes | docs/current/commands/cards/4e_9e_rf_carrier_control.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 5 | 7.3.5 | UHF_CheckAntenna | リーダライタ制御 | 55h | 44h | Control | SUPPORTED_WITH_IMPACT_NOTICE | Yes | docs/current/commands/cards/55_44_uhf_check_antenna.md | PDF Ver.1.17 desk review | Stage 2: RF read operations | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 6 | 7.3.6 | 使用アンテナ番号の読み取り | リーダライタ制御 | 55h | 48h | Read | NEEDS_DEVICE_OR_ROM_CHECK | As needed | docs/current/commands/cards/55_48_read_active_antenna.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 7 | 7.3.7 | 使用アンテナ番号の書き込み | リーダライタ制御 | 55h | 38h | Write | NEEDS_DEVICE_OR_ROM_CHECK | Yes | docs/current/commands/cards/55_38_write_active_antenna.md | PDF Ver.1.17 desk review | Stage 3: Antenna and runtime parameter operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 8 | 7.3.8 | ROMバージョンの読み取り | リーダライタ制御 | 4Fh | 90h | Read | SUPPORTED | As needed | docs/current/commands/cards/rom_version_read.md | PDF Ver.1.17 desk review | Stage 0: Connection and identification | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 9 | 7.3.9 | チップバージョンの読み取り | リーダライタ制御 | 55h | 90h | Read | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_90_chip_version_read.md | PDF Ver.1.17 desk review | Stage 0: Connection and identification | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 10 | 7.3.10 | リスタート | リーダライタ制御 | 4Eh | 9Dh | Control | SUPPORTED_WITH_IMPACT_NOTICE | Yes | docs/current/commands/cards/4e_9d_restart_reader.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 11 | 7.3.11 | FLASH設定の初期化 | リーダライタ制御 | 4Eh | 6Fh | Control | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/4e_6f_flash_initialize.md | PDF Ver.1.17 desk review | Stage 5: FLASH and persistent settings | BLOCKED_BY_RECOVERY_PLAN | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 12 | 7.3.12 | UHF_GetHandle | リーダライタ制御 | 55h | 46h | RF tag | NEEDS_DEVICE_OR_ROM_CHECK | Yes | docs/current/commands/cards/55_46_uhf_get_handle.md | PDF Ver.1.17 desk review | Stage 2: RF read operations | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 13 | 7.4.1 | リーダライタ動作モードの読み取り | リーダライタ設定 | 4Fh | 00h | Read | SUPPORTED | As needed | docs/current/commands/cards/4f_00_read_reader_mode.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 14 | 7.4.2 | UHF_GetSelectParam | リーダライタ設定 | 55h | 40h | Read | SUPPORTED | As needed | docs/current/commands/cards/55_40_uhf_get_select_param.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | AI_TRACE_REVIEWED | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 15 | 7.4.3 | UHF_GetInventoryParam | リーダライタ設定 | 55h | 41h | Read | SUPPORTED | As needed | docs/current/commands/cards/55_41_uhf_get_inventory_param.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | AI_TRACE_REVIEWED | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 16 | 7.4.4 | UHF_GetExpandSelectParam | リーダライタ設定 | 55h | 42h | Read | SUPPORTED | As needed | docs/current/commands/cards/55_42_uhf_get_expand_select_param.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | AI_TRACE_REVIEWED | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 17 | 7.4.5 | アンテナ切替設定の読み取り | リーダライタ設定 | 55h | 43h | Read | SUPPORTED | As needed | docs/current/commands/cards/55_43_00_read_antenna_switching.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 18 | 7.4.6 | 出力設定の読み取り | リーダライタ設定 | 55h | 43h | Read | SUPPORTED | As needed | docs/current/commands/cards/55_43_01_read_output_power.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 19 | 7.4.7 | 周波数設定の読み取り | リーダライタ設定 | 55h | 43h | Read | SUPPORTED | As needed | docs/current/commands/cards/55_43_02_read_frequency.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 20 | 7.4.8 | RFタグ通信関連パラメータの読み取り | リーダライタ設定 | 55h | 43h | Read | SUPPORTED | As needed | docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 21 | 7.4.9 | EPC(UII)関連パラメータの読み取り | リーダライタ設定 | 55h | 43h | Read | SUPPORTED | As needed | docs/current/commands/cards/55_43_05_read_epc_uii_params.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 22 | 7.4.10 | 外部アンテナ自動切替設定の読み取り | リーダライタ設定 | 55h | 47h | Read | NEEDS_DEVICE_OR_ROM_CHECK | As needed | docs/current/commands/cards/55_47_read_external_antenna_auto_switch.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 23 | 7.4.11 | 汎用ポート値の読み取り | リーダライタ設定 | 4Fh | 9Fh | Read | SUPPORTED | As needed | docs/current/commands/cards/4f_9f_read_general_port.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 24 | 7.4.12 | 拡張ポート値の読み取り | リーダライタ設定 | 4Fh | A0h | Read | NEEDS_DEVICE_OR_ROM_CHECK | As needed | docs/current/commands/cards/4f_a0_read_extended_port.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 25 | 7.4.13 | FLASH設定値の読み取り(1バイトアクセス) | リーダライタ設定 | 4Fh | B4h | Read | SUPPORTED | As needed | docs/current/commands/cards/4f_b4_read_flash_settings.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 26 | 7.4.14 | RSSIフィルタ設定の読み取り | リーダライタ設定 | 55h | 49h | Read | NEEDS_DEVICE_OR_ROM_CHECK | As needed | docs/current/commands/cards/55_49_read_rssi_filter.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 27 | 7.4.15 | アンテナ個別送信出力設定の読み取り | リーダライタ設定 | 55h | 4Ah | Read | NEEDS_DEVICE_OR_ROM_CHECK | As needed | docs/current/commands/cards/55_4a_read_antenna_output_power.md | PDF Ver.1.17 desk review | Stage 1: Read-only configuration | READY_FOR_REAL_DEVICE_TEST | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 28 | 7.4.16 | リーダライタ動作モードの書き込み | リーダライタ設定 | 4Eh | 00h / 10h | Write | SUPPORTED_WITH_IMPACT_NOTICE | Yes | docs/current/commands/cards/4e_00_10_write_reader_mode.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 29 | 7.4.17 | UHF_SetSelectParam | リーダライタ設定 | 55h | 30h | Write | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_30_uhf_set_select_param.md | PDF Ver.1.17 desk review | Stage 3: Antenna and runtime parameter operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 30 | 7.4.18 | UHF_SetInventoryParam | リーダライタ設定 | 55h | 31h | Write | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_31_uhf_set_inventory_param.md | PDF Ver.1.17 desk review | Stage 3: Antenna and runtime parameter operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 31 | 7.4.19 | UHF_SetExpandSelectParam | リーダライタ設定 | 55h | 32h | Write | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_32_uhf_set_expand_select_param.md | PDF Ver.1.17 desk review | Stage 3: Antenna and runtime parameter operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 32 | 7.4.20 | アンテナ切替設定の書き込み | リーダライタ設定 | 55h | 33h | Write | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_33_00_write_antenna_switching.md | PDF Ver.1.17 desk review | Stage 3: Antenna and runtime parameter operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 33 | 7.4.21 | 出力設定の書き込み | リーダライタ設定 | 55h | 33h | Write | SUPPORTED_WITH_IMPACT_NOTICE | Yes | docs/current/commands/cards/55_33_01_write_output_power.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 34 | 7.4.22 | 周波数設定の書き込み | リーダライタ設定 | 55h | 33h | Write | SUPPORTED_WITH_IMPACT_NOTICE | Yes | docs/current/commands/cards/55_33_02_write_frequency.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 35 | 7.4.23 | Accessパスワードの書き込み | リーダライタ設定 | 55h | 33h | Write | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_33_03_write_access_password.md | PDF Ver.1.17 desk review | Stage 5: FLASH and persistent settings | BLOCKED_BY_RECOVERY_PLAN | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 36 | 7.4.24 | RFタグ通信関連パラメータの書き込み | リーダライタ設定 | 55h | 33h | Write | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md | PDF Ver.1.17 desk review | Stage 3: Antenna and runtime parameter operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 37 | 7.4.25 | EPC(UII)関連パラメータの書き込み | リーダライタ設定 | 55h | 33h | Write | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_33_05_write_epc_uii_params.md | PDF Ver.1.17 desk review | Stage 3: Antenna and runtime parameter operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 38 | 7.4.26 | 外部アンテナ自動切替設定の書き込み | リーダライタ設定 | 55h | 37h | Write | NEEDS_DEVICE_OR_ROM_CHECK | Yes | docs/current/commands/cards/55_37_write_external_antenna_auto_switch.md | PDF Ver.1.17 desk review | Stage 3: Antenna and runtime parameter operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 39 | 7.4.27 | 汎用ポート値の書き込み | リーダライタ設定 | 4Eh | 9Fh | Write | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/4e_9f_write_general_port.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 40 | 7.4.28 | 拡張ポート値の書き込み | リーダライタ設定 | 4Eh | A0h | Write | NEEDS_DEVICE_OR_ROM_CHECK | Yes | docs/current/commands/cards/4e_a0_write_extended_port.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 41 | 7.4.29 | FLASH設定値の書き込み(1バイトアクセス) | リーダライタ設定 | 4Eh | B4h | Write | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/4e_b4_flash_write.md | PDF Ver.1.17 desk review | Stage 5: FLASH and persistent settings | BLOCKED_BY_RECOVERY_PLAN | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 42 | 7.4.30 | RSSIフィルタ設定の書き込み | リーダライタ設定 | 55h | 39h | Write | NEEDS_DEVICE_OR_ROM_CHECK | Yes | docs/current/commands/cards/55_39_write_rssi_filter.md | PDF Ver.1.17 desk review | Stage 3: Antenna and runtime parameter operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 43 | 7.4.31 | アンテナ個別送信出力設定の書き込み | リーダライタ設定 | 55h | 3Ah | Write | NEEDS_DEVICE_OR_ROM_CHECK | Yes | docs/current/commands/cards/55_3a_write_antenna_output_power.md | PDF Ver.1.17 desk review | Stage 4: RF condition and reader operation settings | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 44 | 7.5.1 | UHF_Inventory | RFタグ通信 | 55h | 10h | RF tag | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_10_uhf_inventory.md | PDF Ver.1.17 desk review | Stage 2: RF read operations | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 45 | 7.5.2 | UHF_InventoryRead | RFタグ通信 | 55h | 14h | RF tag | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_14_uhf_inventory_read.md | PDF Ver.1.17 desk review | Stage 2: RF read operations | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 46 | 7.5.3 | UHF_Read | RFタグ通信 | 55h | 15h | RF tag | SUPPORTED_WITH_PARAMETERS | Yes | docs/current/commands/cards/55_15_uhf_read.md | PDF Ver.1.17 desk review | Stage 2: RF read operations | BLOCKED_BY_SITE_CONDITION | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 47 | 7.5.4 | UHF_Write | RFタグ通信 | 55h | 16h | RF tag | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_16_uhf_write.md | PDF Ver.1.17 desk review | Stage 6: Tag memory operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 48 | 7.5.5 | UHF_Kill | RFタグ通信 | 55h | 17h | RF tag | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_17_uhf_kill.md | PDF Ver.1.17 desk review | Stage 7: Irreversible or advanced tag operations | BLOCKED_BY_RECOVERY_PLAN | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 49 | 7.5.6 | UHF_Lock | RFタグ通信 | 55h | 18h | RF tag | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_18_uhf_lock.md | PDF Ver.1.17 desk review | Stage 7: Irreversible or advanced tag operations | BLOCKED_BY_RECOVERY_PLAN | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 50 | 7.5.7 | UHF_BlockWrite | RFタグ通信 | 55h | 1Ah | RF tag | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_1a_uhf_block_write.md | PDF Ver.1.17 desk review | Stage 6: Tag memory operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 51 | 7.5.8 | UHF_BlockErase | RFタグ通信 | 55h | 1Bh | RF tag | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_1b_uhf_block_erase.md | PDF Ver.1.17 desk review | Stage 6: Tag memory operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 52 | 7.5.9 | UHF_BlockWrite2 | RFタグ通信 | 55h | 1Dh | RF tag | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_1d_uhf_block_write2.md | PDF Ver.1.17 desk review | Stage 6: Tag memory operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 53 | 7.5.10 | UHF_Encode | RFタグ通信 | 55h | 1Eh | RF tag | SUPPORTED_WITH_RECOVERY_NOTE | Yes | docs/current/commands/cards/55_1e_uhf_encode.md | PDF Ver.1.17 desk review | Stage 6: Tag memory operations | BLOCKED_BY_PARAMETER | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
-| 54 | 7.5.11 | UHF_ThroughCmd | RFタグ通信 | 55h | FFh | RF tag | NEEDS_DEVICE_OR_ROM_CHECK | Yes | docs/current/commands/cards/55_ff_uhf_through_cmd.md | PDF Ver.1.17 desk review | Stage 7: Irreversible or advanced tag operations | BLOCKED_BY_RECOVERY_PLAN | No completed Hex or SUM-calculated command; See docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md |
+PDF 6.1 のコマンド一覧に基づき、上位から送信する通常コマンドは54件です。
 
-Traceability index reference: `docs/current/16_TRACEABILITY_INDEX_V117.md`
+| 区分 | 件数 |
+|---|---:|
+| リーダライタ制御コマンド | 12 |
+| リーダライタ設定コマンド | 31 |
+| RFタグ通信コマンド | 11 |
+| 合計 | 54 |
 
-Real-device verification framework reference: `docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md`
+PDF 7.1 と 7.2 は自動読み取りや非同期レスポンス動作の説明として扱い、通常の上位送信コマンド54件には含めません。
+
+## 3. コマンドカード
+
+各コマンドの詳細は `docs/current/commands/cards/` 配下のコマンドカードを参照してください。
+
+コマンドカードでは、以下を整理しています。
+
+- コマンドの目的
+- PDF章番号
+- コマンドバイト、詳細コマンド、サブコマンド
+- 読み取り、制御、設定変更、タグメモリ操作などの分類
+- 実装前に確認すること
+- ACK / NACK / timeout の扱い
+- 実機確認時の注意点
+
+## 4. 利用手順
+
+1. 対象機種とROMバージョンを確認する。
+2. このコマンドマスタで対象コマンドの分類を確認する。
+3. 対象コマンドカードを開く。
+4. 応答処理は `10_RESPONSE_AND_NACK_MASTER.md` を確認する。
+5. 機種・ROM条件は `11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` を確認する。
+6. RAM / FLASH / RF影響は `12_RAM_FLASH_IMPACT_MATRIX.md` と `13_RF_SAFETY_AND_CARRIER_RULES.md` を確認する。
+
+## 5. 実機送信に関する注意
+
+プロトコル仕様書に存在し、対象機種、ROMバージョン、地域条件、現場条件を満たすコマンドは、実装・実機送信の対象にできます。
+
+ただし、完成HexやSUM計算済みの送信用コマンド例は、このドキュメントには記載しません。実機送信する場合は、対象、設定値、影響範囲、復旧方法、停止条件、ログ方針を明確にしてください。
