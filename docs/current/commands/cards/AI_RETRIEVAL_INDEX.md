@@ -1,11 +1,11 @@
 ---
-title: "AI Retrieval Index"
+title: "AI検索用インデックス"
 doc_type: "index"
 package_scope: "UTR-S201"
 manual: "TDR-MNL-PRC-UTR-S201-117"
 manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
-result_status: "N/A"
+result_status: "V100_FINAL_DOCUMENTATION"
 related_docs:
   - "../../09_COMMAND_MASTER_V117.md"
   - "../../16_TRACEABILITY_INDEX_V117.md"
@@ -16,10 +16,11 @@ tags:
   - "command-master"
   - "traceability"
   - "guide"
+  - "v100"
 ---
 
-# AI Retrieval Index
+# AI検索用インデックス
 
-Use `docs/current/09_COMMAND_MASTER_V117.md` first, then open the card path for the target command.
+AIがコマンドを調査するときは、まず `docs/current/09_COMMAND_MASTER_V117.md` で対象コマンドを確認し、その後で該当するコマンドカードを開いてください。
 
-AI should check ROM identification, device/ROM support, parameter confirmation, impact, ACK/NACK, timeout, and recovery notes before implementation guidance.
+実装やレビューの前には、ROM判定、対象機種、必要パラメータ、影響範囲、ACK/NACK、timeout、復旧方法、停止条件を確認してください。

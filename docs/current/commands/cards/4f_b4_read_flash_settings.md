@@ -40,185 +40,130 @@ tags:
 
 # FLASH設定値の読み取り(1バイトアクセス)
 
-## 1. Command identity
+## 1. コマンドの位置づけ
 
-- PDF section: 7.4.13
-- Command name: FLASH設定値の読み取り(1バイトアクセス)
-- Category: リーダライタ設定
-- Command byte: 4Fh
-- Detail command byte: B4h
-- Subcommand byte: -
-- Command family: リーダライタ設定
-- Read / Write / Control / RF tag / Mode: Read
-- Source PDF: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17 (TDR-MNL-PRC-UTR-S201-117.pdf, 2025-06-16)
-- Verification status: PDF Ver.1.17 desk review
+このカードは、UTR-S201 シリーズ通信プロトコル説明書 Ver.1.17 に記載された **FLASH設定値の読み取り(1バイトアクセス)** を、AIとの実装・レビュー・検証で参照しやすくするための整理資料です。
 
-## 2. Purpose
+- PDF章番号: `7.4.13`
+- コマンド分類: リーダライタ設定
+- 操作段階: `Stage 1`
+- 操作レベル: write/configuration
+- コマンドバイト: `4Fh` / 詳細コマンド: `B4h` / サブコマンド: `null`
+- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
+- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
 
-FLASH設定値を読み取る。
+## 2. 目的
 
-## 3. Usage status
+このコマンドの目的は、**FLASH設定値の読み取り(1バイトアクセス)** です。
 
-- Status: SUPPORTED
-- Reason: PDF Ver.1.17 lists this command in section 7.4.13. AI/RAG organizes device, ROM, parameter, impact, response, and recovery conditions instead of deciding arbitrary non-use.
+詳細なフィールド定義、データ長、レスポンス形式は公式PDFを一次情報として確認してください。このカードは、公式PDFを置き換えるものではなく、AIに実装やレビューを依頼するときの補助資料です。
 
-## 4. Safety / impact classification
+## 3. 使用可否・位置づけ
 
-- RF emission: No or indirect
-- Setting change: No
-- RAM change: No
-- FLASH change: Possible
-- Tag memory change: No
-- External I/O change: No
-- Persistent effect: Check whether the target field is RAM-only, FLASH-backed, or tag-memory persistent.
-- Recovery note required: Yes
-- Parameter confirmation required: Target device series, ROM version, connection address, timeout policy
+判定: `SUPPORTED`
 
-## 5. Device / ROM support
+このコマンドはPDF Ver.1.17のコマンド一覧に含まれるため、仕様上の対象コマンドとして扱います。
 
-- UTR-S201: Supported
-- UTR-SUN02-4CH: Supported
-- UTR-SHR201: Supported
-- UTR-SUN02V-8CH: Supported
-- UTR-SUN02-8CH: Supported
-- ROM/version notes: Use the rightmost applicable ROM column in the support table.
-- How to identify device:
-  - Read ROM version first
-  - Parse series name
-  - Map USM01/USM02/USM05/USM06/USM08 to product type
-- Unsupported cases: Treat as unsupported only when the PDF support table or ROM/version notes say so.
+ただし、仕様に存在することと、実機へ送信してよいことは別です。実機送信前には、対象機種、ROMバージョン、接続先、パラメータ、影響範囲、復旧方法、停止条件を確認してください。
 
-## 6. Required parameters
+## 4. 安全性・影響分類
 
-- Parameters: Target device series, ROM version, connection address, timeout policy
-- Parameter constraints: Follow the field definitions in PDF section 7.4.13.
-- Parameters that should be asked from user: Field conditions and values not obtainable from ROM.
-- Parameters that can be read from device: ROM version number, series name, and applicable readable settings.
-- Parameters that can be inferred from ROM/series: Product type, 4CH/8CH class, and ROM-dependent support.
+| 項目 | 判定 |
+|---|---|
+| RF送信 | なし |
+| 書き込み操作 | あり |
+| FLASH操作 | あり |
+| タグメモリ操作 | なし |
+| ROM確認 | あり |
+| アンテナ条件確認 | なし |
+| タグ条件確認 | なし |
+| Accessパスワード確認 | なし |
+| パラメータ確認 | あり |
+| 明示許可 | 必要 |
 
-## 7. Command format summary
+高影響コマンドを、高影響という理由だけで仕様上禁止扱いにはしません。ただし、上記の確認事項が揃うまで実機送信しません。
 
-- Command format overview: Use the common frame from chapter 5 and the command/detail/subcommand identifiers above.
-- Do not include completed Hex: This card intentionally avoids a ready-to-send full frame.
-- Do not include SUM-calculated command: This card intentionally avoids a SUM-calculated command.
+## 5. 実装前の確認事項
 
-## 8. ACK response
+実装前に、少なくとも以下を確認してください。
 
-- ACK exists: Yes, unless the PDF section defines asynchronous, multiple-response, completion-response, or no-response behavior.
-- ACK command: Use the command-specific ACK structure described in PDF section 7.4.13.
-- Data length: See PDF section 7.4.13.
-- Data fields: Parse the fields documented in the command section.
-- Multiple responses: RF tag and automatic-reading related commands may require a receive loop.
-- Completion response: Required when the command section defines an end/completion response.
-- No response: Treat only as specified by the command section or timeout policy.
-- Notes: Always distinguish ACK, NACK, multiple response, completion response, and timeout.
+1. ROMバージョンを読み取り、シリーズ名と対象機種を確認する。
+2. 対象コマンドが、その機種・ROMで利用可能か確認する。
+3. 読み取り専用か、設定変更か、タグメモリ操作かを分類する。
+4. 実機送信が必要な場合は、接続先、タイムアウト、ログ保存先、停止条件を決める。
+5. 周波数、送信出力、アンテナ設定、FLASH、タグメモリに影響する場合は、事前承認を取る。
 
-## 9. NACK response
+## 6. コマンド形式の扱い
 
-- NACK uses common 7.6 format: Yes.
-- Error code 1 relevance: Check CRC, time-over, receive, RF tag no response, internal command error, UHF IC error, LBT, hardware, antenna, SUM, and format errors.
-- Error code 2 relevance: Used mainly when Error code 1 is CMD_UHF_IC_ERROR.
-- Error code 3 relevance: Important for UHF_Encode and UHF_BlockWrite2 partial-failure diagnostics.
-- Error code 4 relevance: Important for UHF_BlockWrite2 when the code indicates RF tag access error.
-- Command-specific NACK notes: Check PDF section 7.4.13 and section 7.6 together.
-- Partial success risk: Relevant for write, erase, lock, kill, encode, and multi-word tag operations.
-- Notes: Reserved bytes in NACK should be ignored unless the PDF assigns meaning.
+コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-## 10. Important errors and diagnostics
+このカードでは、以下を意図的に記載しません。
 
-- CMD_LBT_ERROR
-- CMD_ANT_ERROR
-- CMD_RXBUSY_ERROR
-- FORMAT_ERROR
-- SUM_ERROR
-- CMD_UHF_IC_ERROR
-- Access password error
-- Memory lock
-- Tag not detected
+- 実機へそのまま送信できる完成Hex
+- SUM計算済みの送信用コマンド例
+- 安全ガードを省略した実装コード
 
-## 11. Implementation notes for AI
+AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
-- まずROMバージョン読み取りで機種とROMを自動判定する。
-- AIが勝手に使用不可と決めない。
-- 実行に必要なパラメータを整理する。
-- 実機確認が必要な点と机上確認で可能な点を分ける。
-- ログには送信目的、パラメータ、ACK/NACK、エラーコード、タイムアウト、復旧判断を残す。
-- タイムアウト、受信ループ、複数レスポンス、完了レスポンス、無応答を区別する。
+## 7. レスポンス処理
 
-## 12. Current RAG decision
+レスポンス処理では、以下を区別してください。
 
-- Decision: SUPPORTED
-- Reason: Listed in PDF Ver.1.17 command master and classified by impact and required confirmation.
-- Required parameter confirmation: Target device series, ROM version, connection address, timeout policy
-- Required device/ROM check: Read ROM version first and consult the support table.
-- Required recovery note: Yes
-- Next action: Use this card with the command master, response/NACK master, ROM support document, and parameter confirmation guide before implementation.
+- ACK
+- NACK
+- timeout
+- 無応答
+- 複数レスポンス
+- 完了レスポンス
+- LBTエラー
+- アンテナ関連エラー
+- UHF ICエラー
 
-## Traceability
+NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
 
-- Command list source:
-  - PDF 6.1.2
-- Command format source:
-  - PDF 7.4.13
-- ACK response source:
-  - PDF 7.4.13 ACK response
-- NACK response source:
-  - PDF 7.6 common NACK; PDF 7.4.13 NACK response
-- Device/ROM support source:
-  - PDF 6.2.2
-- RAM/FLASH impact source:
-  - PDF 7.4.13; docs/current/12_RAM_FLASH_IMPACT_MATRIX.md
-- RF / carrier / antenna safety source:
-  - NEEDS_RF_SAFETY_TRACE
-- Traceability status:
-  - TRACE_COMPLETE_WITH_NOTES
-- Notes:
-  - No completed Hex
-  - No SUM-calculated command
-  - No device-sendable code
+## 8. 実機確認
 
+実機確認段階: `Stage 1`
 
+実機確認では、以下をログに残してください。
 
-## Real-device verification
+- 実行日時
+- 操作者
+- 対象機種
+- ROMバージョン
+- 接続方式
+- 対象コマンド
+- パラメータ
+- 送信目的
+- ACK/NACK/timeout
+- エラーコード
+- 復旧判断
+- 結果状態
 
-- Verification stage:
-  - Stage 1: Stage 0/1 read-only verification
-- Initial status:
-  - READY_FOR_REAL_DEVICE_TEST
-- Required prior checks:
-  - ROM version read first; confirm product/series/ROM and connection target before execution.
-- Required parameters:
-  - Explicit connection target, timeout policy, output directory, operator, and device/ROM applicability.
-- Required log fields:
-  - date_time, operator, command_card, pdf_section, command_name, device_series, product_type, rom_version, connection_type, port_or_ip, timeout_ms, elapsed_ms, actual_response_type, ack_summary, nack_error_code_1-4, result_status, notes
-- Expected response type:
-  - ACK/NACK/timeout/no-response
-- Recovery note:
-  - Read-only scope. No setting change is expected. Timeout/no-response requires connection and ROM/applicability review.
-- Result status values:
-  - READY_FOR_REAL_DEVICE_TEST
-  - REAL_DEVICE_PASS
-  - REAL_DEVICE_PASS_WITH_NOTES
-  - REAL_DEVICE_FAIL
-  - NEEDS_RETEST
-  - BLOCKED_BY_DEVICE_OR_ROM
-  - BLOCKED_BY_PARAMETER
-  - NOT_APPLICABLE_TO_TARGET
-- v011 notes:
-  - ROM読み取りで機種判定後に実行
-  - 読み取りのみ。FLASH書き込みは対象外
-- Related documents:
-  - docs/current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md
-  - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
-  - docs/current/19_VERIFICATION_STAGE_PLAN.md
-  - docs/current/20_VERIFICATION_RESULT_STATUS.md
-  - docs/current/21_STAGE01_READONLY_VERIFICATION_KIT.md
-  - docs/current/22_STAGE01_READONLY_COMMAND_LIST.md
-  - docs/current/23_STAGE01_READONLY_LOGGING_GUIDE.md
+runtime logs、実CSVログ、顧客情報、実IPアドレス、raw EPC / UII / TID は GitHub にアップロードしないでください。必要な場合はマスク・要約して記録してください。
 
-- v015 Stage 1 read-only configuration result:
-  - docs/current/27_STAGE1_READONLY_CONFIGURATION_RESULT.md
-- Latest result status:
-  - BLOCKED_BY_PARAMETER
-- Latest result notes:
-  - v015 did not send this command because the FLASH read address was not specified.
+## 9. AIに実装・移植を依頼するときの注意
+
+AIへ依頼するときは、次の前提を明示してください。
+
+- 対象機種とROMバージョン
+- 接続方式
+- 実装言語
+- このコマンドカード
+- 関連ドキュメント
+- 実機送信の有無
+- 許可する操作範囲
+- 禁止する操作範囲
+- テスト方法
+- 完了条件
+
+実装言語は限定しません。Python、C#、C++、JavaScriptなど、対象環境に合わせて選択してください。
+
+## 10. 参照ドキュメント
+
+- `../../09_COMMAND_MASTER_V117.md`
+- `../../16_TRACEABILITY_INDEX_V117.md`
+- `../../10_RESPONSE_AND_NACK_MASTER.md`
+- `../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

@@ -1,8 +1,21 @@
-# UTR-S201 Command Cards
+# UTR-S201 コマンドカード
 
-This directory contains 54 command cards for UTR-S201 series protocol manual Ver.1.17.
+このディレクトリには、UTR-S201 シリーズ通信プロトコル説明書 Ver.1.17 に対応するコマンドカードを格納します。
 
-- Command cards: 54
-- Index files: 5
-- Source PDF: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17
-- Completed Hex and SUM-calculated commands are not included.
+## 1. 目的
+
+コマンドカードは、AIとのペアプログラミングで以下を確認しやすくするための資料です。
+
+- コマンドの目的
+- PDF上の参照章番号
+- コマンドバイト、詳細コマンド、サブコマンド
+- 読み取り、設定変更、タグメモリ操作などの分類
+- 実装前に確認すること
+- ACK / NACK / timeout の扱い
+- 実機確認時の注意点
+
+## 2. 注意
+
+公式PDFが一次情報です。PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。
+
+完成Hex、SUM計算済み送信用コマンド例、実機へそのまま送信できるコードは、このディレクトリには追加しません。
