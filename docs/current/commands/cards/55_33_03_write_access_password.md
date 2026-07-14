@@ -24,10 +24,10 @@ requires_parameters: true
 verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
 result_status: "REAL_DEVICE_PASS_WITH_NOTES"
 related_docs:
-  - "../../09_COMMAND_MASTER_V117.md"
-  - "../../16_TRACEABILITY_INDEX_V117.md"
-  - "../../10_RESPONSE_AND_NACK_MASTER.md"
-  - "../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../COMMAND_MASTER_V117.md"
+  - "../../TRACEABILITY_INDEX_V117.md"
+  - "../../RESPONSE_AND_NACK_MASTER.md"
+  - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
 tags:
   - "utr-s201"
   - "command-card"
@@ -161,9 +161,9 @@ AIへ依頼するときは、次の前提を明示してください。
 
 ## 10. 参照ドキュメント
 
-- `../../09_COMMAND_MASTER_V117.md`
-- `../../16_TRACEABILITY_INDEX_V117.md`
-- `../../10_RESPONSE_AND_NACK_MASTER.md`
-- `../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+- `../../COMMAND_MASTER_V117.md`
+- `../../TRACEABILITY_INDEX_V117.md`
+- `../../RESPONSE_AND_NACK_MASTER.md`
+- `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

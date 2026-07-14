@@ -7,9 +7,9 @@ manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
 result_status: "N/A"
 related_docs:
-  - "../../09_COMMAND_MASTER_V117.md"
-  - "../../12_RAM_FLASH_IMPACT_MATRIX.md"
-  - "../../13_RF_SAFETY_AND_CARRIER_RULES.md"
+  - "../../COMMAND_MASTER_V117.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../RF_SAFETY_AND_CARRIER_RULES.md"
 tags:
   - "utr-s201"
   - "guide"

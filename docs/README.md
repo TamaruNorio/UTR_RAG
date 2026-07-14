@@ -1,49 +1,13 @@
 # UTR_RAG ドキュメント
 
-このディレクトリには、UTR-S201 シリーズ制御プログラムをAIと一緒に設計・実装・レビューするためのドキュメントを格納します。
+## 構成
 
-現在版は **V100 Final documentation package** です。
+このディレクトリには、V100で利用する現在版ドキュメントを格納します。過去工程の記録ではなく、現在の利用者がAIペアプログラミングで使う入口を重視します。
 
-## 1. 対象者
+## 主な入口
 
-- AIを使ったペアプログラミング経験がある人
-- Git / GitHub の基本操作を理解している人
-- UTR-S201 シリーズの制御プログラムを作成、移植、レビュー、検証したい人
-
-実装言語は限定しません。Python、C#、C++、JavaScriptなど、必要な言語で利用できます。
-
-## 2. 公式PDFの扱い
-
-公式PDFが一次情報です。このディレクトリの文書は公式PDFの代替ではありません。
-
-PDF原本は、社内の正式な配布場所または管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。
-
-## 3. 最初に読む文書
-
-1. `../README.md`
-2. `../llms.txt`
-3. `current/AI_CONTEXT_INDEX.md`
-4. `current/45_V100_FINAL_USAGE_GUIDE.md`
-5. `current/00_OVERVIEW.md`
-
-## 4. コマンドを調べるとき
-
-1. `current/09_COMMAND_MASTER_V117.md` で対象コマンドを確認する。
-2. `current/16_TRACEABILITY_INDEX_V117.md` で参照関係を確認する。
-3. `current/commands/cards/` 配下のコマンドカードを読む。
-4. `current/10_RESPONSE_AND_NACK_MASTER.md` で応答、ACK、NACK、timeoutを確認する。
-5. `current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` でROMと機種差分を確認する。
-
-## 5. 実機確認を考えるとき
-
-- `current/17_REAL_DEVICE_VERIFICATION_FRAMEWORK.md`
-- `current/19_VERIFICATION_STAGE_PLAN.md`
-- `current/20_VERIFICATION_RESULT_STATUS.md`
-- `current/37_STAGE3PLUS_EXECUTION_GATES.md`
-- `current/38_STAGE3PLUS_RECOVERY_AND_STOP_PLAN.md`
-
-実機送信は、対象コマンド、パラメータ、復旧方法、停止条件が揃ってから行います。
-
-## 6. GitHubにアップロードしない情報
-
-PDF原本、runtime logs、実CSVログ、顧客情報、実IPアドレス、raw EPC / UII / TID、完成Hex、SUM計算済み送信用コマンド例はGitHubにアップロードしないでください。
+- `current/V100_USAGE_GUIDE.md`: 使い方
+- `current/COMMAND_MASTER_V117.md`: コマンド一覧
+- `current/commands/cards/`: 個別コマンドカード
+- `current/RESPONSE_AND_NACK_MASTER.md`: レスポンスとNACK
+- `current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`: ROMと機種判定
