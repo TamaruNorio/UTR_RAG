@@ -37,8 +37,7 @@ tags:
   - "pass-with-notes"
 ---
 
-# UHF_GetSelectParam
-
+# UHF_GetSelectParam（Select条件読み取り）
 ## 1. コマンドの位置づけ
 
 このカードは、UTR-S201 シリーズ通信プロトコル説明書 Ver.1.17 に記載された **UHF_GetSelectParam** を、AIとの実装・レビュー・検証で参照しやすくするための整理資料です。

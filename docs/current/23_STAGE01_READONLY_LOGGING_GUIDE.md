@@ -1,44 +1,13 @@
-# Stage 0/1 Read-only Logging Guide
+# Stage 0/1 ログ記録ガイド
 
-## 1. Storage paths
+## 目的
 
-- CSVログ保存先案: `runtime_logs/stage01_readonly/`
-- Markdown結果保存先案: `runtime_logs/stage01_readonly/`
-- `runtime_logs/` は `.gitignore` 対象とし、実機ログは原則としてGit管理しない。
+Stage 0/1の実機確認結果を、後から見直せる形で記録するためのガイドです。
 
-## 2. File naming
+## 記録項目
 
-- CSV: `stage01_readonly_<date_time>_<connection>_log.csv`
-- Markdown: `stage01_readonly_<date_time>_<connection>_result.md`
-- date_time: `YYYYMMDD_HHMMSS`
-- connection: `COMx` or masked host label
+日時、操作者、対象機種、ROMバージョン、接続方式、対象コマンド、timeout、レスポンス種別、ACK内容、NACKエラーコード、結果ステータス、補足メモを記録します。
 
-## 3. Required record fields
+## 注意
 
-- 実行時刻
-- 実行者
-- 接続方式
-- COMポート/IPのマスク方針
-- ROMバージョン
-- シリーズ名
-- 機種判定
-- 実行コマンド
-- ACK/NACK/timeout
-- エラーコード1〜4
-- 実行結果ステータス
-- 備考
-
-## 4. Masking policy
-
-- COM: `COMx`
-- IP: `192.168.xxx.xxx`
-- tag ID: `EPC_xxxxxxxxxxxx`
-- customer: `株式会社XXXX`
-
-## 5. Result handling
-
-- `REAL_DEVICE_PASS` is used only when a real-device response is captured.
-- `REAL_DEVICE_PASS_WITH_NOTES` is used when the response is acceptable but notes remain.
-- `NOT_APPLICABLE_TO_TARGET` is used when the ROM/product condition does not apply.
-- Timeout is not NACK.
-- No-response is not NACK.
+実IPアドレス、顧客名、raw EPC / UII / TID、実CSVログはそのままアップロードしません。必要な場合はマスクした要約を使います。

@@ -42,8 +42,7 @@ tags:
   - "pass-with-notes"
 ---
 
-# UHF_BlockWrite2
-
+# UHF_BlockWrite2（ブロック書き込み2）
 ## 1. コマンドの位置づけ
 
 このカードは、UTR-S201 シリーズ通信プロトコル説明書 Ver.1.17 に記載された **UHF_BlockWrite2** を、AIとの実装・レビュー・検証で参照しやすくするための整理資料です。
