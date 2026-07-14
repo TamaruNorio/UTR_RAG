@@ -1,3 +1,19 @@
+---
+title: "Stage 2 RF Read Preflight"
+doc_type: "preflight"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+verification_status: "DOCUMENTATION_CURRENT"
+result_status: "N/A"
+related_docs:[]
+tags:
+  - "utr-s201"
+  - "preflight"
+  - "stage2"
+  - "rf-read"
+---
+
 # Stage 2 RF Read Preflight
 
 ## 1. Positioning

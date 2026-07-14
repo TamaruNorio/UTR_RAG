@@ -1,3 +1,17 @@
+---
+title: "Response And NACK Master"
+doc_type: "guide"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+verification_status: "DOCUMENTATION_CURRENT"
+result_status: "N/A"
+related_docs:[]
+tags:
+  - "utr-s201"
+  - "guide"
+---
+
 # Response And NACK Master
 
 Target specification: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17.

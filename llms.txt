@@ -1,0 +1,24 @@
+# UTR_RAG AI Context
+
+UTR_RAG is an AI-assisted documentation and verification package for the UTR-S201 series.
+
+The official PDF is the source of truth. This repository is not a replacement for the official PDF.
+
+## Reading order for AI agents
+
+1. Read `docs/current/AI_CONTEXT_INDEX.md`.
+2. Read `docs/current/00_OVERVIEW.md`.
+3. Use `docs/current/09_COMMAND_MASTER_V117.md` as the command master.
+4. Use `docs/current/commands/cards/` for per-command cards.
+5. Use `docs/current/10_RESPONSE_AND_NACK_MASTER.md` for response and NACK handling.
+6. Use `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` for ROM and device identification.
+7. Use `docs/current/20_VERIFICATION_RESULT_STATUS.md` for result status meanings.
+
+## Safety and data policy
+
+- Runtime logs are not committed.
+- Do not expose customer information, raw EPC/UII/TID, real IP addresses, or actual CSV logs.
+- Do not generate completed Hex examples in documents.
+- Do not add PDF files to the repository.
+- Do not treat protocol-defined commands as prohibited only because they are high-impact.
+- Separate protocol support from execution permission.

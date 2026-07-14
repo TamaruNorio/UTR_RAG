@@ -1,3 +1,21 @@
+---
+title: "Operation Level Index"
+doc_type: "index"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+verification_status: "DOCUMENTATION_CURRENT"
+result_status: "N/A"
+related_docs:
+  - "../../09_COMMAND_MASTER_V117.md"
+  - "../../12_RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../13_RF_SAFETY_AND_CARRIER_RULES.md"
+tags:
+  - "utr-s201"
+  - "guide"
+  - "taxonomy"
+---
+
 # Operation Level Index
 
 Classify operations by impact: read-only, control, setting change, RF-emitting, FLASH-persistent, tag-memory-changing, irreversible tag operation, and external I/O operation.

@@ -1,3 +1,17 @@
+---
+title: "Command Master Ver.1.17"
+doc_type: "index"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+verification_status: "DOCUMENTATION_CURRENT"
+result_status: "N/A"
+related_docs:[]
+tags:
+  - "utr-s201"
+  - "command-master"
+---
+
 # Command Master Ver.1.17
 
 Target specification: UTR-S201シリーズ 通信プロトコル説明書 Ver.1.17 (TDR-MNL-PRC-UTR-S201-117.pdf, 2025-06-16)

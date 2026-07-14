@@ -1,3 +1,18 @@
+---
+title: "Real Device Log Schema"
+doc_type: "schema"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+verification_status: "DOCUMENTATION_CURRENT"
+result_status: "N/A"
+related_docs:[]
+tags:
+  - "utr-s201"
+  - "schema"
+  - "real-device-test"
+---
+
 # Real Device Log Schema
 
 ## 1. Positioning

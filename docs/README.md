@@ -128,3 +128,16 @@ The current set is based on UTR-S201 series communication protocol manual Ver.1.
 - Runtime logs under `runtime_logs/` are not committed.
 - Write commands, FLASH, frequency changes, output changes, antenna setting changes, InventoryParam/SelectParam/ExpandSelectParam changes, tag memory writes, Lock, Kill, Encode, and ThroughCmd were not executed.
 - v019 is not a formal external release, not a formal RC, not a customer release, and not production-ready.
+
+## AI context / frontmatter metadata policy
+
+This repository uses both hierarchy/index files and frontmatter metadata.
+
+- `llms.txt` is the first AI-facing repository map.
+- `docs/current/AI_CONTEXT_INDEX.md` is the detailed AI navigation map.
+- `docs/current/FRONTMATTER_SCHEMA.md` defines frontmatter keys.
+- `docs/current/TAG_TAXONOMY.md` defines tag vocabulary.
+- Command cards under `docs/current/commands/cards/` include frontmatter metadata.
+- Standard Markdown links are preferred.
+- New Obsidian-style wikilinks must not be added.
+- Protocol-defined commands are not marked prohibited only because they are high impact.

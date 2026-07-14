@@ -1,3 +1,17 @@
+---
+title: "Device ROM Identification And Support"
+doc_type: "guide"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+verification_status: "DOCUMENTATION_CURRENT"
+result_status: "N/A"
+related_docs:[]
+tags:
+  - "utr-s201"
+  - "guide"
+---
+
 # Device ROM Identification And Support
 
 ## 1. Standard identification flow

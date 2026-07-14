@@ -1,3 +1,52 @@
+---
+title: "UHF_Read"
+doc_type: "command_card"
+package_scope: "UTR-S201"
+manual: "TDR-MNL-PRC-UTR-S201-117"
+manual_version: "1.17"
+pdf_section: "7.5.3"
+command_group: "rf_tag_communication"
+command_name: "UHF_Read"
+command_byte: "55h"
+detail_command: "15h"
+subcommand: null
+operation_stage: "Stage 2"
+operation_level: "RF read"
+rf_emission: true
+write_operation: false
+flash_operation: false
+tag_memory_operation: false
+requires_rom_check: true
+requires_antenna: true
+requires_tag: true
+requires_access_password: false
+requires_parameters: true
+verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
+result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+related_docs:
+  - "../../09_COMMAND_MASTER_V117.md"
+  - "../../16_TRACEABILITY_INDEX_V117.md"
+  - "../../10_RESPONSE_AND_NACK_MASTER.md"
+  - "../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../28_STAGE2_RF_READ_PREFLIGHT.md"
+  - "../../29_STAGE2_RF_READ_COMMAND_PLAN.md"
+  - "../../30_STAGE2_RF_READ_LOG_TEMPLATE.md"
+  - "../../31_STAGE2_STOP_CONDITIONS.md"
+  - "../../32_STAGE2_RF_READ_MINIMAL_RESULT.md"
+  - "../../33_STAGE2_RF_READ_OPERATIONS_RESULT.md"
+  - "../../34_STAGE2_READ_COMPLETION_RESULT.md"
+tags:
+  - "utr-s201"
+  - "command-card"
+  - "rf-tag-communication"
+  - "stage2"
+  - "rf-read"
+  - "rf-emission"
+  - "requires-antenna"
+  - "requires-tag"
+  - "pass-with-notes"
+---
+
 # UHF_Read
 
 ## 1. Command identity
