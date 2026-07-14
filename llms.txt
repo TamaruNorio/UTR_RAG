@@ -1,32 +1,39 @@
 # UTR_RAG AI Context
 
-UTR_RAG は、UTR-S201シリーズ向けのAI補助ドキュメントおよび段階的検証パッケージです。
+UTR_RAG は、UTR-S201 シリーズの通信プロトコル理解、実装支援、レビュー、段階的検証をAIと進めるためのドキュメントリポジトリです。
 
-公式PDFが一次情報です。このリポジトリは、公式PDFの代替ではありません。
+現在版は V100 Final documentation package です。
 
-## AI agentの推奨読取順
+公式PDFが一次情報です。このリポジトリは公式PDFの代替ではありません。
 
-1. `docs/current/AI_CONTEXT_INDEX.md` を読む。
-2. `docs/current/00_OVERVIEW.md` を読む。
-3. コマンド一覧は `docs/current/09_COMMAND_MASTER_V117.md` を参照する。
-4. 個別コマンドは `docs/current/commands/cards/` 配下のカードを参照する。
-5. レスポンス、ACK、NACK、timeoutは `docs/current/10_RESPONSE_AND_NACK_MASTER.md` を参照する。
-6. ROMと機種判定は `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` を参照する。
-7. 検証状況は `docs/current/20_VERIFICATION_RESULT_STATUS.md` を参照する。
-8. Final RCの判断は `docs/current/43_FINAL_RC_REVIEW.md` と `docs/current/44_RELEASE_DECISION_NOTES.md` を参照する。
+## AIが最初に読む順序
 
-## 最新成果物
+1. `README.md`
+2. `docs/current/AI_CONTEXT_INDEX.md`
+3. `docs/current/00_OVERVIEW.md`
+4. `docs/current/45_V100_FINAL_USAGE_GUIDE.md`
+5. `docs/current/09_COMMAND_MASTER_V117.md`
+6. `docs/current/commands/cards/`
+7. `docs/current/10_RESPONSE_AND_NACK_MASTER.md`
+8. `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+9. `docs/current/20_VERIFICATION_RESULT_STATUS.md`
 
-- v022 Final RC no-PDF package
-- ZIP: `artifacts/utr_s201_ai_v022/utr_s201_ai_v022_final_rc_no_pdf.zip`
-- SHA256: `2A7E97DE4A19B634EC49953B5E6815C307C90D0E420AA381E3AF5752C9166984`
+## 実装支援時の原則
 
-## 安全・データ方針
-
-- runtime logsはcommitしない。
-- 顧客情報、raw EPC / UII / TID、実IPアドレス、実CSVログを公開しない。
-- 完成Hex例やSUM計算済みの送信用コマンド例を安易に作成しない。
-- PDFファイルをリポジトリに追加しない。
-- プロトコル仕様書に定義されたコマンドを、高影響という理由だけで禁止扱いしない。
+- 実装言語は限定しない。
+- 仕様確認、設計、実装、レビュー、実機確認を分ける。
 - protocol support と execution permission を分ける。
-- Stage 3+の実機送信は、明示許可、パラメータ確定、復旧計画、停止条件が揃うまで実行しない。
+- 高影響コマンドを、仕様にあるという理由だけで自動実行しない。
+- 高影響コマンドを、高影響という理由だけで仕様上禁止扱いしない。
+- 実機送信には、明示許可、パラメータ、復旧方法、停止条件が必要。
+
+## Gitに含めないもの
+
+- PDF原本
+- runtime logs
+- 実CSVログ
+- 顧客情報
+- 実IPアドレス
+- raw EPC / UII / TID
+- 完成Hex
+- SUM計算済み送信用コマンド例
