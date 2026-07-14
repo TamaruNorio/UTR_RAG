@@ -162,3 +162,13 @@ This repository uses both hierarchy/index files and frontmatter metadata.
 - Standard Markdown links are preferred.
 - New Obsidian-style wikilinks must not be added.
 - Protocol-defined commands are not marked prohibited only because they are high impact.
+
+## v021 Stage 3+ first batch planning
+
+v021 adds a plan-only package for selecting the first Stage 3+ execution batch.
+
+- Stage 3+ first execution batch plan
+- Stage 3+ parameter sheet
+- Stage 3+ operator approval template
+- No real-device command send
+- No ZIP or Release

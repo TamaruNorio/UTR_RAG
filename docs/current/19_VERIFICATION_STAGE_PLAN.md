@@ -184,3 +184,13 @@ v020 adds a plan-only readiness layer for Stage 3 and later high-impact commands
 - Real-device command send in v020: none
 - ZIP / Release in v020: none
 - Stage 3+ execution requires explicit approval, complete parameters, impact review, recovery plan, runtime logging, and stop conditions.
+
+## v021 Stage 3+ first batch planning
+
+v021 adds a plan-only package for selecting the first Stage 3+ execution batch.
+
+- Stage 3+ first execution batch plan
+- Stage 3+ parameter sheet
+- Stage 3+ operator approval template
+- No real-device command send
+- No ZIP or Release

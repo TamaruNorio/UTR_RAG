@@ -62,3 +62,13 @@ Use standard Markdown links. Do not add new Obsidian-style wikilinks. Relative l
 A protocol-defined command is not automatically executable. Do not mark a protocol-defined command as prohibited unless it is out of scope, unsupported, or explicitly prohibited by user/project policy.
 
 High-impact commands need conditions, parameters, impact notes, and recovery notes. Runtime logs remain outside Git.
+
+## v021 Stage 3+ first batch planning
+
+v021 adds a plan-only package for selecting the first Stage 3+ execution batch.
+
+- Stage 3+ first execution batch plan
+- Stage 3+ parameter sheet
+- Stage 3+ operator approval template
+- No real-device command send
+- No ZIP or Release
