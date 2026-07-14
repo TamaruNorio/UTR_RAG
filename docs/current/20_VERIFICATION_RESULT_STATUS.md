@@ -38,6 +38,8 @@ BLOCKEDは「仕様上禁止」ではない。対象機器、ROM、パラメー�
 | BLOCKED_BY_SITE_CONDITION | 現場条件が未確定。 | アンテナ、タグ、RF環境、顧客環境が不足。 | 現場条件を記録する。 |
 | BLOCKED_BY_RECOVERY_PLAN | 復旧方法または戻し手順が未確定。 | FLASH、永続設定、Lock/Kill等。 | 復旧手順と承認条件を確定する。 |
 | NOT_APPLICABLE_TO_TARGET | 対象機種/ROMでは確認対象外。 | 仕様上の対応外や構成非該当。 | 理由と根拠を記録する。 |
+| READY_FOR_EXPLICIT_APPROVAL | 高影響コマンドの整理は完了しているが、実行許可はまだ出ていない。 | Stage 3+ readinessで、条件・影響・復旧計画・承認待ちの場合。 | 明示許可、パラメータ、復旧計画、ログ条件を揃える。 |
+| NOT_EXECUTED_IN_V020 | v020では計画整理のみで実機送信していない。 | Stage 3+ plan-only / dry-run / guard整備。 | 必要なら別スコープで実行計画を作る。 |
 
 ## 3. Recording rules
 
@@ -66,3 +68,14 @@ v012 Stage 0 read-only real-device result summary:
 - docs/current/24_STAGE0_READONLY_REAL_DEVICE_RESULT.md
 
 The v012 attempt did not record REAL_DEVICE_PASS. Runtime logs are not committed.
+
+## 6. v020 Stage 3+ status usage
+
+v020 Stage 3+ readiness primarily uses:
+
+- READY_FOR_EXPLICIT_APPROVAL
+- NOT_EXECUTED_IN_V020
+- BLOCKED_BY_PARAMETER
+- BLOCKED_BY_RECOVERY_PLAN
+
+These statuses separate protocol support from execution permission.

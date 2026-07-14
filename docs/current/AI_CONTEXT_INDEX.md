@@ -43,11 +43,21 @@ UTR_RAG uses hierarchy, index documents, standard Markdown links, and frontmatte
 - [Stage 2 RF Read Operations Result](33_STAGE2_RF_READ_OPERATIONS_RESULT.md)
 - [Stage 2 Read Completion Result](34_STAGE2_READ_COMPLETION_RESULT.md)
 
-## 6. Link policy
+## 6. Stage 3+ high-impact readiness flow
+
+- [Stage 3+ High Impact Readiness](35_STAGE3PLUS_HIGH_IMPACT_READINESS.md)
+- [Stage 3+ Command Matrix](36_STAGE3PLUS_COMMAND_MATRIX.md)
+- [Stage 3+ Execution Gates](37_STAGE3PLUS_EXECUTION_GATES.md)
+- [Stage 3+ Recovery And Stop Plan](38_STAGE3PLUS_RECOVERY_AND_STOP_PLAN.md)
+
+Stage 3+ commands require explicit approval and complete parameters before real-device execution.
+Protocol support and execution permission are separate.
+
+## 7. Link policy
 
 Use standard Markdown links. Do not add new Obsidian-style wikilinks. Relative links are preferred.
 
-## 7. Safety policy
+## 8. Safety policy
 
 A protocol-defined command is not automatically executable. Do not mark a protocol-defined command as prohibited unless it is out of scope, unsupported, or explicitly prohibited by user/project policy.
 

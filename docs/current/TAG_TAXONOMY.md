@@ -42,6 +42,7 @@
 - rf-emission
 - write-operation
 - flash-operation
+- flash-initialize
 - persistent-setting
 - frequency-setting
 - output-power
@@ -52,6 +53,9 @@
 - kill
 - encode
 - through-command
+- high-impact
+- explicit-approval
+- recovery-plan
 
 ## Result/status tags
 
@@ -62,7 +66,9 @@
 - blocked-by-parameter
 - blocked-by-device-or-rom
 - blocked-by-site-condition
+- ready-for-explicit-approval
 - not-executed
+- not-executed-in-v020
 - preflight-only
 - needs-review
 - needs-real-device-test

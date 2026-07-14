@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 
-PACKAGE_VERSION = "v019"
+PACKAGE_VERSION = "v020"
 ROM_READ_PDF_SECTION = "7.3.8"
 ROM_READ_COMMAND_BYTE = 0x4F
 ROM_READ_DETAIL_BYTE = 0x90
@@ -142,6 +142,278 @@ STAGE2_READ_EXTRA_COMMANDS = [
         "device_rom_condition": "Inventoryでタグを検出し、MemBank/address/word countが確定した場合のみ実行",
         "notes": "v018 target only when read parameters are explicitly confirmed.",
     },
+]
+STAGE3PLUS_COMMANDS = [
+    {
+        "stage_bucket": "Stage 3 tag memory write",
+        "pdf_section": "7.5.4",
+        "name": "UHF_Write",
+        "command_bytes": "55h/16h",
+        "command_group": "RFタグ通信",
+        "operation_category": "write/tag-memory",
+        "impact_category": "TAG_MEMORY_WRITE",
+        "persistent_change": "tag memory",
+        "tag_memory_change": "yes",
+        "irreversible_operation": "no",
+        "rf_emission": "yes",
+        "requires_rom_check": "yes",
+        "requires_antenna": "yes",
+        "requires_tag": "yes",
+        "requires_target_epc_uii": "yes",
+        "requires_memory_bank": "yes",
+        "requires_address": "yes",
+        "requires_word_count": "yes",
+        "requires_access_password": "depends",
+        "requires_recovery_plan": "yes",
+        "card_path": "docs/current/commands/cards/55_16_uhf_write.md",
+        "notes": "Tag memory write. Explicit approval, target tag, write data, and recovery limits are required.",
+    },
+    {
+        "stage_bucket": "Stage 3 irreversible tag operation",
+        "pdf_section": "7.5.5",
+        "name": "UHF_Kill",
+        "command_bytes": "55h/17h",
+        "command_group": "RFタグ通信",
+        "operation_category": "irreversible/tag-kill",
+        "impact_category": "IRREVERSIBLE_TAG_OPERATION",
+        "persistent_change": "tag state",
+        "tag_memory_change": "irreversible",
+        "irreversible_operation": "yes",
+        "rf_emission": "yes",
+        "requires_rom_check": "yes",
+        "requires_antenna": "yes",
+        "requires_tag": "yes",
+        "requires_target_epc_uii": "yes",
+        "requires_memory_bank": "no",
+        "requires_address": "no",
+        "requires_word_count": "no",
+        "requires_access_password": "yes",
+        "requires_recovery_plan": "yes",
+        "card_path": "docs/current/commands/cards/55_17_uhf_kill.md",
+        "notes": "Irreversible tag kill. Requires explicit approval and isolated disposable target tag conditions.",
+    },
+    {
+        "stage_bucket": "Stage 3 irreversible tag operation",
+        "pdf_section": "7.5.6",
+        "name": "UHF_Lock",
+        "command_bytes": "55h/18h",
+        "command_group": "RFタグ通信",
+        "operation_category": "lock/tag-memory",
+        "impact_category": "TAG_LOCK_OR_PERMISSION_CHANGE",
+        "persistent_change": "tag lock state",
+        "tag_memory_change": "lock state",
+        "irreversible_operation": "possible",
+        "rf_emission": "yes",
+        "requires_rom_check": "yes",
+        "requires_antenna": "yes",
+        "requires_tag": "yes",
+        "requires_target_epc_uii": "yes",
+        "requires_memory_bank": "depends",
+        "requires_address": "no",
+        "requires_word_count": "no",
+        "requires_access_password": "yes",
+        "requires_recovery_plan": "yes",
+        "card_path": "docs/current/commands/cards/55_18_uhf_lock.md",
+        "notes": "Lock state may be irreversible depending on parameters. Do not execute without recovery decision.",
+    },
+    {
+        "stage_bucket": "Stage 3 tag memory write",
+        "pdf_section": "7.5.7",
+        "name": "UHF_BlockWrite",
+        "command_bytes": "55h/1Ah",
+        "command_group": "RFタグ通信",
+        "operation_category": "block-write/tag-memory",
+        "impact_category": "TAG_MEMORY_WRITE",
+        "persistent_change": "tag memory",
+        "tag_memory_change": "yes",
+        "irreversible_operation": "no",
+        "rf_emission": "yes",
+        "requires_rom_check": "yes",
+        "requires_antenna": "yes",
+        "requires_tag": "yes",
+        "requires_target_epc_uii": "yes",
+        "requires_memory_bank": "yes",
+        "requires_address": "yes",
+        "requires_word_count": "yes",
+        "requires_access_password": "depends",
+        "requires_recovery_plan": "yes",
+        "card_path": "docs/current/commands/cards/55_1a_uhf_block_write.md",
+        "notes": "Block write changes tag memory and requires explicit data and recovery limits.",
+    },
+    {
+        "stage_bucket": "Stage 3 tag memory write",
+        "pdf_section": "7.5.8",
+        "name": "UHF_BlockErase",
+        "command_bytes": "55h/1Bh",
+        "command_group": "RFタグ通信",
+        "operation_category": "block-erase/tag-memory",
+        "impact_category": "TAG_MEMORY_ERASE",
+        "persistent_change": "tag memory",
+        "tag_memory_change": "erase",
+        "irreversible_operation": "possible",
+        "rf_emission": "yes",
+        "requires_rom_check": "yes",
+        "requires_antenna": "yes",
+        "requires_tag": "yes",
+        "requires_target_epc_uii": "yes",
+        "requires_memory_bank": "yes",
+        "requires_address": "yes",
+        "requires_word_count": "yes",
+        "requires_access_password": "depends",
+        "requires_recovery_plan": "yes",
+        "card_path": "docs/current/commands/cards/55_1b_uhf_block_erase.md",
+        "notes": "Erase operation may not be recoverable from device side.",
+    },
+    {
+        "stage_bucket": "Stage 3 tag memory write",
+        "pdf_section": "7.5.9",
+        "name": "UHF_BlockWrite2",
+        "command_bytes": "55h/1Dh",
+        "command_group": "RFタグ通信",
+        "operation_category": "block-write/tag-memory",
+        "impact_category": "TAG_MEMORY_WRITE_PARTIAL_FAILURE_RISK",
+        "persistent_change": "tag memory",
+        "tag_memory_change": "yes",
+        "irreversible_operation": "possible",
+        "rf_emission": "yes",
+        "requires_rom_check": "yes",
+        "requires_antenna": "yes",
+        "requires_tag": "yes",
+        "requires_target_epc_uii": "yes",
+        "requires_memory_bank": "yes",
+        "requires_address": "yes",
+        "requires_word_count": "yes",
+        "requires_access_password": "depends",
+        "requires_recovery_plan": "yes",
+        "card_path": "docs/current/commands/cards/55_1d_uhf_block_write2.md",
+        "notes": "Partial-failure diagnostics must be planned before execution.",
+    },
+    {
+        "stage_bucket": "Stage 3 tag memory write",
+        "pdf_section": "7.5.10",
+        "name": "UHF_Encode",
+        "command_bytes": "55h/1Eh",
+        "command_group": "RFタグ通信",
+        "operation_category": "encode/tag-memory",
+        "impact_category": "TAG_ENCODING",
+        "persistent_change": "tag memory and lock state possible",
+        "tag_memory_change": "yes",
+        "irreversible_operation": "possible",
+        "rf_emission": "yes",
+        "requires_rom_check": "yes",
+        "requires_antenna": "yes",
+        "requires_tag": "yes",
+        "requires_target_epc_uii": "yes",
+        "requires_memory_bank": "yes",
+        "requires_address": "yes",
+        "requires_word_count": "yes",
+        "requires_access_password": "depends",
+        "requires_recovery_plan": "yes",
+        "card_path": "docs/current/commands/cards/55_1e_uhf_encode.md",
+        "notes": "Encode can affect multiple tag fields. Use isolated disposable tags only after explicit approval.",
+    },
+    {
+        "stage_bucket": "Stage 3 advanced RF command",
+        "pdf_section": "7.5.11",
+        "name": "UHF_ThroughCmd",
+        "command_bytes": "55h/FFh",
+        "command_group": "RFタグ通信",
+        "operation_category": "through/advanced",
+        "impact_category": "ADVANCED_UNBOUNDED_TAG_OPERATION",
+        "persistent_change": "depends on payload",
+        "tag_memory_change": "depends on payload",
+        "irreversible_operation": "depends on payload",
+        "rf_emission": "yes",
+        "requires_rom_check": "yes",
+        "requires_antenna": "yes",
+        "requires_tag": "depends",
+        "requires_target_epc_uii": "depends",
+        "requires_memory_bank": "depends",
+        "requires_address": "depends",
+        "requires_word_count": "depends",
+        "requires_access_password": "depends",
+        "requires_recovery_plan": "yes",
+        "card_path": "docs/current/commands/cards/55_ff_uhf_through_cmd.md",
+        "notes": "Through command impact depends on payload. Payload review is mandatory.",
+    },
+]
+
+STAGE3PLUS_COMMANDS += [
+    {
+        "stage_bucket": "Stage 4 reader configuration write",
+        "pdf_section": section,
+        "name": name,
+        "command_bytes": command_bytes,
+        "command_group": "リーダライタ設定",
+        "operation_category": operation,
+        "impact_category": impact,
+        "persistent_change": persistent,
+        "tag_memory_change": "no",
+        "irreversible_operation": irreversible,
+        "rf_emission": rf,
+        "requires_rom_check": "yes",
+        "requires_antenna": antenna,
+        "requires_tag": "no",
+        "requires_target_epc_uii": "no",
+        "requires_memory_bank": "no",
+        "requires_address": address,
+        "requires_word_count": "no",
+        "requires_access_password": access,
+        "requires_recovery_plan": "yes",
+        "card_path": card,
+        "notes": notes,
+    }
+    for section, name, command_bytes, operation, impact, persistent, irreversible, rf, antenna, address, access, card, notes in [
+        ("7.4.16", "リーダライタ動作モードの書き込み", "4Eh/00h/10h", "configuration-write", "READER_MODE_CHANGE", "RAM or FLASH depending on target", "no", "no", "no", "no", "no", "docs/current/commands/cards/4e_00_10_write_reader_mode.md", "Reader operating mode change requires rollback plan."),
+        ("7.4.17", "UHF_SetSelectParam", "55h/30h", "configuration-write", "SELECT_PARAM_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_30_uhf_set_select_param.md", "Selection parameter changes affect subsequent RF tag operations."),
+        ("7.4.18", "UHF_SetInventoryParam", "55h/31h", "configuration-write", "INVENTORY_PARAM_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_31_uhf_set_inventory_param.md", "Inventory parameter changes affect RF behavior and read results."),
+        ("7.4.19", "UHF_SetExpandSelectParam", "55h/32h", "configuration-write", "EXPAND_SELECT_PARAM_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md", "Expanded selection parameters require current-setting backup."),
+        ("7.4.20", "アンテナ切替設定の書き込み", "55h/33h/00h", "configuration-write", "ANTENNA_SWITCH_SETTING_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_33_00_write_antenna_switching.md", "Antenna switching setting changes can affect RF routing."),
+        ("7.4.21", "出力設定の書き込み", "55h/33h/01h", "configuration-write", "OUTPUT_POWER_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_33_01_write_output_power.md", "Output power changes require legal/site confirmation."),
+        ("7.4.22", "周波数設定の書き込み", "55h/33h/02h", "configuration-write", "FREQUENCY_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_33_02_write_frequency.md", "Frequency changes require legal/site confirmation."),
+        ("7.4.23", "Accessパスワードの書き込み", "55h/33h/03h", "configuration-write", "ACCESS_PASSWORD_CHANGE", "RAM/configuration", "possible", "no", "no", "no", "yes", "docs/current/commands/cards/55_33_03_write_access_password.md", "Password changes require credential and recovery policy."),
+        ("7.4.24", "RFタグ通信関連パラメータの書き込み", "55h/33h/04h", "configuration-write", "RF_TAG_COMM_PARAM_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md", "RF communication parameter changes require baseline backup."),
+        ("7.4.25", "EPC(UII)関連パラメータの書き込み", "55h/33h/05h", "configuration-write", "EPC_UII_PARAM_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_33_05_write_epc_uii_params.md", "EPC/UII parameter changes affect tag parsing and response behavior."),
+        ("7.4.26", "外部アンテナ自動切替設定の書き込み", "55h/37h", "configuration-write", "EXTERNAL_ANTENNA_AUTO_SWITCH_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_37_write_external_antenna_auto_switch.md", "8CH-related automatic switching requires device/ROM and wiring confirmation."),
+        ("7.4.27", "汎用ポート値の書き込み", "4Eh/9Fh", "configuration-write", "GENERAL_PORT_OUTPUT_CHANGE", "external I/O", "no", "no", "no", "no", "no", "docs/current/commands/cards/4e_9f_write_general_port.md", "External I/O state changes require connected equipment review."),
+        ("7.4.28", "拡張ポート値の書き込み", "4Eh/A0h", "configuration-write", "EXTENDED_PORT_OUTPUT_CHANGE", "external I/O", "no", "no", "no", "no", "no", "docs/current/commands/cards/4e_a0_write_extended_port.md", "Extended I/O changes require connected equipment review."),
+        ("7.4.29", "FLASH設定値の書き込み(1バイトアクセス)", "4Eh/B4h", "flash-write", "FLASH_ONE_BYTE_WRITE", "FLASH/persistent", "possible", "no", "no", "yes", "no", "docs/current/commands/cards/4e_b4_flash_write.md", "Persistent FLASH write requires backup and recovery plan."),
+        ("7.4.30", "RSSIフィルタ設定の書き込み", "55h/39h", "configuration-write", "RSSI_FILTER_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_39_write_rssi_filter.md", "RSSI filtering changes tag detection behavior."),
+        ("7.4.31", "アンテナ個別送信出力設定の書き込み", "55h/3Ah", "configuration-write", "ANTENNA_OUTPUT_POWER_CHANGE", "RAM/configuration", "no", "yes", "yes", "no", "no", "docs/current/commands/cards/55_3a_write_antenna_output_power.md", "Per-antenna output changes require legal/site confirmation."),
+    ]
+]
+
+STAGE3PLUS_COMMANDS += [
+    {
+        "stage_bucket": "Stage 5 reader control high-impact",
+        "pdf_section": section,
+        "name": name,
+        "command_bytes": command_bytes,
+        "command_group": "リーダライタ制御",
+        "operation_category": operation,
+        "impact_category": impact,
+        "persistent_change": persistent,
+        "tag_memory_change": "no",
+        "irreversible_operation": irreversible,
+        "rf_emission": rf,
+        "requires_rom_check": "yes",
+        "requires_antenna": antenna,
+        "requires_tag": "no",
+        "requires_target_epc_uii": "no",
+        "requires_memory_bank": "no",
+        "requires_address": "no",
+        "requires_word_count": "no",
+        "requires_access_password": "no",
+        "requires_recovery_plan": "yes",
+        "card_path": card,
+        "notes": notes,
+    }
+    for section, name, command_bytes, operation, impact, persistent, irreversible, rf, antenna, card, notes in [
+        ("7.3.4", "RF送信信号の制御", "4Eh/9Eh", "rf-carrier-control", "RF_CARRIER_CONTROL", "runtime state", "no", "yes", "yes", "docs/current/commands/cards/4e_9e_rf_carrier_control.md", "RF carrier control requires site/legal confirmation and stop conditions."),
+        ("7.3.7", "使用アンテナ番号の書き込み", "55h/38h", "antenna-selection-write", "ACTIVE_ANTENNA_CHANGE", "runtime configuration", "no", "yes", "yes", "docs/current/commands/cards/55_38_write_active_antenna.md", "Active antenna changes require wiring and recovery confirmation."),
+        ("7.3.10", "リスタート", "4Eh/9Dh", "restart", "READER_RESTART", "device runtime state", "no", "no", "no", "docs/current/commands/cards/4e_9d_restart_reader.md", "Restart interrupts device operation and requires reconnection plan."),
+        ("7.3.11", "FLASH設定の初期化", "4Eh/6Fh", "flash-initialize", "FLASH_INITIALIZE", "FLASH/persistent", "possible", "no", "no", "docs/current/commands/cards/4e_6f_flash_initialize.md", "FLASH initialization requires backup and recovery plan."),
+    ]
 ]
 
 LOG_FIELDS = ['log_id', 'date_time', 'operator', 'repository_version', 'package_version', 'command_card', 'pdf_section', 'command_name', 'command_byte', 'detail_command', 'subcommand', 'device_series', 'product_type', 'rom_version', 'connection_type', 'port_or_ip', 'baudrate_or_socket', 'antenna_count', 'active_antenna', 'antenna_switching_mode', 'target_tag_count', 'target_memory_bank', 'parameter_summary', 'ram_flash_impact', 'rf_impact', 'tag_memory_impact', 'recovery_required', 'pre_read_required', 'expected_response_type', 'actual_response_type', 'ack_summary', 'nack_error_code_1', 'nack_error_code_2', 'nack_error_code_3', 'nack_error_code_4', 'timeout_ms', 'elapsed_ms', 'raw_response_hex', 'raw_log_file', 'result_status', 'notes']
@@ -644,6 +916,8 @@ def read_until_cr(ser: object, timeout_sec: float) -> bytes:
 
 
 def select_commands(command_set: str) -> list[dict[str, str]]:
+    if command_set == "stage3plus-plan":
+        return []
     if command_set == "all":
         stage0_order = {ROM_READ_PDF_SECTION: 0, CHIP_VERSION_PDF_SECTION: 1, ERROR_INFO_PDF_SECTION: 2}
         stage1_order = {f"7.4.{number}": number for number in range(1, 16)}
@@ -668,6 +942,59 @@ def select_commands(command_set: str) -> list[dict[str, str]]:
         rom_command = next(command for command in COMMANDS if command["pdf_section"] == ROM_READ_PDF_SECTION)
         return [rom_command, *STAGE2_MINIMAL_COMMANDS, *STAGE2_READ_EXTRA_COMMANDS]
     return commands
+
+
+def print_stage3plus_plan(execute_requested: bool = False) -> None:
+    print("Stage 3+ high-impact command readiness plan:")
+    print("- mode: plan-only / dry-run")
+    print("- real-device command send: no")
+    if execute_requested:
+        print("- stage3plus-plan is plan-only. No real-device command was sent.")
+    print("- protocol support and execution permission are separated.")
+    print("- high-impact commands require explicit approval, complete parameters, impact review, and recovery plan.")
+    print("")
+    headers = [
+        "PDF",
+        "Command",
+        "Bytes",
+        "Impact",
+        "Category",
+        "ROM",
+        "Antenna",
+        "Tag",
+        "Target",
+        "Bank",
+        "Address",
+        "Words",
+        "Password",
+        "Recovery",
+        "v020 status",
+    ]
+    print(" | ".join(headers))
+    print(" | ".join(["---"] * len(headers)))
+    for command in STAGE3PLUS_COMMANDS:
+        print(" | ".join([
+            command["pdf_section"],
+            command["name"],
+            command["command_bytes"],
+            command["impact_category"],
+            command["operation_category"],
+            command["requires_rom_check"],
+            command["requires_antenna"],
+            command["requires_tag"],
+            command["requires_target_epc_uii"],
+            command["requires_memory_bank"],
+            command["requires_address"],
+            command["requires_word_count"],
+            command["requires_access_password"],
+            command["requires_recovery_plan"],
+            "READY_FOR_EXPLICIT_APPROVAL",
+        ]))
+    print("")
+    print("Execution gate:")
+    print("- NOT_EXECUTED_IN_V020")
+    print("- Explicit approval required before any real-device execution.")
+    print("- No completed Hex or SUM-calculated command is emitted.")
 
 
 def output_paths(output_dir: Path, connection_label: str) -> tuple[Path, Path]:
@@ -1004,7 +1331,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--read-size", type=int, default=256)
     parser.add_argument("--output-dir", default="runtime_logs/stage01_readonly")
     parser.add_argument("--mask-sensitive", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--command-set", choices=["stage0", "stage1", "stage2-minimal", "stage2-read", "all"], default="all")
+    parser.add_argument(
+        "--command-set",
+        choices=["stage0", "stage1", "stage2-minimal", "stage2-read", "stage3plus-plan", "all"],
+        default="all",
+    )
     parser.add_argument("--read-profile", choices=["none", "safe-tid"], default="none")
     parser.add_argument("--memory-bank", choices=sorted(MEMORY_BANKS.keys()), default=None)
     parser.add_argument("--read-memory-bank", type=lambda value: int(value, 0), default=None)
@@ -1037,6 +1368,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
+    if args.command_set == "stage3plus-plan":
+        print_stage3plus_plan(args.execute)
+        return 0
     commands = select_commands(args.command_set)
     target = args.port or args.host or "not-specified"
     connection_label = mask_value(target, args.mask_sensitive).replace(".", "_")

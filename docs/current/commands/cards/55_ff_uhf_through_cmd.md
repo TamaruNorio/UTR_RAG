@@ -215,3 +215,18 @@ RFタグへThroughコマンドを送る。
   - docs/current/18_REAL_DEVICE_LOG_SCHEMA.md
   - docs/current/19_VERIFICATION_STAGE_PLAN.md
   - docs/current/20_VERIFICATION_RESULT_STATUS.md
+
+## v020 Stage 3+ readiness
+
+- Readiness document:
+  docs/current/35_STAGE3PLUS_HIGH_IMPACT_READINESS.md
+- Command matrix:
+  docs/current/36_STAGE3PLUS_COMMAND_MATRIX.md
+- Execution gates:
+  docs/current/37_STAGE3PLUS_EXECUTION_GATES.md
+- Recovery and stop plan:
+  docs/current/38_STAGE3PLUS_RECOVERY_AND_STOP_PLAN.md
+- v020 status:
+  READY_FOR_EXPLICIT_APPROVAL
+- Real-device execution:
+  NOT_EXECUTED_IN_V020

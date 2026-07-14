@@ -121,3 +121,16 @@ v009 is the Ver.1.17 traceability completed package with AI-assisted traceabilit
 - Runtime logs under `runtime_logs/` are not committed.
 - Write commands, FLASH, frequency changes, output changes, antenna setting changes, InventoryParam/SelectParam/ExpandSelectParam changes, tag memory writes, Lock, Kill, Encode, and ThroughCmd were not executed.
 - v019 is not a formal external release, not a formal RC, not a customer release, and not production-ready.
+
+## v020 Stage 3+ high-impact readiness
+
+- Latest plan-only readiness update: v020 Stage 3+ high-impact readiness
+- Readiness document: `docs/current/35_STAGE3PLUS_HIGH_IMPACT_READINESS.md`
+- Command matrix: `docs/current/36_STAGE3PLUS_COMMAND_MATRIX.md`
+- Execution gates: `docs/current/37_STAGE3PLUS_EXECUTION_GATES.md`
+- Recovery and stop plan: `docs/current/38_STAGE3PLUS_RECOVERY_AND_STOP_PLAN.md`
+- v020 separates protocol support from execution permission.
+- Stage 3+ real-device execution requires explicit approval, complete parameters, impact review, recovery plan, runtime logging, and stop conditions.
+- Artifact ZIP: not created in v020
+- GitHub Release: not created in v020
+- Real-device command send: not performed in v020
