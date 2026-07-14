@@ -1,41 +1,49 @@
 ---
-title: "RAM FLASH Impact Matrix"
+title: "RAM・FLASH影響整理"
 doc_type: "guide"
 package_scope: "UTR-S201"
 manual: "TDR-MNL-PRC-UTR-S201-117"
 manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
-result_status: "N/A"
-related_docs:[]
+result_status: "V100_FINAL_DOCUMENTATION"
+related_docs: []
 tags:
   - "utr-s201"
   - "guide"
+  - "ram-flash"
 ---
 
-# RAM FLASH Impact Matrix
+# RAM・FLASH影響整理
 
-## 1. Classification
+## 1. 目的
 
-| Area | Typical commands | Impact | Recovery / confirmation |
-| --- | --- | --- | --- |
-| Command-mode parameters | Reader/writer mode, RF tag communication parameters, EPC(UII) parameters | RAM or configured target area changes | Read current value first and log intended target |
-| Automatic-reading parameters | Select, Inventory, ExpandSelect, mode parameters | Affects asynchronous reading behavior | Confirm mode, session, Q value, select mask, and timeout |
-| FLASH data | FLASH setting read/write, FLASH initialize, selected persistent settings | Persistent across restart when written to FLASH | Read before change, record old/new values, define restore path |
-| RAM-only changes | Temporary operating parameters | Lost on restart if not persisted | Log expected lifetime |
-| RAM/FLASH interaction | Settings with RAM and FLASH reflection rules | Can differ by parameter and ROM version | Confirm source, target, and reflection behavior |
-| Access password | Access password write and tag operations | Affects protected tag access | Confirm password handling and masking |
-| RSSI filter | RSSI filter read/write | Affects tag response filtering | Confirm ROM 2.100 or later and threshold intent |
-| Inventory timeout | Inventory-related parameters | Affects receive loop and completion timing | Confirm ROM behavior and timeout policy |
-| Command timeout | Reader/writer command timeout | Affects NACK/timeout timing | Avoid unnecessarily large values and log timeout policy |
+この文書は、設定変更がRAMだけに影響するのか、FLASHなどの永続設定に影響するのかを確認するための整理資料です。
 
-## 2. Impact handling
+公式PDFが一次情報です。実装前に、対象コマンドの該当節と機種・ROM条件を確認してください。
 
-Protocol-defined commands are organized by impact and recovery requirements. Setting changes, FLASH persistence, RF output, antenna switching, tag memory writes, Lock, Kill, and external I/O changes should include before/after confirmation and a recovery note where applicable.
+## 2. 影響分類
 
+| 分類 | 代表例 | 確認すること |
+|---|---|---|
+| 読み取りのみ | 設定値読み取り、ROM読み取り | 通常は設定変更なし。対象機種とレスポンス形式を確認する。 |
+| RAM上の一時設定 | 動作中だけ有効な設定 | 再起動時に失われるか確認する。 |
+| FLASH保存を伴う設定 | FLASH設定値書き込み、FLASH初期化 | 変更前の値、変更後の値、復旧方法を記録する。 |
+| RF関連設定 | 周波数、送信出力、アンテナ設定 | 地域条件、接続アンテナ、現場条件を確認する。 |
+| タグメモリ操作 | Write、Lock、Kill、Encode | 対象タグ、メモリ領域、Accessパスワード、復旧可否を確認する。 |
 
-## 3. Traceability use
+## 3. 実装時の扱い
 
-- Each command card should link to the RAM/FLASH impact category.
-- If impact is not explicit, use NEEDS_RAM_FLASH_TRACE.
-- Setting write commands should distinguish RAM-only effect and FLASH/persistent effect where possible.
-- FLASH initialization and FLASH one-byte write require recovery notes.
+プロトコル仕様書にある設定変更は、条件が揃えば実施対象です。
+
+ただし、AIが独断でRAM/FLASHの保存先、設定値、復旧方法を決めないようにします。実機送信する場合は、変更前後の値と復旧手順をログに残します。
+
+## 4. GitHubに残さないもの
+
+- runtime logs
+- 実CSVログ
+- 顧客情報
+- 実IPアドレス
+- raw EPC / UII / TID
+- 認証情報
+- 完成Hex
+- SUM計算済み送信用コマンド例
