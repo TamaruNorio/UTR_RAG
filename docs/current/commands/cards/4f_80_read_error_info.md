@@ -10,7 +10,7 @@ command_name: "エラー情報の読み取り"
 command_byte: "4Fh"
 detail_command: "80h"
 subcommand: null
-operation_stage: "Stage 0"
+operation_profile: "rom-identification"
 operation_level: "read-only"
 rf_emission: false
 write_operation: false
@@ -32,7 +32,6 @@ tags:
   - "utr-s201"
   - "command-card"
   - "reader-control"
-  - "stage0"
   - "read-only"
   - "pass-with-notes"
 ---
@@ -45,7 +44,7 @@ tags:
 
 - PDF章番号: `7.3.1`
 - コマンド分類: リーダライタ制御
-- 操作段階: `Stage 0`
+- 確認区分: `rom-identification`
 - 操作レベル: 読み取り専用
 - コマンドバイト: `4Fh` / 詳細コマンド: `80h` / サブコマンド: `null`
 - 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
@@ -120,9 +119,11 @@ AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送
 
 NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
 
+ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+
 ## 8. 実機確認
 
-実機確認段階: `Stage 0`
+実機確認区分: `rom-identification`
 
 実機確認では、以下をログに残してください。
 

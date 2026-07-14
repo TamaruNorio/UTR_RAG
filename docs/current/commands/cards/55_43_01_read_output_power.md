@@ -10,7 +10,7 @@ command_name: "出力設定の読み取り"
 command_byte: "55h"
 detail_command: "43h"
 subcommand: "01h"
-operation_stage: "Stage 1"
+operation_profile: "read-only"
 operation_level: "read-only"
 rf_emission: false
 write_operation: false
@@ -32,7 +32,6 @@ tags:
   - "utr-s201"
   - "command-card"
   - "reader-setting"
-  - "stage1"
   - "read-only"
   - "pass-with-notes"
 ---
@@ -45,7 +44,7 @@ tags:
 
 - PDF章番号: `7.4.6`
 - コマンド分類: リーダライタ設定
-- 操作段階: `Stage 1`
+- 確認区分: `read-only`
 - 操作レベル: 読み取り専用
 - コマンドバイト: `55h` / 詳細コマンド: `43h` / サブコマンド: `01h`
 - 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
@@ -120,9 +119,11 @@ AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送
 
 NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
 
+ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+
 ## 8. 実機確認
 
-実機確認段階: `Stage 1`
+実機確認区分: `read-only`
 
 実機確認では、以下をログに残してください。
 

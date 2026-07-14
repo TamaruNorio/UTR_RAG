@@ -10,7 +10,7 @@ command_name: "使用アンテナ番号の書き込み"
 command_byte: "55h"
 detail_command: "38h"
 subcommand: null
-operation_stage: "NEEDS_METADATA_CONFIRMATION"
+operation_profile: "needs-metadata-confirmation"
 operation_level: "write/configuration"
 rf_emission: false
 write_operation: true
@@ -44,7 +44,7 @@ tags:
 
 - PDF章番号: `7.3.7`
 - コマンド分類: リーダライタ制御
-- 操作段階: `NEEDS_METADATA_CONFIRMATION`
+- 確認区分: `needs-metadata-confirmation`
 - 操作レベル: write/configuration
 - コマンドバイト: `55h` / 詳細コマンド: `38h` / サブコマンド: `null`
 - 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
@@ -119,9 +119,11 @@ AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送
 
 NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
 
+ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+
 ## 8. 実機確認
 
-実機確認段階: `NEEDS_METADATA_CONFIRMATION`
+実機確認区分: `needs-metadata-confirmation`
 
 実機確認では、以下をログに残してください。
 

@@ -19,5 +19,6 @@ AI検索や文書整理に使うメタデータ項目を定義します。`doc_t
 | manual_version | 公式文書バージョン |
 | verification_status | 確認状態 |
 | result_status | 結果状態 |
+| operation_profile | 実機確認時の操作影響区分 |
 | related_docs | 関連文書 |
 | tags | 検索用タグ |
