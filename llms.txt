@@ -1,24 +1,32 @@
 # UTR_RAG AI Context
 
-UTR_RAG is an AI-assisted documentation and verification package for the UTR-S201 series.
+UTR_RAG は、UTR-S201シリーズ向けのAI補助ドキュメントおよび段階的検証パッケージです。
 
-The official PDF is the source of truth. This repository is not a replacement for the official PDF.
+公式PDFが一次情報です。このリポジトリは、公式PDFの代替ではありません。
 
-## Reading order for AI agents
+## AI agentの推奨読取順
 
-1. Read `docs/current/AI_CONTEXT_INDEX.md`.
-2. Read `docs/current/00_OVERVIEW.md`.
-3. Use `docs/current/09_COMMAND_MASTER_V117.md` as the command master.
-4. Use `docs/current/commands/cards/` for per-command cards.
-5. Use `docs/current/10_RESPONSE_AND_NACK_MASTER.md` for response and NACK handling.
-6. Use `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` for ROM and device identification.
-7. Use `docs/current/20_VERIFICATION_RESULT_STATUS.md` for result status meanings.
+1. `docs/current/AI_CONTEXT_INDEX.md` を読む。
+2. `docs/current/00_OVERVIEW.md` を読む。
+3. コマンド一覧は `docs/current/09_COMMAND_MASTER_V117.md` を参照する。
+4. 個別コマンドは `docs/current/commands/cards/` 配下のカードを参照する。
+5. レスポンス、ACK、NACK、timeoutは `docs/current/10_RESPONSE_AND_NACK_MASTER.md` を参照する。
+6. ROMと機種判定は `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` を参照する。
+7. 検証状況は `docs/current/20_VERIFICATION_RESULT_STATUS.md` を参照する。
+8. Final RCの判断は `docs/current/43_FINAL_RC_REVIEW.md` と `docs/current/44_RELEASE_DECISION_NOTES.md` を参照する。
 
-## Safety and data policy
+## 最新成果物
 
-- Runtime logs are not committed.
-- Do not expose customer information, raw EPC/UII/TID, real IP addresses, or actual CSV logs.
-- Do not generate completed Hex examples in documents.
-- Do not add PDF files to the repository.
-- Do not treat protocol-defined commands as prohibited only because they are high-impact.
-- Separate protocol support from execution permission.
+- v022 Final RC no-PDF package
+- ZIP: `artifacts/utr_s201_ai_v022/utr_s201_ai_v022_final_rc_no_pdf.zip`
+- SHA256: `2A7E97DE4A19B634EC49953B5E6815C307C90D0E420AA381E3AF5752C9166984`
+
+## 安全・データ方針
+
+- runtime logsはcommitしない。
+- 顧客情報、raw EPC / UII / TID、実IPアドレス、実CSVログを公開しない。
+- 完成Hex例やSUM計算済みの送信用コマンド例を安易に作成しない。
+- PDFファイルをリポジトリに追加しない。
+- プロトコル仕様書に定義されたコマンドを、高影響という理由だけで禁止扱いしない。
+- protocol support と execution permission を分ける。
+- Stage 3+の実機送信は、明示許可、パラメータ確定、復旧計画、停止条件が揃うまで実行しない。
