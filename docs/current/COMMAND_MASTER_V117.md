@@ -53,9 +53,9 @@ PDF 7.1 と 7.2 は自動読み取りや非同期レスポンス動作の説明�
 1. 対象機種とROMバージョンを確認する。
 2. このコマンドマスタで対象コマンドの分類を確認する。
 3. 対象コマンドカードを開く。
-4. 応答処理は `10_RESPONSE_AND_NACK_MASTER.md` を確認する。
-5. 機種・ROM条件は `11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` を確認する。
-6. RAM / FLASH / RF影響は `12_RAM_FLASH_IMPACT_MATRIX.md` と `13_RF_SAFETY_AND_CARRIER_RULES.md` を確認する。
+4. 応答処理は `RESPONSE_AND_NACK_MASTER.md` を確認する。
+5. 機種・ROM条件は `DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` を確認する。
+6. RAM / FLASH / RF影響は `RAM_FLASH_IMPACT_MATRIX.md` と `RF_SAFETY_AND_CARRIER_RULES.md` を確認する。
 
 ## 5. 実機送信に関する注意
 

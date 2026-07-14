@@ -7,10 +7,10 @@ manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
 result_status: "V100_FINAL_DOCUMENTATION"
 related_docs:
-  - "../../09_COMMAND_MASTER_V117.md"
-  - "../../16_TRACEABILITY_INDEX_V117.md"
-  - "../../10_RESPONSE_AND_NACK_MASTER.md"
-  - "../../11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../COMMAND_MASTER_V117.md"
+  - "../../TRACEABILITY_INDEX_V117.md"
+  - "../../RESPONSE_AND_NACK_MASTER.md"
+  - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
 tags:
   - "utr-s201"
   - "command-master"
@@ -21,6 +21,6 @@ tags:
 
 # AI検索用インデックス
 
-AIがコマンドを調査するときは、まず `docs/current/09_COMMAND_MASTER_V117.md` で対象コマンドを確認し、その後で該当するコマンドカードを開いてください。
+AIがコマンドを調査するときは、まず `docs/current/COMMAND_MASTER_V117.md` で対象コマンドを確認し、その後で該当するコマンドカードを開いてください。
 
 実装やレビューの前には、ROM判定、対象機種、必要パラメータ、影響範囲、ACK/NACK、timeout、復旧方法、停止条件を確認してください。

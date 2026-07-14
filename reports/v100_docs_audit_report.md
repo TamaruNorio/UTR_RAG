@@ -1,3 +1,44 @@
 ﻿# V100ドキュメント監査レポート
 
-主要なYAMLエラー候補と英語だけの見出し候補は検出されませんでした。
+以下の確認候補が残っています。
+
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\42_buzzer_control.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_10_uhf_inventory.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_14_uhf_inventory_read.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_15_uhf_read.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_16_uhf_write.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_17_uhf_kill.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_18_uhf_lock.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_1a_uhf_block_write.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_1b_uhf_block_erase.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_1d_uhf_block_write2.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_1e_uhf_encode.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_30_uhf_set_select_param.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_31_uhf_set_inventory_param.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_32_uhf_set_expand_select_param.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_33_00_write_antenna_switching.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_33_01_write_output_power.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_33_02_write_frequency.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_33_03_write_access_password.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_33_04_write_rf_tag_comm_params.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_33_05_write_epc_uii_params.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_37_write_external_antenna_auto_switch.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_38_write_active_antenna.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_39_write_rssi_filter.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_3a_write_antenna_output_power.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_40_uhf_get_select_param.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_41_uhf_get_inventory_param.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_42_uhf_get_expand_select_param.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_43_00_read_antenna_switching.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_43_01_read_output_power.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_43_02_read_frequency.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_43_04_read_rf_tag_comm_params.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_43_05_read_epc_uii_params.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_44_uhf_check_antenna.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_46_uhf_get_handle.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_47_read_external_antenna_auto_switch.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_48_read_active_antenna.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_49_read_rssi_filter.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_4a_read_antenna_output_power.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_90_chip_version_read.md
+- current配下に番号付き旧文書が残存: docs\current\commands\cards\55_ff_uhf_through_cmd.md

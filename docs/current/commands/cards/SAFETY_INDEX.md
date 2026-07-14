@@ -7,9 +7,9 @@ manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
 result_status: "N/A"
 related_docs:
-  - "../../13_RF_SAFETY_AND_CARRIER_RULES.md"
-  - "../../12_RAM_FLASH_IMPACT_MATRIX.md"
-  - "../../15_PARAMETER_CONFIRMATION_GUIDE.md"
+  - "../../RF_SAFETY_AND_CARRIER_RULES.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../PARAMETER_CONFIRMATION_GUIDE.md"
 tags:
   - "utr-s201"
   - "guide"

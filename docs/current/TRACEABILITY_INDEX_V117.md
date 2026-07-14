@@ -31,7 +31,7 @@ tags:
 
 ## 3. 使い方
 
-1. `09_COMMAND_MASTER_V117.md` で対象コマンドを確認する。
+1. `COMMAND_MASTER_V117.md` で対象コマンドを確認する。
 2. `docs/current/commands/cards/` の対象コマンドカードを開く。
 3. コマンドカード内の参照ドキュメントを確認する。
 4. 公式PDFの該当章で一次情報を確認する。
