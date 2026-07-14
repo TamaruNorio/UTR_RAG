@@ -172,3 +172,15 @@ Commands:
 - Stage分類は実行順序と必要な準備を示す。
 - Stageが後段であることは、仕様上禁止という意味ではない。
 - 実機確認時は対象機器、ROM、接続方式、アンテナ構成、ログ、復旧方法を記録する。
+
+## v020 Stage 3+ readiness update
+
+v020 adds a plan-only readiness layer for Stage 3 and later high-impact commands.
+
+- Readiness document: docs/current/35_STAGE3PLUS_HIGH_IMPACT_READINESS.md
+- Command matrix: docs/current/36_STAGE3PLUS_COMMAND_MATRIX.md
+- Execution gates: docs/current/37_STAGE3PLUS_EXECUTION_GATES.md
+- Recovery and stop plan: docs/current/38_STAGE3PLUS_RECOVERY_AND_STOP_PLAN.md
+- Real-device command send in v020: none
+- ZIP / Release in v020: none
+- Stage 3+ execution requires explicit approval, complete parameters, impact review, recovery plan, runtime logging, and stop conditions.
