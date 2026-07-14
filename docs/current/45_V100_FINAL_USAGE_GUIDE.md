@@ -7,119 +7,104 @@ manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
 result_status: "V100_FINAL_DOCUMENTATION"
 related_docs:
-  - "00_OVERVIEW.md"
   - "09_COMMAND_MASTER_V117.md"
   - "10_RESPONSE_AND_NACK_MASTER.md"
   - "11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
-  - "14_AI_IMPLEMENTATION_GUARDRAILS.md"
+  - "20_VERIFICATION_RESULT_STATUS.md"
 tags:
   - "utr-s201"
-  - "v100"
   - "guide"
-  - "final-documentation"
+  - "v100"
 ---
 
 # V100 Final Usage Guide
 
-## 1. 目的
+## 1. この文書の目的
 
-この文書は、UTR_RAGを使ってAIとペアプログラミングする開発者向けの最終版利用ガイドです。
+この文書は、UTR_RAGをAIペアプログラミングで使うための入口です。
 
-対象者は、Git / GitHubの基本操作を理解し、ChatGPT、Codex、GitHub Copilotなどを使って実装・レビューを進められる人です。実装言語は限定しません。
+対象読者は、AIを使ったペアプログラミング経験があり、Git / GitHub の基本操作を理解している開発者です。実装言語は限定しません。Python、C#、C++、JavaScript、その他の言語でも利用できます。
 
-## 2. このリポジトリで行うこと
+## 2. UTR_RAGでできること
 
-UTR_RAGでは、UTR-S201シリーズの制御プログラムを作るために必要な情報を、AIが参照しやすい単位で整理しています。
+- UTR-S201 シリーズのコマンド仕様を調べる。
+- コマンド別に、目的、パラメータ、応答、NACK、注意点を確認する。
+- ROMバージョンとシリーズ名から、対象機種を整理する。
+- AIに実装、移植、レビュー、テスト観点整理を依頼するための前提資料にする。
+- 実機送信前に、許可、パラメータ、復旧方法、停止条件を確認する。
 
-主に以下を扱います。
+## 3. 公式PDFの扱い
 
-- コマンド一覧
-- 個別コマンドカード
-- ACK / NACK / timeoutの考え方
-- ROMバージョンによる機種判定
-- RAM / FLASH影響
-- RF送信、アンテナ、タグメモリ操作の安全条件
-- 実機確認の段階管理
-- AI実装時のガードレール
+公式PDFが一次情報です。このリポジトリは公式PDFの代替ではありません。
 
-## 3. 使い方の基本手順
+PDF原本は、社内の正式な配布場所または管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。
 
-### 3.1 調査する
+## 4. 最初に読む順番
 
-1. `docs/current/09_COMMAND_MASTER_V117.md` で対象コマンドを探します。
-2. `docs/current/commands/cards/` の個別カードを開きます。
-3. コマンドバイト、詳細コマンド、サブコマンド、必要条件を確認します。
-4. `docs/current/10_RESPONSE_AND_NACK_MASTER.md` で応答処理を確認します。
-5. `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md` で対象機種とROM条件を確認します。
+1. `README.md`
+2. `llms.txt`
+3. `docs/current/AI_CONTEXT_INDEX.md`
+4. `docs/current/09_COMMAND_MASTER_V117.md`
+5. `docs/current/commands/cards/`
+6. `docs/current/10_RESPONSE_AND_NACK_MASTER.md`
+7. `docs/current/11_DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+8. `docs/current/20_VERIFICATION_RESULT_STATUS.md`
 
-### 3.2 AIへ依頼する
+## 5. AIに依頼するときの指定項目
 
-AIへ依頼するときは、以下を明示します。
+AIに作業を依頼するときは、最低限以下を指定します。
 
+- 目的
 - 対象機種
 - 接続方式
 - 対象コマンド
 - 実装言語
-- dry-runか、実機送信を含むか
-- 書き込み、FLASH、周波数、出力、アンテナ、タグメモリ操作を含むか
-- 参照するコマンドカード
+- 実行環境
+- 実機送信の有無
+- 変更してよい範囲
+- 変更してはいけない範囲
+- 確認方法
 
-依頼文の例です。
+## 6. 実装前の分類
 
-```text
-UTR-S201シリーズ向けに、PythonでROMバージョン読み取り処理を実装してください。
-まず docs/current/commands/cards/4f_90_read_rom_version.md を参照してください。
-ACK、NACK、timeoutを分けて処理してください。
-実機への書き込み、FLASH操作、周波数変更、出力変更、タグメモリ操作は実装しないでください。
-```
+実装前に、対象処理を以下に分類します。
 
-### 3.3 実装する
+| 分類 | 例 | 扱い |
+|---|---|---|
+| 読み取りのみ | ROM読み取り、設定値読み取り | 机上確認後、条件が揃えば実機確認候補 |
+| RF読み取り | Inventory、Read | タグ、アンテナ、ログ、停止条件を確認 |
+| 設定変更 | 周波数、出力、アンテナ、InventoryParam | 明示許可が必要 |
+| 永続設定 | FLASH write / init | 明示許可、復旧計画、社内判断が必要 |
+| タグメモリ操作 | Write、Lock、Kill、Encode | 明示許可、テストタグ、復旧条件が必要 |
 
-AIが生成したコードは、そのまま実機へ送信しないでください。最初に以下を確認します。
+## 7. GitHubにアップロードしない情報
 
-- 送信フレームを勝手に完成させていないか。
-- SUM計算済みの送信用コマンドを無断で追加していないか。
-- 読み取り系と書き込み系が分離されているか。
-- timeout処理があるか。
-- NACKを共通フォーマットで解析しているか。
-- ログに必要情報が残るか。
-- 危険操作が明示許可なしに実行されないか。
+以下はGitHubにアップロードしないでください。
 
-## 4. 高影響操作の扱い
+| 種類 | 扱い |
+|---|---|
+| PDF原本 | 社内の正式な管理場所から別途準備する |
+| runtime logs | ローカル確認用に留める |
+| 実CSVログ | 必要に応じてマスク・要約する |
+| 顧客情報 | 顧客名、現場名、個別条件を公開しない |
+| 実IPアドレス | `192.168.xxx.xxx` のようにマスクする |
+| raw EPC / UII / TID | 必ずマスクする |
+| 認証情報 | APIキー、パスワード、トークンを記載しない |
+| 完成Hex | そのまま実機送信できる形で安易に記載しない |
+| SUM計算済み送信用コマンド例 | 実機誤送信を避けるため、安易に記載しない |
 
-以下は、明示許可なしに実行しません。
+## 8. 安全方針
+
+プロトコル仕様書に存在するコマンドを、高影響という理由だけで禁止扱いにはしません。
+
+ただし、以下は明示許可なしに実機送信しません。
 
 - FLASH write / init
 - 周波数変更
 - 送信出力変更
 - アンテナ設定変更
-- InventoryParam / SelectParam / ExpandSelectParam変更
+- InventoryParam / SelectParam / ExpandSelectParam 変更
 - タグメモリ書き込み
-- Lock
-- Kill
-- Encode
-- ThroughCmd
+- Lock / Kill / Encode / ThroughCmd
 
-これらは、仕様上存在していても、実行には別途確認が必要です。
-
-## 5. 実機確認前のチェック
-
-実機送信前に以下を満たしてください。
-
-| 確認項目 | 内容 |
-|---|---|
-| 対象機種 | ROMバージョン読み取りで機種を確認する |
-| 接続条件 | COMポート、LAN接続先、timeoutを明示する |
-| 対象コマンド | 読み取りか、高影響操作かを分ける |
-| パラメータ | 未確定値を残さない |
-| 停止条件 | NACK、timeout、無応答、LBT、アンテナエラー時の停止を決める |
-| 復旧手順 | 設定変更やタグ操作時は復旧方法を決める |
-| ログ | 送信目的、パラメータ、ACK/NACK、結果を残す |
-
-## 6. V100の位置づけ
-
-V100は、過去の作業履歴ではなく、現在の利用方法を説明する最終版です。
-
-このリポジトリを使う人は、まずこの文書とREADMEを読み、必要なコマンドカードを参照してから、AIへ実装またはレビューを依頼してください。
-
-社外公開、顧客提供、海外利用、Stage 3+実機送信は、引き続き別途承認が必要です。
+実機送信には、対象、パラメータ、影響、復旧方法、停止条件、ログ方針が必要です。
