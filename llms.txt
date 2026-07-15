@@ -6,6 +6,7 @@ AIが最初に読む文書:
 - docs/current/V100_USAGE_GUIDE.md
 - docs/current/COMMAND_MASTER_V117.md
 - docs/current/RESPONSE_AND_NACK_MASTER.md
+- docs/current/RESPONSE_CLASSIFICATION_MATRIX.md
 - docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md
 - docs/current/PARAMETER_CONFIRMATION_GUIDE.md
 - docs/current/commands/cards/

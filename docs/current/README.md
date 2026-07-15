@@ -8,8 +8,10 @@ V100で通常利用する現在版ドキュメントを格納します。
 
 1. `V100_USAGE_GUIDE.md`
 2. `COMMAND_MASTER_V117.md`
-3. `commands/cards/`
-4. 必要に応じて関連文書
+3. `RESPONSE_AND_NACK_MASTER.md`
+4. `RESPONSE_CLASSIFICATION_MATRIX.md`
+5. `commands/cards/`
+6. 必要に応じて関連文書
 
 ## 注意
 
