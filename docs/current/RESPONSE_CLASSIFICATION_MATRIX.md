@@ -41,12 +41,13 @@ tags:
 | `ACK_THEN_READBACK` | 設定書き込みACK後に読戻し確認が必要 | RAM/FLASH、復元要否、再起動保持を別管理する |
 | `ACK_THEN_TAG_VERIFY` | タグメモリ操作のACK後にタグ状態確認が必要 | NACK時はUHF ICエラー詳細も確認する |
 | `NO_RESPONSE` | 正常系でACK/NACKを期待しない | Restart後は待機し、ROM読出し等で復帰確認する |
+| `ACK_OR_NO_RESPONSE_BY_REQUEST` | 応答要求パラメータによりACKあり/なしが変わる | 送信DATAの応答要求値を受信判定へ渡す |
 
 ## 4. 全54コマンド分類
 
 | No. | カード | コマンド | 詳細 | サブ | 操作分類 | レスポンス分類 | 事前スナップショット | 受信ループ方針 |
 |---:|---|---|---|---|---|---|---|---|
-| 1 | [`ブザーの制御`](commands/cards/42_buzzer_control.md) | `42h` | `-` | `-` | `needs-metadata-confirmation` | `ACK_SIMPLE_OR_PAYLOAD` | ROM/機種 | ACK/NACK/timeout/invalid frameを共通処理 |
+| 1 | [`ブザーの制御`](commands/cards/42_buzzer_control.md) | `42h` | `-` | `-` | `needs-metadata-confirmation` | `ACK_OR_NO_RESPONSE_BY_REQUEST` | ROM/機種, 汎用ポート7機能, 応答要求, ブザー音 | 応答要求`01h`はACK待ち、`00h`は正常無応答。ただし異常時NACKあり |
 | 2 | [`リーダライタ動作モードの書き込み`](commands/cards/4e_00_10_write_reader_mode.md) | `4Eh` | `00h` | `10h` | `settings-change` | `ACK_THEN_READBACK` | ROM/機種, 読戻し | ACK後、必要に応じ対応読出しでRAM/FLASH反映確認 |
 | 3 | [`LED&ブザーの制御`](commands/cards/4e_57_led_buzzer_control.md) | `4Eh` | `57h` | `-` | `needs-metadata-confirmation` | `ACK_SIMPLE_OR_PAYLOAD` | ROM/機種 | ACK/NACK/timeout/invalid frameを共通処理 |
 | 4 | [`FLASH設定の初期化`](commands/cards/4e_6f_flash_initialize.md) | `4Eh` | `6Fh` | `-` | `needs-metadata-confirmation` | `ACK_SIMPLE_OR_PAYLOAD` | ROM/機種, FLASH | ACK/NACK/timeout/invalid frameを共通処理 |
