@@ -142,6 +142,99 @@ ACK、後続レスポンス、可変長データの解釈は、コマンド番�
 NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
 
 
+### 7.4 AI実装用レスポンス定義
+
+この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+
+#### 共通フレームoffset
+
+| offset | フィールド | 実装上の意味 |
+|---:|---|---|
+| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
+| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
+| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
+| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
+| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
+| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
+| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
+| `6+LEN` | `CR` | 常に `0Dh` |
+
+#### 受信分類ルール
+
+| 条件 | 分類 | 実装アクション |
+|---|---|---|
+| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
+| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
+| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
+| `CMD=30h` かつ `DATA[0]` が `43h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 43h 01h` の成功応答としてPDF該当節を読む |
+| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
+
+対象識別子: コマンド `55h` / 詳細 `43h` / サブ `01h`。
+
+
+#### ACK/データ部offset
+成功ACK `CMD=30h` のDATA先頭は、原則として `43h` またはPDF該当節の応答識別子として扱います。
+
+| DATA offset | フィールド | 解釈 |
+|---:|---|---|
+| 0 | `detail/status` | 対象コマンドの詳細識別子または状態識別子 |
+| 1.. | `payload` | PDF該当節の順序で読む。予約byteは独自解釈しない |
+
+アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
+
+
+#### NACK分類
+
+このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
+
+| DATA offset | フィールド | 解釈 |
+|---:|---|---|
+| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 43h 01h` |
+| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
+| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
+| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
+| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
+| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
+
+判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
+
+#### 最小疑似コード
+
+```text
+frame = read_next_frame(timeout)
+if frame is None:
+    return TIMEOUT
+parsed = parse_common_frame(frame)
+if parsed.invalid:
+    return INVALID_FRAME
+if parsed.cmd == 0x31:
+    return parse_nack(parsed)
+if parsed.cmd == 0x30:
+    return parse_ack_payload(parsed, settings_snapshot)
+if parsed.cmd == 0x6C:
+    return RF_TAG_DATA_ASYNC_EVENT
+return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
+```
+
+#### 推奨パーサ出力
+
+```json
+{
+  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
+  "command": "対象コマンド名",
+  "address_role": "reader_id | antenna_id | unknown",
+  "detail": "PDFで定義された詳細コマンドまたは応答種別",
+  "data_length": 0,
+  "settings_snapshot_used": true,
+  "is_success": false,
+  "error": null,
+  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
+}
+```
+
+#### 設定スナップショット必須項目
+
+実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 8. 実機確認
 
 実機確認区分: `read-only`

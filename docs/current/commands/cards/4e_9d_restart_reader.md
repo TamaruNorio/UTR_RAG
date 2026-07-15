@@ -135,6 +135,90 @@ ACK、後続レスポンス、可変長データの解釈は、コマンド番�
 本コマンドは、仕様上NACKレスポンスも返しません。送信後はレスポンス待ちで成否を判断せず、約2秒以上待ってからROMバージョン読み取りなどの低影響コマンドで復帰を確認してください。
 
 
+### 7.4 AI実装用レスポンス定義
+
+この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+
+#### 共通フレームoffset
+
+| offset | フィールド | 実装上の意味 |
+|---:|---|---|
+| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
+| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
+| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
+| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
+| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
+| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
+| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
+| `6+LEN` | `CR` | 常に `0Dh` |
+
+#### 受信分類ルール
+
+| 条件 | 分類 | 実装アクション |
+|---|---|---|
+| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
+| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
+| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
+| 送信後にACK/NACKなし | `NO_RESPONSE` | 本コマンドでは正常系。再起動後の待機時間を置く |
+| 再起動待機中に受信した不完全フレーム | `INVALID_FRAME` | 成功ACKとして扱わない |
+
+このコマンドはリーダライタ再起動を伴うため、正常系でもACK/NACKを期待しません。実装では、送信成功、ポート維持または再オープン、再起動後のROM確認を別ステップに分けてください。
+
+対象識別子: コマンド `4Eh` / 詳細 `9Dh` / サブ `なし`。
+
+
+#### ACK/データ部offset
+このコマンドは正常系でACK/NACKを期待しません。受信フレームを成功ACKとして待たず、再起動待機後にROM読出し等で復帰を確認してください。
+
+アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
+
+
+#### NACK分類
+
+このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
+
+| DATA offset | フィールド | 解釈 |
+|---:|---|---|
+| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `4Eh 9Dh` |
+| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
+| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
+| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
+| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
+| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
+
+判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
+
+#### 最小疑似コード
+
+```text
+send_frame()
+wait_restart_interval()
+probe_rom_version()
+if rom_probe_ok:
+    return NO_RESPONSE_SUCCESS
+else:
+    return TIMEOUT_OR_RECONNECT_REQUIRED
+```
+
+#### 推奨パーサ出力
+
+```json
+{
+  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
+  "command": "対象コマンド名",
+  "address_role": "reader_id | antenna_id | unknown",
+  "detail": "PDFで定義された詳細コマンドまたは応答種別",
+  "data_length": 0,
+  "settings_snapshot_used": true,
+  "is_success": false,
+  "error": null,
+  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
+}
+```
+
+#### 設定スナップショット必須項目
+
+実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 8. 実機確認
 
 実機確認区分: `needs-metadata-confirmation`

@@ -124,7 +124,58 @@ NACKは、共通NACK形式と各コマンドの該当節を併せて確認しま
 - 自動読み取り中は、コマンド応答、タグ応答、読取完了応答、アンテナ切替完了応答、キャリア検知応答を同じ受信ループ内で分類する。
 - キャリア検知イベント0件、アンテナ切替完了応答OFF時の切替完了ACKなし、TID付加OFF時のTIDなしは、設定どおりなら異常扱いしない。
 
-## 8. ログに残す情報
+## 8. AI実装用パーサ契約
+
+生成AIに実装を依頼する場合は、各コマンドカードの `7.4 AI実装用レスポンス定義` を優先して参照してください。実装は、少なくとも次の順番で判定します。
+
+| 順序 | 判定 | 条件 |
+|---:|---|---|
+| 1 | `INVALID_FRAME` | `STX/ETX/CR/SUM` または `LEN + 7` の総長が不正 |
+| 2 | `TIMEOUT` | 期限内に有効フレームを受信しない |
+| 3 | `NACK` | `CMD=31h`。DATA内のエラーコードを共通NACK表で読む |
+| 4 | `RF_TAG_DATA` | `CMD=6Ch`。Inventory系または自動読み取りのタグ応答 |
+| 5 | `ACK` | `CMD=30h`。DATA先頭とPDF該当節で成功応答を読む |
+| 6 | `COMPLETION` | 読取完了応答ON時の完了ACK |
+| 7 | `ANT_SWITCH_COMPLETE` | アンテナ切替完了応答ON時の切替ACK |
+| 8 | `CARRIER_DETECTED` | キャリア検知応答ON時のイベントACK |
+| 9 | `NO_RESPONSE` | Restartなど、仕様上ACK/NACKを期待しないコマンド |
+
+`CMD=30h` だけで成功処理を閉じないでください。RFタグ読み取り系ではタグ応答、完了ACK、アンテナ切替完了ACK、キャリア検知ACKが同じ受信ループに混在します。設定がOFFの応答は、返らないことを異常扱いしません。
+
+推奨する実装入力は以下です。
+
+```json
+{
+  "frame_bytes": "受信フレーム",
+  "command_context": "送信したコマンドカードID",
+  "settings_snapshot": {
+    "rom_version": "取得済みROM",
+    "device_model": "機種",
+    "connected_antennas": [0, 1, 2],
+    "antenna_id_output": true,
+    "tid_append": false,
+    "read_complete_response": false,
+    "antenna_switch_complete_response": false,
+    "carrier_detect_response": true
+  }
+}
+```
+
+推奨する実装出力は以下です。
+
+```json
+{
+  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
+  "command_card": "対象カード",
+  "address_role": "reader_id | antenna_id | unknown",
+  "data_length": 0,
+  "detail": "応答種別",
+  "is_success": false,
+  "error": null
+}
+```
+
+## 9. ログに残す情報
 
 - 実行日時
 - 操作者
