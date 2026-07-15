@@ -8,6 +8,7 @@
 
 - `current/V100_USAGE_GUIDE.md`: 使い方
 - `current/COMMAND_MASTER_V117.md`: コマンド一覧
-- `current/commands/cards/`: 個別コマンドカード
 - `current/RESPONSE_AND_NACK_MASTER.md`: レスポンスとNACK
+- `current/RESPONSE_CLASSIFICATION_MATRIX.md`: 全54コマンドのレスポンス分類
+- `current/commands/cards/`: 個別コマンドカード
 - `current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`: ROMと機種判定
