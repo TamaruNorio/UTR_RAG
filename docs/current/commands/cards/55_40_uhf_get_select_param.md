@@ -225,11 +225,17 @@ ACK、後続レスポンス、可変長データの解釈は、コマンド番�
 
 | 項目 | 内容 |
 |---|---|
-| ACK構造 | `02 ADR 30 LEN 40 <READ_DATA...> 03 SUM 0D` |
-| ACKデータ部の先頭 | `40h` |
-| 後続データ | PDF 7.4.2 のACKレスポンス表で定義される読戻し値。バイト数と意味はコマンドごとに異なります。 |
+| ACK構造 | `02 ADR 30 LEN 40 PARAM_KIND PARAM1 PARAM2 MASK_START[4] MASK_BIT_LEN MASK_DATA[n] 03 SUM 0D` |
+| `LEN` | `9+n`。`n` はマスクデータbyte数。`MASK_BIT_LEN=00h` の場合、通常 `n=0` |
+| `DATA[0]` | `40h`: 詳細コマンド `UHF_GetSelectParam` |
+| `DATA[1]` | パラメータ種類。`00h`=コマンドモード、`01h`=自動読み取りモード、`02h`=FLASHデータ |
+| `DATA[2]` | パラメータ1。MemBank、Action、Targetをbit単位で読む |
+| `DATA[3]` | パラメータ2。Truncateと予約bitを読む。Truncate Enableは未サポート扱い |
+| `DATA[4..7]` | マスク開始ビットアドレス。MSBファースト |
+| `DATA[8]` | マスクbit数。最大 `80h`=128bit |
+| `DATA[9..]` | マスクデータ。マスクbit数に応じて存在し、マスクbit数0なら省略 |
 
-読み取り系は、ACKデータ部に読戻し値が入ります。実装では、`LEN` からデータ部長を確定し、詳細コマンド/詳細サブコマンドを確認してから、残りをPDF該当節のフィールド定義でパースしてください。
+実装では `LEN >= 09h` を確認し、`LEN - 9` をマスクデータbyte数として扱ってください。`MASK_BIT_LEN` と実際の `MASK_DATA` 長が矛盾する場合は、成功ACKとして丸飲みせず、`INVALID_FRAME` または `FIELD_LENGTH_MISMATCH` として記録してください。
 
 ### 8.2 NACK例（フォーマットエラーの例）
 
