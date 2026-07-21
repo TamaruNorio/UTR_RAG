@@ -281,11 +281,18 @@ ACK、後続レスポンス、可変長データの解釈は、コマンド番�
 
 | 項目 | 内容 |
 |---|---|
-| ACK構造 | `02 ADR 30 LEN 41 <READ_DATA...> 03 SUM 0D` |
-| ACKデータ部の先頭 | `41h` |
-| 後続データ | PDF 7.4.3 のACKレスポンス表で定義される読戻し値。バイト数と意味はコマンドごとに異なります。 |
+| ACK構造 | `02 ADR 30 0B 41 PARAM_KIND PARAM1 PARAM2 PARAM3 PARAM4 READ_START[4] READ_WORDS 03 SUM 0D` |
+| `LEN` | `0Bh` 固定 |
+| `DATA[0]` | `41h`: 詳細コマンド `UHF_GetInventoryParam` |
+| `DATA[1]` | パラメータ種類。`00h`=コマンドモード、`01h`=自動読み取りモード、`02h`=FLASHデータ |
+| `DATA[2]` | パラメータ1。Select使用、Q自動UP/DOWN、アンチコリジョン、Q開始値、Inventory Target |
+| `DATA[3]` | パラメータ2。Session、Sel、TRext、M、DR |
+| `DATA[4]` | パラメータ3。Q最小値、Q最大値 |
+| `DATA[5]` | パラメータ4。MemBank、TID付加、予約bit |
+| `DATA[6..9]` | 読み取り開始Wordアドレス。MSBファースト |
+| `DATA[10]` | 読み取りWord数。PDF上の設定範囲は1〜32 |
 
-読み取り系は、ACKデータ部に読戻し値が入ります。実装では、`LEN` からデータ部長を確定し、詳細コマンド/詳細サブコマンドを確認してから、残りをPDF該当節のフィールド定義でパースしてください。
+実装では `LEN=0Bh`、`DATA[0]=41h` を満たす場合だけ成功ACKとして扱ってください。`DATA[5].bit2` のTID付加はInventory応答長にも影響するため、起動時スナップショットに保存してください。
 
 ### 8.2 NACK例（フォーマットエラーの例）
 
