@@ -33,6 +33,8 @@ tags:
   - "command-card"
   - "reader-setting"
   - "write-operation"
+  - "reader-mode"
+  - "ram-flash-target"
   - "pass-with-notes"
 ---
 
@@ -52,9 +54,9 @@ tags:
 
 ## 2. 目的
 
-このコマンドの目的は、**リーダライタ動作モードの書き込み** です。
+このコマンドの目的は、**リーダライタの動作モードをRAMまたはFLASHへ書き込むこと** です。
 
-詳細なフィールド定義、データ長、レスポンス形式は公式PDFを一次情報として確認してください。このカードは、公式PDFを置き換えるものではなく、AIに実装やレビューを依頼するときの補助資料です。
+コマンドモード、UHF連続インベントリモード、UHF連続インベントリリードモードを切り替える設定変更コマンドです。FLASHへ書き込む場合は、リーダライタが自動的にFLASHデータを再読み込みし、RAMデータがFLASHデータで上書きされる点に注意してください。
 
 ## 3. 使用可否・位置づけ
 
@@ -87,9 +89,11 @@ tags:
 
 1. ROMバージョンを読み取り、シリーズ名と対象機種を確認する。
 2. 対象コマンドが、その機種・ROMで利用可能か確認する。
-3. 読み取り専用か、設定変更か、タグメモリ操作かを分類する。
-4. 実機送信が必要な場合は、接続先、タイムアウト、ログ保存先、停止条件を決める。
-5. 周波数、送信出力、アンテナ設定、FLASH、タグメモリに影響する場合は、事前承認を取る。
+3. 書き込み対象が `00h=RAM` か `10h=FLASH` かを確認する。
+4. 設定する動作モードが `00h=コマンドモード`、`65h=UHF連続インベントリモード`、`66h=UHF連続インベントリリードモード` のどれかを確認する。
+5. ブザーbitは `bit4` のみを意味として扱い、予約bitは通常0にする。
+6. FLASHへ書く場合は、実行前にRAM/FLASH設定スナップショットを取得し、ACK後のRAM上書き影響を確認する。
+7. 実機送信が必要な場合は、接続先、タイムアウト、ログ保存先、停止条件、復元手順を決める。
 
 ## 6. PDF仕様フィールド定義
 
@@ -161,17 +165,85 @@ tags:
        02 00 30 00 03 35 0D
 ```
 
-## 7. コマンド形式の扱い
+## 7. コマンド形式・PDFフィールド定義の読み方
 
-コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
+この節は、PDF 7.4.16 のコマンド表・ACK表・注意事項を、生成AIが実装に使える粒度へ分解したものです。特に、成功ACKは `LEN=00h` でDATA部を持たない点に注意してください。
 
-このカードでは、以下を意図的に記載しません。
+### 7.1 送信コマンドフレーム
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+| offset | フィールド | byte数 | 値 | 意味 |
+|---:|---|---:|---|---|
+| 0 | `STX` | 1 | `02h` | フレーム開始 |
+| 1 | `ADR` | 1 | 通常 `00h` | リーダライタアドレス。共通通信フォーマットに従う |
+| 2 | `CMD` | 1 | `4Eh` | リーダライタ設定書き込み系コマンド |
+| 3 | `LEN` | 1 | `07h` | DATA部は7byte |
+| 4 | `DATA[0]` | 1 | `00h` / `10h` | 書き込み対象。`00h=RAM`, `10h=FLASH` |
+| 5 | `DATA[1]` | 1 | `00h` / `65h` / `66h` | リーダライタ動作モード |
+| 6 | `DATA[2]` | 1 | 通常 `00h` | 将来拡張予約。独自解釈しない |
+| 7 | `DATA[3]` | 1 | bit4のみ意味あり | ブザー設定。bit4=`0`鳴らさない、bit4=`1`鳴らす |
+| 8 | `DATA[4]` | 1 | 通常 `00h` | 将来拡張予約 |
+| 9 | `DATA[5]` | 1 | 通常 `00h` | 将来拡張予約 |
+| 10 | `DATA[6]` | 1 | 通常 `00h` | 将来拡張予約 |
+| 11 | `ETX` | 1 | `03h` | フレーム終端 |
+| 12 | `SUM` | 1 | 可変 | `STX`から`ETX`までのSUM下位1byte |
+| 13 | `CR` | 1 | `0Dh` | 改行終端 |
 
-AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
+### 7.2 書き込み対象
+
+| `DATA[0]` | 対象 | 影響 | 実装上の注意 |
+|---|---|---|---|
+| `00h` | RAMへの書き込み | 現在動作中のRAM設定を変更 | 電源再起動やリスタート後はFLASH値に戻る可能性がある |
+| `10h` | FLASHへの書き込み | 不揮発設定を変更 | PDF注意事項により、リーダライタは自動的にFLASHデータを再読み込みし、RAMデータがFLASHデータで上書きされる |
+
+### 7.3 リーダライタ動作モード
+
+| `DATA[1]` | モード | 意味 | 応答・運用上の注意 |
+|---|---|---|---|
+| `00h` | コマンドモード | 上位機器からのコマンド待受を基本とする | 実装・検証時の安全な復帰先として扱いやすい |
+| `65h` | UHF連続インベントリモード | UHF連続インベントリ動作 | 設定状態によりRFタグ応答や非同期応答を受ける可能性がある |
+| `66h` | UHF連続インベントリリードモード | UHF連続インベントリリード動作 | TID付加、EPC/UII応答設定、アンテナID出力等の設定依存を確認する |
+
+### 7.4 ブザー設定byte
+
+| bit | 意味 | 値 |
+|---:|---|---|
+| bit0-3 | 将来拡張予約 | 通常 `0` |
+| bit4 | ブザー | `0=鳴らさない`, `1=鳴らす`（初期値） |
+| bit5-7 | 将来拡張予約 | 通常 `0` |
+
+PDF掲載例の `10h` は、bit4だけが1で、ブザーを「鳴らす」設定です。予約bitは意味定義がないため、独自解釈しないでください。
+
+### 7.5 ACKレスポンス形式
+
+| offset | フィールド | byte数 | 値 | 意味 |
+|---:|---|---:|---|---|
+| 0 | `STX` | 1 | `02h` | フレーム開始 |
+| 1 | `ADR` | 1 | 通常 `00h` | リーダライタアドレス |
+| 2 | `CMD` | 1 | `30h` | ACK |
+| 3 | `LEN` | 1 | `00h` | DATA部なし |
+| 4 | `ETX` | 1 | `03h` | フレーム終端 |
+| 5 | `SUM` | 1 | `35h` | PDF掲載例のSUM。`02+00+30+00+03 = 35h` |
+| 6 | `CR` | 1 | `0Dh` | 改行終端 |
+
+このACKには詳細コマンド `00h` やサブコマンド `10h` は含まれません。実装では、送信中コマンドのコンテキストと受信順序で、どの書き込みに対するACKかを対応づけてください。
+
+### 7.6 コマンド／レスポンス例
+
+| 種別 | Hex | 説明 |
+|---|---|---|
+| 送信例 | `02 00 4E 07 00 65 00 10 00 00 00 03 CF 0D` | RAMへ、UHF連続インベントリモード、ブザー鳴らすを書き込み |
+| ACK例 | `02 00 30 00 03 35 0D` | `CMD=30h`, `LEN=00h` の成功ACK |
+
+### 7.7 FLASH書き込み時の設定反映
+
+FLASHへ書き込む場合、リーダライタは自動的にFLASHデータを再読み込みし、RAMに保存されたデータはFLASHデータで上書きされます。
+
+| 場面 | 影響 | 実装アクション |
+|---|---|---|
+| `DATA[0]=00h` RAM書き込み | RAM設定のみ変更 | 読戻しでRAM反映を確認。必要なら復帰値を書き戻す |
+| `DATA[0]=10h` FLASH書き込み | FLASH変更後、RAMがFLASH値で上書き | 実行前にRAM/FLASHスナップショットを取得し、ACK後に設定再取得する |
+| 自動読み取り系モードへ変更 | 非同期タグ応答が発生し得る | ACK後の受信ループでRFタグデータ等を通常ACKと混同しない |
+| コマンドモードへ復帰 | 通常のコマンド待受へ戻る | 実機検証の終了時はコマンドモードへ戻す方針を明確にする |
 
 ## 8. レスポンス処理
 
@@ -181,43 +253,47 @@ AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送
 - NACK
 - timeout
 - 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+- フレーム不正
+- ACK後の読戻し未確認
+- FLASH書き込み後のRAM上書き
+- 自動読み取り系モード変更後の非同期応答
 
 NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+### 8.1 受信分類ルール
 
-### 8.1 ACK/レスポンス例（PDF掲載例）
+| 条件 | 分類 | 実装アクション |
+|---|---|---|
+| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | ACK成功とは扱わない |
+| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、設定反映を断定しない |
+| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
+| `CMD=30h` かつ `LEN=00h` | `ACK` | リーダライタ動作モード書き込みの成功ACK候補。送信中コンテキストで対応づける |
+| `CMD=30h` だが `LEN!=00h` | `UNEXPECTED_ACK_SHAPE` | このコマンドのPDF ACKではない可能性として扱う |
+| ACK後に読戻し未実施 | `ACK_PENDING_VERIFY` | 対応する読出コマンドでRAM/FLASH反映を確認する |
+| `CMD=6Ch` などのタグ応答 | `RF_TAG_DATA_OR_ASYNC_EVENT` | 自動読み取り系モード変更後の非同期応答候補。通常ACKとは分離する |
 
-| 種別 | Hex |
+対象識別子: コマンド `4Eh` / 詳細 `00h` / サブ `10h`。
+
+### 8.2 ACK/レスポンス例
+
+| 項目 | 内容 |
 |---|---|
-| TX | `02 00 4E 07 00 65 00 10 00 00 00 03 CF 0D` |
-| RX | `02 00 30 00 03 35 0D` |
+| 代表TX Hex | `02 00 4E 07 00 65 00 10 00 00 00 03 CF 0D` |
+| 代表ACK Hex | `02 00 30 00 03 35 0D` |
+| ACKデータ部 | なし。`LEN=00h` |
+| ACK照合 | DATAがないため、送信中コマンドコンテキストで照合する |
 
-ACKはデータ長00hです。FLASHへ書く場合はRAM再読込の影響を別途確認します。
-
-### 8.2 NACK例（フォーマットエラーの例）
+### 8.3 NACK例（フォーマットエラーの例）
 
 | 項目 | 内容 |
 |---|---|
 | 代表NACK Hex | `02 00 31 0A 00 44 00 00 00 00 00 00 00 00 03 84 0D` |
 | エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコード |
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
-
-### 8.3 設定依存の注意
-
-- 設定変更またはタグメモリ変更後は、対応する読み取りコマンドで読戻し確認してください。
-
+NACK時は、エラーコード1だけでなく、PDF定義の追加コードも確認してください。予約領域は意味定義がない限り無視します。
 
 ### 8.4 AI実装用レスポンス定義
-
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
 
 #### 共通フレームoffset
 
@@ -227,48 +303,29 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 | 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
 | 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
 | 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
+| 4..`4+LEN-1` | `DATA` | ACKでは空、NACKではエラー情報 |
 | `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
 | `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
 | `6+LEN` | `CR` | 常に `0Dh` |
 
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `00h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `4Eh 00h 10h` の成功応答としてPDF該当節を読む |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-| `CMD=30h` だが書込値の反映を確認していない | `ACK_PENDING_VERIFY` | 必要に応じて対応する読出コマンドで読戻し確認する |
-
-対象識別子: コマンド `4Eh` / 詳細 `00h` / サブ `10h`。
-
-
 #### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は、原則として `00h` またはPDF該当節の応答識別子として扱います。
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail/status` | 対象コマンドの詳細識別子または状態識別子 |
-| 1.. | `payload` | PDF該当節の順序で読む。予約byteは独自解釈しない |
+成功ACK `CMD=30h` は `LEN=00h` です。DATA offsetは存在しません。
 
-設定書き込み系は、ACK受信後に必要なら対応する読出コマンドで読戻しし、RAM/FLASHの反映範囲と復元要否を別管理してください。
-
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
-
+| 項目 | 解釈 |
+|---|---|
+| `CMD=30h` | ACK |
+| `LEN=00h` | DATA部なし |
+| `DATA[0]` | 存在しない。`DATA[0]=00h` と誤判定しない |
 
 #### NACK分類
 
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
 | DATA offset | フィールド | 解釈 |
 |---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `4Eh 00h 10h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
+| 0 | `error_source` | 原則として対象詳細コマンド `00h`。サブコマンド `10h` は送信コンテキスト側で保持する |
+| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR等の主エラー |
+| 2 | `error_code_2` | PDF定義がある場合のみ参照 |
+| 3 | `error_code_3` | PDF定義がある場合のみ参照 |
 | 4 | `error_code_4` | PDF定義がある場合のみ参照 |
 | 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
 
@@ -277,6 +334,8 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 #### 最小疑似コード
 
 ```text
+snapshot = read_startup_snapshot_if_needed()
+send_write_reader_mode(target, mode, buzzer_bit4)
 frame = read_next_frame(timeout)
 if frame is None:
     return TIMEOUT
@@ -284,11 +343,12 @@ parsed = parse_common_frame(frame)
 if parsed.invalid:
     return INVALID_FRAME
 if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
+    return parse_nack(parsed, sent_context={"detail": "00h", "sub": "10h"})
+if parsed.cmd == 0x30 and parsed.len == 0:
+    verify_by_read_reader_mode(target)
+    if target == 0x10:
+        refresh_ram_flash_snapshot()
+    return ACK_PENDING_OR_VERIFIED
 return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
 ```
 
@@ -296,11 +356,14 @@ return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
 
 ```json
 {
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
+  "frame_type": "ACK | NACK | TIMEOUT | INVALID_FRAME | ACK_PENDING_VERIFY | RF_TAG_DATA_OR_ASYNC_EVENT",
+  "command": "リーダライタ動作モードの書き込み",
+  "command_bytes": "4E 00 10",
+  "write_target": "RAM(00h) | FLASH(10h)",
+  "reader_mode": "COMMAND(00h) | UHF_INVENTORY(65h) | UHF_INVENTORY_READ(66h)",
+  "ack_hex": "02 00 30 00 03 35 0D",
+  "ack_data_length": 0,
+  "flash_write_reloads_ram": true,
   "settings_snapshot_used": true,
   "is_success": false,
   "error": null,
@@ -310,7 +373,8 @@ return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
 
 #### 設定スナップショット必須項目
 
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
+実行前後に、ROM/機種、現在のリーダライタ動作モード、RAM/FLASH対象、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、物理アンテナ容量、接続OKアンテナ、現在ANT、復元要否を確認してください。
+
 ## 9. 実機確認
 
 実機確認区分: `settings-change`
