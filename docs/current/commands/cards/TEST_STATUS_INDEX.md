@@ -1,4 +1,4 @@
----
+﻿---
 title: "Test Status Index"
 doc_type: "index"
 package_scope: "UTR-S201"
@@ -18,10 +18,10 @@ tags:
 
 # 実機確認ステータス索引
 
-この索引は、`scripts/check_docs.py` と同じロジック（`scripts/update_test_status_index.py`）で、各コマンドカードのfrontmatterから自動生成したものです。
+この索引は、各コマンドカードのfrontmatterに記載された `verification_status` をもとに、現在有効な確認状態を整理したものです。
 全54コマンドを個別に実機送信済みであることを示すものではありません。各カードの詳細な確認内容は、カード本体の「9. 実機確認」を参照してください。
 
-最終更新時点のカード枚数: 54件
+整理対象のカード枚数: 54件
 
 ## REAL_DEVICE_VERIFIED_WITH_NOTES（54件）
 
@@ -87,3 +87,4 @@ tags:
 この表は手動で行を書き写さず、`python scripts/update_test_status_index.py` を実行して更新してください。カードのfrontmatterに`verification_status`を追加・変更した場合は、このスクリプトを再実行するだけで表が更新されます。
 
 公式PDFが一次情報です。この索引は公式PDFの代替ではありません。
+
