@@ -316,9 +316,18 @@ ACK、後続レスポンス、可変長データの解釈は、コマンド番�
 
 | 項目 | 内容 |
 |---|---|
-| ACK構造例 | `02 ADR 30 LEN 33h 01h <設定値または反映値...> 03 SUM 0D` |
-| ACKデータ部の先頭 | `33h 01h` |
-| 注意 | 設定書き込み系は、コマンドによりACKデータ部が固定長ACK、詳細コマンドのみ、または書き込んだ設定値の反映型になります。この行は送信用完成Hexではなく、パース設計用の構造例です。PDF 7.4.21 のACKレスポンス表で最終確認してください。 |
+| ACK構造 | `02 ADR 30 0B 33 01 <param_type> <power_lsb> <power_msb> <carrier_on_lsb> <carrier_on_msb> <carrier_off_lsb> <carrier_off_msb> <cs_wait_lsb> <cs_wait_msb> 03 SUM 0D` |
+| `CMD` | `30h`（ACK） |
+| `LEN` | `0Bh` |
+| `DATA[0]` | `33h`（詳細コマンド） |
+| `DATA[1]` | `01h`（詳細サブコマンド: 出力書込） |
+| `DATA[2]` | パラメータ種類: `00h` コマンドモード / `01h` 自動読み取りモード / `02h` FLASH |
+| `DATA[3..4]` | RF送信出力レベル（dBm x 10、LSB/MSB） |
+| `DATA[5..6]` | キャリア送信時間（msec、LSB/MSB、機種依存） |
+| `DATA[7..8]` | キャリア休止時間（msec、LSB/MSB） |
+| `DATA[9..10]` | キャリアセンス待ち時間（msec、LSB/MSB） |
+| PDF掲載レスポンス例 | `02 00 30 0B 33 01 02 F0 00 D0 07 32 00 C8 00 03 37 0D` |
+| 注意 | 送信出力は電波法・地域設定・実機安全に関わります。ACK構造化は仕様整理であり、自動送信用の許可ではありません。 |
 
 設定変更後は、対応する読み取りコマンドで読戻し確認し、RAM変更の場合は終了時に開始値へ復元してください。FLASH変更の場合は再起動後の保持も確認対象です。
 
@@ -369,12 +378,19 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 
 
 #### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は、原則として `33h` またはPDF該当節の応答識別子として扱います。
+成功ACK `CMD=30h` は `LEN=0Bh` の設定反映型ACKです。
 
 | DATA offset | フィールド | 解釈 |
 |---:|---|---|
-| 0 | `detail/status` | 対象コマンドの詳細識別子または状態識別子 |
-| 1.. | `payload` | PDF該当節の順序で読む。予約byteは独自解釈しない |
+| 0 | `detail` | `33h`: 設定書込系 |
+| 1 | `sub` | `01h`: 出力書込 |
+| 2 | `parameter_type` | `00h` コマンドモード / `01h` 自動読み取りモード / `02h` FLASH |
+| 3..4 | `power_dbm_x10_le` | RF送信出力レベル、little-endian |
+| 5..6 | `carrier_on_ms_le` | キャリア送信時間、little-endian |
+| 7..8 | `carrier_off_ms_le` | キャリア休止時間、little-endian |
+| 9..10 | `carrier_sense_wait_ms_le` | キャリアセンス待ち時間、little-endian |
+
+`LEN=0Bh`、`DATA[0]=33h`、`DATA[1]=01h` を満たさない場合は、このコマンドの通常成功ACKとして扱わないでください。
 
 設定書き込み系は、ACK受信後に必要なら対応する読出コマンドで読戻しし、RAM/FLASHの反映範囲と復元要否を別管理してください。
 
