@@ -1,4 +1,4 @@
----
+﻿---
 title: "Safety Index"
 doc_type: "index"
 package_scope: "UTR-S201"
@@ -20,3 +20,8 @@ tags:
 Protocol-defined commands are treated as usable when the target device, ROM, parameters, impact, responses, and recovery conditions are understood.
 
 Important topics include RF emission, carrier timing, LBT, antenna switching, FLASH persistence, tag memory changes, Lock, Kill, and external I/O changes.
+
+コマンドごとの安全性分類とカードへのリンクの実表は
+`../../RESPONSE_CLASSIFICATION_MATRIX.md` の第4節を参照してください。
+実機確認状態は `TEST_STATUS_INDEX.md` を参照してください。
+

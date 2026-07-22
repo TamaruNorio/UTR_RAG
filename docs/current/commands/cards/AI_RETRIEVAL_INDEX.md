@@ -1,4 +1,4 @@
----
+﻿---
 title: "AI検索用インデックス"
 doc_type: "index"
 package_scope: "UTR-S201"
@@ -24,3 +24,6 @@ tags:
 AIがコマンドを調査するときは、まず `docs/current/COMMAND_MASTER_V117.md` で対象コマンドを確認し、その後で該当するコマンドカードを開いてください。
 
 実装やレビューの前には、ROM判定、対象機種、必要パラメータ、影響範囲、ACK/NACK、timeout、復旧方法、停止条件を確認してください。
+
+全54コマンドの一覧とカードへのリンクは `../../RESPONSE_CLASSIFICATION_MATRIX.md` を参照してください。
+
