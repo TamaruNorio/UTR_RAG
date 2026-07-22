@@ -10,6 +10,7 @@ related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../RAM_FLASH_IMPACT_MATRIX.md"
   - "../../RF_SAFETY_AND_CARRIER_RULES.md"
+  - "../../RESPONSE_CLASSIFICATION_MATRIX.md"
 tags:
   - "utr-s201"
   - "guide"
@@ -21,4 +22,3 @@ Classify operations by impact: read-only, control, setting change, RF-emitting, 
 
 コマンドごとの操作分類とカードへのリンクの実表は
 `../../RESPONSE_CLASSIFICATION_MATRIX.md` の第4節を参照してください。
-

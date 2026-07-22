@@ -10,8 +10,9 @@ V100で通常利用する現在版ドキュメントを格納します。
 2. `COMMAND_MASTER_V117.md`
 3. `RESPONSE_AND_NACK_MASTER.md`
 4. `RESPONSE_CLASSIFICATION_MATRIX.md`
-5. `commands/cards/`
-6. 必要に応じて関連文書
+5. `commands/cards/TEST_STATUS_INDEX.md`
+6. `commands/cards/`
+7. 必要に応じて関連文書
 
 ## 注意
 

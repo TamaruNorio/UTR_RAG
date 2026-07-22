@@ -11,6 +11,7 @@ related_docs:
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../RESPONSE_CLASSIFICATION_MATRIX.md"
 tags:
   - "utr-s201"
   - "command-master"
@@ -26,4 +27,3 @@ AIがコマンドを調査するときは、まず `docs/current/COMMAND_MASTER_
 実装やレビューの前には、ROM判定、対象機種、必要パラメータ、影響範囲、ACK/NACK、timeout、復旧方法、停止条件を確認してください。
 
 全54コマンドの一覧とカードへのリンクは `../../RESPONSE_CLASSIFICATION_MATRIX.md` を参照してください。
-
