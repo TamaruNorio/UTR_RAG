@@ -17,8 +17,9 @@ UTR_RAG は、タカヤ製 UTR-S201シリーズの通信プロトコル理解、
 2. `docs/current/COMMAND_MASTER_V117.md`
 3. `docs/current/RESPONSE_AND_NACK_MASTER.md`
 4. `docs/current/RESPONSE_CLASSIFICATION_MATRIX.md`
-5. `docs/current/commands/cards/`
-6. 必要に応じて、ROM、RF安全、パラメータ確認の文書
+5. `docs/current/commands/cards/TEST_STATUS_INDEX.md`
+6. `docs/current/commands/cards/`
+7. 必要に応じて、ROM、RF安全、パラメータ確認の文書
 
 ## 公式PDFの扱い
 

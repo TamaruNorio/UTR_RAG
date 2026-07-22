@@ -10,6 +10,8 @@ related_docs:
   - "../../RF_SAFETY_AND_CARRIER_RULES.md"
   - "../../RAM_FLASH_IMPACT_MATRIX.md"
   - "../../PARAMETER_CONFIRMATION_GUIDE.md"
+  - "../../RESPONSE_CLASSIFICATION_MATRIX.md"
+  - "TEST_STATUS_INDEX.md"
 tags:
   - "utr-s201"
   - "guide"
@@ -24,4 +26,3 @@ Important topics include RF emission, carrier timing, LBT, antenna switching, FL
 コマンドごとの安全性分類とカードへのリンクの実表は
 `../../RESPONSE_CLASSIFICATION_MATRIX.md` の第4節を参照してください。
 実機確認状態は `TEST_STATUS_INDEX.md` を参照してください。
-

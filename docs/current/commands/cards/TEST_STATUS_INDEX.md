@@ -84,7 +84,6 @@ tags:
 
 ## 更新方法
 
-この表は手動で行を書き写さず、`python scripts/update_test_status_index.py` を実行して更新してください。カードのfrontmatterに`verification_status`を追加・変更した場合は、このスクリプトを再実行するだけで表が更新されます。
+この表は手動で行を書き写さず、手元管理の検証ツールで更新してください。検証ツールはリポジトリには含めません。カードのfrontmatterに`verification_status`を追加・変更した場合は、検証ツールで表を再生成してください。
 
 公式PDFが一次情報です。この索引は公式PDFの代替ではありません。
-
