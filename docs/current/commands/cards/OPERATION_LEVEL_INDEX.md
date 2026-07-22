@@ -1,4 +1,4 @@
----
+﻿---
 title: "Operation Level Index"
 doc_type: "index"
 package_scope: "UTR-S201"
@@ -18,3 +18,7 @@ tags:
 
 # 操作レベル索引
 Classify operations by impact: read-only, control, setting change, RF-emitting, FLASH-persistent, tag-memory-changing, irreversible tag operation, and external I/O operation.
+
+コマンドごとの操作分類とカードへのリンクの実表は
+`../../RESPONSE_CLASSIFICATION_MATRIX.md` の第4節を参照してください。
+

@@ -1,4 +1,4 @@
----
+﻿---
 title: "コマンドマスタ Ver.1.17"
 doc_type: "index"
 package_scope: "UTR-S201"
@@ -6,7 +6,8 @@ manual: "TDR-MNL-PRC-UTR-S201-117"
 manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
 result_status: "V100_FINAL_DOCUMENTATION"
-related_docs: []
+related_docs:
+  - RESPONSE_CLASSIFICATION_MATRIX.md
 tags:
   - "utr-s201"
   - "command-master"
@@ -35,6 +36,11 @@ PDF 6.1 のコマンド一覧に基づき、上位から送信する通常コマ
 PDF 7.1 と 7.2 は自動読み取りや非同期レスポンス動作の説明として扱い、通常の上位送信コマンド54件には含めません。
 
 ## 3. コマンドカード
+
+全54コマンドの一覧、カードへのリンク、レスポンス分類、受信ループ方針は、
+RESPONSE_CLASSIFICATION_MATRIX.md の第4節を正本索引として参照してください。
+本ファイルはV1.17コマンド体系の概要と分類方針を示す文書であり、
+個別コマンドの実装確認には必ず各コマンドカードを参照してください。
 
 各コマンドの詳細は `docs/current/commands/cards/` 配下のコマンドカードを参照してください。
 
@@ -65,3 +71,4 @@ PDF 7.1 と 7.2 は自動読み取りや非同期レスポンス動作の説明�
 プロトコル仕様書に存在し、対象機種、ROMバージョン、地域条件、現場条件を満たすコマンドは、実装・実機送信の対象にできます。
 
 ただし、完成HexやSUM計算済みの送信用コマンド例は、このドキュメントには記載しません。実機送信する場合は、対象、設定値、影響範囲、復旧方法、停止条件、ログ方針を明確にしてください。
+
