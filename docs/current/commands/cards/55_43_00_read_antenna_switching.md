@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "read-antenna-switching"
 ---
 
 # アンテナ切替設定の読み取り

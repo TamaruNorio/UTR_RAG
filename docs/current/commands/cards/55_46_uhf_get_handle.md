@@ -38,6 +38,7 @@ tags:
   - "rf-emission"
   - "requires-antenna"
   - "pass-with-notes"
+  - "uhf-get-handle"
 ---
 
 # UHF_GetHandle（ハンドル取得）

@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "read-flash-settings"
 ---
 
 # FLASH設定値の読み取り(1バイトアクセス)

@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "read-general-port"
 ---
 
 # 汎用ポート値の読み取り

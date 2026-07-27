@@ -34,6 +34,7 @@ tags:
   - "reader-control"
   - "read-only"
   - "pass-with-notes"
+  - "rom-version-read"
 ---
 
 # ROMバージョンの読み取り

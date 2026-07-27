@@ -34,6 +34,7 @@ tags:
   - "reader-control"
   - "write-operation"
   - "pass-with-notes"
+  - "write-active-antenna"
 ---
 
 # 使用アンテナ番号の書き込み

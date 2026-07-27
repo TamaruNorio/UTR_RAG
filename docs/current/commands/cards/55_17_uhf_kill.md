@@ -39,6 +39,7 @@ tags:
   - "requires-tag"
   - "access-password"
   - "pass-with-notes"
+  - "uhf-kill"
 ---
 
 # UHF_Kill（タグ無効化）

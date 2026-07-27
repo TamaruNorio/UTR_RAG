@@ -39,6 +39,7 @@ tags:
   - "requires-tag"
   - "access-password"
   - "pass-with-notes"
+  - "uhf-block-erase"
 ---
 
 # UHF_BlockErase（ブロック消去）

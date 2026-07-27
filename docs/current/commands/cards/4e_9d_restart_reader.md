@@ -35,6 +35,7 @@ tags:
   - "restart"
   - "no-response-success"
   - "pass-with-notes"
+  - "restart-reader"
 ---
 
 # リスタート

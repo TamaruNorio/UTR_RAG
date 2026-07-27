@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "write-operation"
   - "pass-with-notes"
+  - "write-general-port"
 ---
 
 # 汎用ポート値の書き込み

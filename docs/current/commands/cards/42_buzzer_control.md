@@ -34,6 +34,7 @@ tags:
   - "reader-control"
   - "requires-parameters"
   - "pass-with-notes"
+  - "buzzer-control"
 ---
 
 # ブザーの制御

@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "uhf-get-inventory-param"
 ---
 
 # UHF_GetInventoryParam（Inventory条件読み取り）

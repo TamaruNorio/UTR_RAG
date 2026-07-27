@@ -38,6 +38,7 @@ tags:
   - "requires-antenna"
   - "requires-tag"
   - "pass-with-notes"
+  - "uhf-write"
 ---
 
 # UHF_Write（タグメモリ書き込み）

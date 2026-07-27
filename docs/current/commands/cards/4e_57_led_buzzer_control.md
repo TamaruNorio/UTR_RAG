@@ -34,6 +34,7 @@ tags:
   - "reader-control"
   - "requires-parameters"
   - "pass-with-notes"
+  - "led-buzzer-control"
 ---
 
 # LED&ブザーの制御

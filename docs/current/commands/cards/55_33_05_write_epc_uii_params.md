@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "write-operation"
   - "pass-with-notes"
+  - "write-epc-uii-params"
 ---
 
 # EPC(UII)関連パラメータの書き込み

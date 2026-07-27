@@ -34,6 +34,7 @@ tags:
   - "reader-control"
   - "read-only"
   - "pass-with-notes"
+  - "read-active-antenna"
 ---
 
 # 使用アンテナ番号の読み取り

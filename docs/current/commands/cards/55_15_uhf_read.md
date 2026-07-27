@@ -40,6 +40,7 @@ tags:
   - "requires-antenna"
   - "requires-tag"
   - "pass-with-notes"
+  - "uhf-read"
 ---
 
 # UHF_Read（タグメモリ読み取り）

@@ -33,9 +33,9 @@ tags:
   - "command-card"
   - "reader-control"
   - "flash-operation"
-  - "flash-initialize"
   - "requires-backup"
   - "pass-with-notes"
+  - "flash-initialize"
 ---
 
 # FLASH設定の初期化

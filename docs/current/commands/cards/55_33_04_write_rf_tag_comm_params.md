@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "write-operation"
   - "pass-with-notes"
+  - "write-rf-tag-comm-params"
 ---
 
 # RFタグ通信関連パラメータの書き込み

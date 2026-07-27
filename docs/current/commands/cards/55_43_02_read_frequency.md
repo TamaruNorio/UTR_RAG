@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "read-frequency"
 ---
 
 # 周波数設定の読み取り

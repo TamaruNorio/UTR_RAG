@@ -32,10 +32,10 @@ tags:
   - "utr-s201"
   - "command-card"
   - "reader-control"
-  - "rf-carrier-control"
   - "rf-emission"
   - "requires-parameters"
   - "pass-with-notes"
+  - "rf-carrier-control"
 ---
 
 # RF送信信号の制御

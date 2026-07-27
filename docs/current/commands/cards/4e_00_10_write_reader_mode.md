@@ -36,6 +36,7 @@ tags:
   - "reader-mode"
   - "ram-flash-target"
   - "pass-with-notes"
+  - "write-reader-mode"
 ---
 
 # リーダライタ動作モードの書き込み

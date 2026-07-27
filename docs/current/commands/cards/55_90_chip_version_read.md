@@ -34,6 +34,7 @@ tags:
   - "reader-control"
   - "read-only"
   - "pass-with-notes"
+  - "chip-version-read"
 ---
 
 # チップバージョンの読み取り

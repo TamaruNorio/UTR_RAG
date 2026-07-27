@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "write-operation"
   - "pass-with-notes"
+  - "write-extended-port"
 ---
 
 # 拡張ポート値の書き込み
