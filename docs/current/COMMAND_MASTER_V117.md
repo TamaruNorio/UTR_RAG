@@ -1,4 +1,4 @@
-﻿---
+---
 title: "コマンドマスタ Ver.1.17"
 doc_type: "index"
 package_scope: "UTR-S201"
@@ -8,6 +8,10 @@ verification_status: "DOCUMENTATION_CURRENT"
 result_status: "V100_FINAL_DOCUMENTATION"
 related_docs:
   - RESPONSE_CLASSIFICATION_MATRIX.md
+  - RESPONSE_AND_NACK_MASTER.md
+  - DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md
+  - RAM_FLASH_IMPACT_MATRIX.md
+  - RF_SAFETY_AND_CARRIER_RULES.md
 tags:
   - "utr-s201"
   - "command-master"
