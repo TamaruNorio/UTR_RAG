@@ -37,6 +37,7 @@ tags:
   - "requires-antenna"
   - "requires-tag"
   - "pass-with-notes"
+  - "uhf-through-cmd"
 ---
 
 # UHF_ThroughCmd（高度なタグ直接コマンド）

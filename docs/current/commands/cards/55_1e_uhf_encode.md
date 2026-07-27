@@ -38,6 +38,7 @@ tags:
   - "requires-antenna"
   - "requires-tag"
   - "pass-with-notes"
+  - "uhf-encode"
 ---
 
 # UHF_Encode（エンコード）

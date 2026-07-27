@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "write-operation"
   - "pass-with-notes"
+  - "write-antenna-output-power"
 ---
 
 # アンテナ個別送信出力設定の書き込み

@@ -35,6 +35,7 @@ tags:
   - "write-operation"
   - "flash-operation"
   - "pass-with-notes"
+  - "flash-write"
 ---
 
 # FLASH設定値の書き込み(1バイトアクセス)

@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "read-epc-uii-params"
 ---
 
 # EPC(UII)関連パラメータの読み取り

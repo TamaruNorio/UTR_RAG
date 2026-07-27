@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "read-extended-port"
 ---
 
 # 拡張ポート値の読み取り

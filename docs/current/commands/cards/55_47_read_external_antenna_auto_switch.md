@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "read-external-antenna-auto-switch"
 ---
 
 # 外部アンテナ自動切替設定の読み取り

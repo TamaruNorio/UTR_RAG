@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "read-antenna-output-power"
 ---
 
 # アンテナ個別送信出力設定の読み取り

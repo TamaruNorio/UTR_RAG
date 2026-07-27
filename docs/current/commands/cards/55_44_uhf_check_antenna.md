@@ -38,6 +38,7 @@ tags:
   - "rf-emission"
   - "requires-antenna"
   - "pass-with-notes"
+  - "uhf-check-antenna"
 ---
 
 # UHF_CheckAntenna（アンテナ確認）

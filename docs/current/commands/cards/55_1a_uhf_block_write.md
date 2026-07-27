@@ -39,6 +39,7 @@ tags:
   - "requires-tag"
   - "access-password"
   - "pass-with-notes"
+  - "uhf-block-write"
 ---
 
 # UHF_BlockWrite（ブロック書き込み）

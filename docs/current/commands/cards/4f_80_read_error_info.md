@@ -34,6 +34,7 @@ tags:
   - "reader-control"
   - "read-only"
   - "pass-with-notes"
+  - "read-error-info"
 ---
 
 # エラー情報の読み取り

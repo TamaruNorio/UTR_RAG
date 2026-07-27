@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "write-operation"
   - "pass-with-notes"
+  - "uhf-set-inventory-param"
 ---
 
 # UHF_SetInventoryParam（Inventory条件設定）

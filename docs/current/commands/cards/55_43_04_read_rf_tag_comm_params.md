@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "read-only"
   - "pass-with-notes"
+  - "read-rf-tag-comm-params"
 ---
 
 # RFタグ通信関連パラメータの読み取り

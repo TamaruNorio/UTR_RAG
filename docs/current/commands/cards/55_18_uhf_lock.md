@@ -39,6 +39,7 @@ tags:
   - "requires-tag"
   - "access-password"
   - "pass-with-notes"
+  - "uhf-lock"
 ---
 
 # UHF_Lock（タグメモリロック）

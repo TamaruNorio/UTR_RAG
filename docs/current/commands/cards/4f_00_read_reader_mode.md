@@ -36,6 +36,7 @@ tags:
   - "reader-mode"
   - "startup-snapshot"
   - "pass-with-notes"
+  - "read-reader-mode"
 ---
 
 # リーダライタ動作モードの読み取り

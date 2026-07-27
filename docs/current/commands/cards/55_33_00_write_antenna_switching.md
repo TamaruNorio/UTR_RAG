@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "write-operation"
   - "pass-with-notes"
+  - "write-antenna-switching"
 ---
 
 # アンテナ切替設定の書き込み

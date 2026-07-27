@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "write-operation"
   - "pass-with-notes"
+  - "write-frequency"
 ---
 
 # 周波数設定の書き込み

@@ -34,6 +34,7 @@ tags:
   - "reader-setting"
   - "write-operation"
   - "pass-with-notes"
+  - "write-external-antenna-auto-switch"
 ---
 
 # 外部アンテナ自動切替設定の書き込み
