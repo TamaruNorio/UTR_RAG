@@ -409,6 +409,36 @@ tags:
        02 00 30 01 30 03 66 0D
 ```
 
+### 6.1 Select条件設定ビット表
+
+#### パラメータ1［初期値：81h］
+
+| bit | 項目 | 値 | 意味 |
+|---:|---|---:|---|
+| bit0-1 | MemBank | 00 | RFU |
+| bit0-1 | MemBank | 01 | EPC(UII)［初期値］ |
+| bit0-1 | MemBank | 10 | TID |
+| bit0-1 | MemBank | 11 | User |
+| bit2-4 | Action値 | 000 | 詳細はパラメータ説明参照 |
+| bit5-7 | Target値 | 000 | Inventoried(S0) |
+| bit5-7 | Target値 | 001 | Inventoried(S1) |
+| bit5-7 | Target値 | 010 | Inventoried(S2) |
+| bit5-7 | Target値 | 011 | Inventoried(S3) |
+| bit5-7 | Target値 | 100 | SL［初期値］ |
+| bit5-7 | Target値 | 101 | Reserved |
+| bit5-7 | Target値 | 110 | Reserved |
+| bit5-7 | Target値 | 111 | Reserved |
+
+#### パラメータ2［初期値：00h］
+
+| bit | 項目 | 値 | 意味 |
+|---:|---|---:|---|
+| bit0 | 将来拡張のための予約 | 0 | 通常は0 |
+| bit1 | Truncate値 | 0 | 0固定 |
+| bit2 | - | 0 | Disable［初期値］ |
+| bit2 | - | 1 | Enable（未サポート） |
+| bit3-7 | 将来拡張のための予約 | 0 | 通常は0 |
+
 ## 7. コマンド形式の扱い
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
