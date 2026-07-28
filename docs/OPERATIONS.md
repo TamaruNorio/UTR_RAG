@@ -41,3 +41,13 @@ git diff --check
 git log --oneline -5
 git branch --show-current
 ```
+
+## RAGチャンク生成
+
+ベクトルDBへの登録用データを作る場合は、以下を実行してください。
+
+    python scripts/build_rag_chunks.py
+
+docs/current 配下の全Markdownを、frontmatterのメタデータ付きで
+JSONL形式（rag_chunks/chunks.jsonl）に分割出力します。
+生成物はコミット対象外です（.gitignoreで除外）。手元で都度生成してください。

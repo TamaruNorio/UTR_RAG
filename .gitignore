@@ -8,3 +8,4 @@ __pycache__/
 Thumbs.db
 *.pdf
 runtime_logs/
+rag_chunks/
