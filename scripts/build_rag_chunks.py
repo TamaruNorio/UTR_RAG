@@ -93,10 +93,63 @@ def split_markdown_table(paragraph: str, hard_max: int, rows_per_chunk: int = 12
     return chunks
 
 
+def split_field_enumeration(paragraph: str, hard_max: int, lines_per_chunk: int = 10):
+    """罫線(|)を使わない「ラベル名 バイト数 内容」形式のフィールド列挙
+    （［コマンド］［ACKレスポンス］などの後に続く行の並び）を、
+    先頭の見出し行（［...］や「ラベル名 バイト数 内容」ヘッダ）を
+    各チャンクに複製しながら、行単位で分割する。
+    該当しない場合はNoneを返す。
+    """
+    lines = paragraph.strip("\n").splitlines()
+    if len(lines) < 6:
+        return None
+
+    # 先頭〜3行目までの範囲で「見出し」行を探す:
+    #   ［コマンド］［ACK レスポンス］等のブラケット行、
+    #   または「ラベル名」「バイト数」「内容」を含むヘッダ行
+    # ヘッダ行の直前に短い説明文（①など）が挟まっている場合も、
+    # まとめてheader_linesに含める。
+    header_lines = []
+    body_start = None
+    scan_range = min(3, len(lines))
+    for i in range(scan_range):
+        stripped = lines[i].strip()
+        is_bracket = stripped.startswith("［") or stripped.startswith("[")
+        is_table_header = ("ラベル名" in stripped and "バイト数" in stripped)
+        if is_bracket or is_table_header:
+            header_lines = lines[: i + 1]
+            body_start = i + 1
+            break
+
+    if not header_lines or body_start is None:
+        return None
+
+    body_lines = lines[body_start:]
+    if len(body_lines) < 4:
+        return None
+
+    header_text = "\n".join(header_lines)
+    chunks = []
+    i = 0
+    while i < len(body_lines):
+        group = body_lines[i:i + lines_per_chunk]
+        chunk_text = header_text + "\n" + "\n".join(group)
+        # 1グループでも大きすぎる場合は、grouping数を段階的に減らす
+        shrink = lines_per_chunk
+        while len(chunk_text) > hard_max and shrink > 1:
+            shrink -= 1
+            group = body_lines[i:i + shrink]
+            chunk_text = header_text + "\n" + "\n".join(group)
+        chunks.append(chunk_text)
+        i += len(group)
+    return chunks
+
+
 def split_paragraphs_greedy(text: str, target: int, hard_max: int):
     """見出しに頼らず、空行区切りの段落を貪欲にまとめてチャンク化する。
     _raw.md のような見出しなしファイルの最終手段として使う。
-    Markdown表の段落は、行単位（ヘッダー行を複製）でさらに分割する。
+    Markdown表は行単位（ヘッダー行を複製）、罫線なしのフィールド列挙
+    （［コマンド］等の後の一行一項目リスト）も行単位でさらに分割する。
     """
     paragraphs = [p for p in re.split(r"\n\s*\n", text.strip()) if p.strip()]
     if not paragraphs:
@@ -112,6 +165,14 @@ def split_paragraphs_greedy(text: str, target: int, hard_max: int):
                     chunks.append(current)
                     current = ""
                 chunks.extend(table_pieces)
+                continue
+
+            field_pieces = split_field_enumeration(p, hard_max)
+            if field_pieces:
+                if current:
+                    chunks.append(current)
+                    current = ""
+                chunks.extend(field_pieces)
                 continue
 
         candidate = (current + "\n\n" + p).strip() if current else p
