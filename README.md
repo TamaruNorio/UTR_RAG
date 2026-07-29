@@ -46,3 +46,5 @@ UTR_RAG は、タカヤ製 UTR-S201シリーズの通信プロトコル理解、
 runtime logs、実CSVログ、顧客情報、実IPアドレス、実機ログ由来のraw EPC / UII / TID、認証情報、パスワードはGitHubにアップロードしません。
 
 公式PDFに掲載済みの完成Hex例は、仕様説明として記載できます。ただし、実機ログ由来のタグ固有値やパスワードを含むHexはマスクしてください。
+
+機密情報、実機ログ、認証情報、raw EPC / UII / TID の詳しい扱いは `SECURITY.md` と `DATA_HANDLING.md` を確認してください。
