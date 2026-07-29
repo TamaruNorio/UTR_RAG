@@ -6,6 +6,8 @@
 
 GitHub Releases の作成、tag push、release asset のアップロードは、この文書を確認したうえで保守者が実行します。
 
+GitHubのAbout欄、branch protection、required checks などの管理設定は `docs/MAINTAINER_ADMIN_CHECKLIST.md` を確認してください。
+
 ## リリース前チェック
 
 - `main` が最新であること
