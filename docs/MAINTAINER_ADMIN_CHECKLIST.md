@@ -37,7 +37,7 @@ GitHubリポジトリ画面のAbout欄で、説明とtopicsを確認します。
 - branch deletion を禁止する
 - required reviews を有効にする
 - required status checks を有効にする
-- CODEOWNERS review requirement を有効にする場合は、先に `.github/CODEOWNERS` に実際のownerを設定する
+- CODEOWNERS review requirement を有効にする場合は、`.github/CODEOWNERS` のownerと担当範囲を確認する
 
 ## Required reviews
 
@@ -66,11 +66,11 @@ required status checks は、実際にGitHub Actionsや検証ジョブが存在�
 
 ## CODEOWNERS review requirement
 
-`.github/CODEOWNERS` は、実ユーザー名またはGitHub Team名が決まるまでコメント中心の暫定版にします。
+`.github/CODEOWNERS` は、実ownerとして `@TamaruNorio` を指定しています。
 
 有効化前に確認すること:
 
-- ownerに実在するGitHubユーザーまたはTeamを指定していること
+- ownerに実在するGitHubユーザーを指定していること
 - ownerがリポジトリへの適切な権限を持つこと
 - README、`docs/current/`、`scripts/`、`.github/` の担当範囲が過不足ないこと
 
