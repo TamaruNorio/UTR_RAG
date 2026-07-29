@@ -1,0 +1,44 @@
+name: Security or data handling concern
+description: 機密情報、実機ログ、認証情報、公開範囲に関する相談
+title: "[Security/Data] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        公開Issueに機密情報を貼らないでください。
+        脆弱性や公開してはいけない情報の混入を見つけた場合は、公開Issueではなく、SECURITY.md に従い GitHub Security Advisories または管理者の指定する非公開連絡手段で報告してください。
+        このテンプレートは、実値を含まない一般的な相談や方針確認に使ってください。
+  - type: dropdown
+    id: concern_type
+    attributes:
+      label: 種別
+      options:
+        - 機密情報の扱い
+        - 実機ログの扱い
+        - raw EPC / UII / TID の扱い
+        - 認証情報・IPアドレスの扱い
+        - 公開範囲の確認
+        - その他
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: 実値を含めず、問題の種類と確認したいことを書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: related_policy
+    attributes:
+      label: 関連する方針文書
+      description: "例: SECURITY.md, DATA_HANDLING.md, RELEASE_SCOPE.md"
+    validations:
+      required: false
+  - type: checkboxes
+    id: no_sensitive_data
+    attributes:
+      label: 公開Issueに貼らない情報の確認
+      options:
+        - label: このIssueには機密情報、実機ログ、raw EPC / UII / TID、認証情報、実IPアドレスを含めていません。
+          required: true

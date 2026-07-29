@@ -1,0 +1,57 @@
+name: Documentation improvement
+description: README、運用文書、仕様整理文書の改善提案
+title: "[Docs] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        公式PDFが一次情報です。仕様値やコマンドカード本文の変更を含む場合は、参照文書と実機影響を明記してください。
+        機密情報、実機ログ、raw EPC / UII / TID、認証情報、実IPアドレスは貼らないでください。
+  - type: input
+    id: target_docs
+    attributes:
+      label: 対象文書
+      description: "例: README.md, docs/current/COMMAND_MASTER_V117.md"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 問題点
+      description: 読みにくい箇所、誤解しやすい箇所、不足している導線を書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: expected_change
+    attributes:
+      label: 期待する修正
+      description: どのような状態になればよいかを短く書いてください。
+    validations:
+      required: true
+  - type: dropdown
+    id: spec_value_change
+    attributes:
+      label: 仕様値変更の有無
+      options:
+        - 仕様値変更なし
+        - 仕様値変更あり
+        - 不明
+    validations:
+      required: true
+  - type: dropdown
+    id: real_device_impact
+    attributes:
+      label: 実機影響の有無
+      options:
+        - 実機影響なし
+        - 実機影響あり
+        - 不明
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: 参照した文書
+      description: 公式PDF、リポジトリ内文書、対象コマンドカードなどを書いてください。
+    validations:
+      required: false
