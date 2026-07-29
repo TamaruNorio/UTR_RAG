@@ -47,6 +47,12 @@ git log --oneline -5
 git branch --show-current
 ```
 
+frontmatterの最低限の必須キーを確認する場合は、以下を実行してください。
+
+```text
+python scripts/validate_frontmatter.py
+```
+
 ## RAGチャンク生成
 
 ベクトルDBへの登録用データを作る場合は、以下を実行してください。
