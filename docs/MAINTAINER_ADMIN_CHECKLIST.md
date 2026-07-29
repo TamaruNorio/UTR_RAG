@@ -30,14 +30,16 @@ GitHubリポジトリ画面のAbout欄で、説明とtopicsを確認します。
 
 ## Branch protection
 
+現時点では、`main` ブランチのbranch protectionは未設定です。現在のアカウントまたは管理画面の状態では、branch protection作成画面のCreate操作を完了できなかったため、後日設定可能になった時点で有効化します。
+
 `main` ブランチに対して、次の設定を推奨します。
 
 - Pull Request 経由の変更を必須にする
-- force push を禁止する
-- branch deletion を禁止する
 - required reviews を有効にする
 - required status checks を有効にする
-- CODEOWNERS review requirement を有効にする場合は、`.github/CODEOWNERS` のownerと担当範囲を確認する
+- review from CODEOWNERS を有効にする
+- force push を禁止する
+- branch deletion を禁止する
 
 ## Required reviews
 
