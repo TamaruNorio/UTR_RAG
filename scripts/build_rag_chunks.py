@@ -42,6 +42,24 @@ OUTPUT_PATH = ROOT / "rag_chunks" / "chunks.jsonl"
 TARGET_CHARS = 500
 HARD_MAX_CHARS = 1000
 
+HELP_TEXT = f"""docs/current 配下のMarkdownを、ベクトルDB登録用にチャンク分割します。
+
+Usage:
+  python scripts/build_rag_chunks.py
+  python scripts/build_rag_chunks.py --help
+
+Input:
+  docs/current/**/*.md
+
+Output:
+  {OUTPUT_PATH.relative_to(ROOT).as_posix()}
+
+Policy:
+  target size: {TARGET_CHARS} chars
+  hard max: {HARD_MAX_CHARS} chars
+  split order: ## headings, ### headings, paragraphs, Markdown table rows, field-list rows
+"""
+
 
 def load_frontmatter_and_body(path: pathlib.Path):
     text = path.read_text(encoding="utf-8").lstrip("\ufeff")
@@ -269,6 +287,10 @@ def build_chunks():
 
 
 def main():
+    if any(arg in ("-h", "--help") for arg in sys.argv[1:]):
+        print(HELP_TEXT)
+        return
+
     chunks, over_hard_max = build_chunks()
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
