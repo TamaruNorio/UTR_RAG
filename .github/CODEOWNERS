@@ -1,0 +1,21 @@
+# CODEOWNERS
+#
+# Actual GitHub users or teams are not fixed yet.
+# Add real owners before enabling required CODEOWNERS review.
+#
+# Suggested ownership units:
+#
+# README and public entry documents:
+# README.md
+# RELEASE_SCOPE.md
+# SECURITY.md
+# DATA_HANDLING.md
+#
+# Current protocol documentation:
+# docs/current/
+#
+# Local maintenance scripts:
+# scripts/
+#
+# GitHub workflow and AI instruction files:
+# .github/
