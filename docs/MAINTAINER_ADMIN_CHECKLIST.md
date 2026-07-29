@@ -62,6 +62,8 @@ required status checks は、実際にGitHub Actionsや検証ジョブが存在�
 
 存在しないチェック名をrequiredにするとPRをmergeできなくなるため、先にActions名と成功状態を確認してください。
 
+`Documentation Validation / Validate documentation metadata and RAG build` をrequired status checksに指定する場合は、GitHub Actions上で実際に表示されるworkflow名とjob名を確認してから設定してください。
+
 ## CODEOWNERS review requirement
 
 `.github/CODEOWNERS` は、実ユーザー名またはGitHub Team名が決まるまでコメント中心の暫定版にします。
