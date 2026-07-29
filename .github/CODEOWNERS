@@ -1,21 +1,21 @@
 # CODEOWNERS
 #
-# Actual GitHub users or teams are not fixed yet.
-# Add real owners before enabling required CODEOWNERS review.
-#
-# Suggested ownership units:
-#
-# README and public entry documents:
-# README.md
-# RELEASE_SCOPE.md
-# SECURITY.md
-# DATA_HANDLING.md
-#
-# Current protocol documentation:
-# docs/current/
-#
-# Local maintenance scripts:
-# scripts/
-#
-# GitHub workflow and AI instruction files:
-# .github/
+# Keep ownership broad and reviewable. Required CODEOWNERS review is enabled
+# from GitHub branch protection, not from this file.
+
+# README and public entry documents
+README.md @TamaruNorio
+RELEASE_SCOPE.md @TamaruNorio
+SECURITY.md @TamaruNorio
+DATA_HANDLING.md @TamaruNorio
+RELEASE_PROCESS.md @TamaruNorio
+CHANGELOG_TEMPLATE.md @TamaruNorio
+
+# Current protocol documentation
+docs/current/ @TamaruNorio
+
+# Local maintenance scripts
+scripts/ @TamaruNorio
+
+# GitHub workflow and AI instruction files
+.github/ @TamaruNorio
