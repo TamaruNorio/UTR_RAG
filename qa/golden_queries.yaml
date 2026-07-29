@@ -1,0 +1,155 @@
+version: 1
+description: "RAG品質を人間レビューで確認するための代表質問セット。自動評価器はまだ前提にしない。"
+queries:
+  - id: GQ-001
+    question: "UTR-S201シリーズの通常コマンドは全部で何件あり、区分ごとの件数はいくつですか。"
+    expected_source_files:
+      - "docs/current/COMMAND_MASTER_V117.md"
+      - "docs/current/RESPONSE_CLASSIFICATION_MATRIX.md"
+    must_include_facts:
+      - "通常コマンドは54件"
+      - "リーダライタ制御コマンドは12件"
+      - "リーダライタ設定コマンドは31件"
+      - "RFタグ通信コマンドは11件"
+
+  - id: GQ-002
+    question: "PDF 7.1 と 7.2 は、通常の上位送信コマンド54件に含めますか。"
+    expected_source_files:
+      - "docs/current/COMMAND_MASTER_V117.md"
+    must_include_facts:
+      - "PDF 7.1 と 7.2 は通常の上位送信コマンド54件には含めない"
+      - "自動読み取りや非同期レスポンス動作の説明として扱う"
+
+  - id: GQ-003
+    question: "ROMバージョン読み取り後、機種判定と実装可否確認はどの順番で進めますか。"
+    expected_source_files:
+      - "docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+      - "docs/current/commands/cards/rom_version_read.md"
+    must_include_facts:
+      - "ROM番号とシリーズ名を解析する"
+      - "シリーズ名から対象機種を判定する"
+      - "対象機種とROMバージョンに対応するコマンドか確認する"
+
+  - id: GQ-004
+    question: "シリーズ名 USM02 はどの機種として扱いますか。4CH機として確認すべき点も答えてください。"
+    expected_source_files:
+      - "docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+      - "docs/current/commands/cards/55_33_00_write_antenna_switching.md"
+    must_include_facts:
+      - "USM02 は UTR-SUN02-4CH"
+      - "4CH機として扱う"
+      - "物理アンテナ容量、接続OKアンテナ、使用アンテナ設定を確認する"
+
+  - id: GQ-005
+    question: "ACKをコマンド番号だけで固定解釈してはいけない理由は何ですか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+      - "docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+    must_include_facts:
+      - "起動時または実機送信前のスナップショットに基づいてACKを解釈する"
+      - "同じ位置のバイトが設定により異なる意味を持つ場合がある"
+      - "ROM、機種、アンテナ設定、TID付加などを確認する"
+
+  - id: GQ-006
+    question: "RFタグ通信系の受信処理で、1送信1応答と決め打ちしてはいけないのはなぜですか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+      - "docs/current/commands/cards/55_10_uhf_inventory.md"
+    must_include_facts:
+      - "RFタグ通信系では複数フレームを受信する場合がある"
+      - "タグ応答、完了ACK、アンテナ切替完了ACK、キャリア検知ACKが混在し得る"
+      - "設定がOFFの応答は返らないことを異常扱いしない"
+
+  - id: GQ-007
+    question: "NACK、timeout、無応答は実装上どのように扱い分けるべきですか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+      - "docs/current/AI_IMPLEMENTATION_GUARDRAILS.md"
+    must_include_facts:
+      - "ACK、NACK、timeout、無応答を同じエラーとして扱わない"
+      - "NACK時はエラーコードをログに残す"
+      - "NACKは共通NACK形式と対象コマンドのPDF該当節を併せて確認する"
+
+  - id: GQ-008
+    question: "RF送信信号の制御を実装または実機送信するとき、AIが独断で決めてはいけないことは何ですか。"
+    expected_source_files:
+      - "docs/current/RF_SAFETY_AND_CARRIER_RULES.md"
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+      - "docs/current/AI_IMPLEMENTATION_GUARDRAILS.md"
+    must_include_facts:
+      - "RF送信信号制御は仕様書に記載された機能"
+      - "対象地域、対象機種、ROM、アンテナ構成、現場条件を確認する"
+      - "AIが独断で周波数、送信出力、アンテナ番号、継続判断を決めない"
+
+  - id: GQ-009
+    question: "LBTエラーやアンテナエラーが発生した場合、AIは再送や継続を自動判断してよいですか。"
+    expected_source_files:
+      - "docs/current/RF_SAFETY_AND_CARRIER_RULES.md"
+      - "docs/current/AI_IMPLEMENTATION_GUARDRAILS.md"
+    must_include_facts:
+      - "LBTエラー、アンテナエラー、timeout、NACKはログに残す"
+      - "作業指示で決めた停止条件に従う"
+      - "AI判断だけで再送、継続、別設定への変更を行わない"
+
+  - id: GQ-010
+    question: "実機確認ステータス索引では、54枚のカードはどのverification_statusに整理されていますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/TEST_STATUS_INDEX.md"
+    must_include_facts:
+      - "整理対象のカード枚数は54件"
+      - "REAL_DEVICE_VERIFIED_WITH_NOTES が54件"
+      - "全54コマンドを個別に実機送信済みであることを示すものではない"
+
+  - id: GQ-011
+    question: "完成HexやSUM計算済み送信用コマンド例は、このリポジトリでどう扱いますか。"
+    expected_source_files:
+      - "docs/current/COMMAND_MASTER_V117.md"
+      - "docs/current/AI_IMPLEMENTATION_GUARDRAILS.md"
+      - "RELEASE_SCOPE.md"
+    must_include_facts:
+      - "完成HexやSUM計算済みの送信用コマンド例は不用意に出力しない"
+      - "実機送信する場合は対象、設定値、影響範囲、復旧方法、停止条件、ログ方針を明確にする"
+      - "公式PDFが一次情報"
+
+  - id: GQ-012
+    question: "GitHubにアップロードしてはいけない情報には何がありますか。"
+    expected_source_files:
+      - "README.md"
+      - "docs/current/AI_IMPLEMENTATION_GUARDRAILS.md"
+      - "RELEASE_SCOPE.md"
+    must_include_facts:
+      - "runtime logs、実CSVログ、顧客情報、実IPアドレスをアップロードしない"
+      - "raw EPC / UII / TID、認証情報、パスワードをアップロードしない"
+      - "実機ログ由来のタグ固有値やパスワードを含むHexはマスクする"
+
+  - id: GQ-013
+    question: "周波数設定の書き込みと読み取りで参照すべきカードはどれですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_02_write_frequency.md"
+      - "docs/current/commands/cards/55_43_02_read_frequency.md"
+      - "docs/current/RF_SAFETY_AND_CARRIER_RULES.md"
+    must_include_facts:
+      - "書き込み側は 55_33_02_write_frequency.md"
+      - "読み取り側は 55_43_02_read_frequency.md"
+      - "周波数変更は対象地域、対象機種、ROM、現場条件を確認する"
+
+  - id: GQ-014
+    question: "FLASHに影響する設定変更を扱う場合、どの文書を確認すべきですか。"
+    expected_source_files:
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+      - "docs/current/COMMAND_MASTER_V117.md"
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+    must_include_facts:
+      - "RAM設定かFLASH設定かを確認する"
+      - "一時変更、復元、再起動後保持の扱いを決める"
+      - "対象、値、影響範囲、復旧方法、停止条件を明確にする"
+
+  - id: GQ-015
+    question: "AIに実装を依頼する前に、最低限確認すべき項目は何ですか。"
+    expected_source_files:
+      - "docs/current/AI_IMPLEMENTATION_GUARDRAILS.md"
+      - "docs/current/V100_USAGE_GUIDE.md"
+    must_include_facts:
+      - "対象機種、ROMバージョン、接続方式、対象コマンドを確認する"
+      - "必要パラメータ、分類、ACK/NACK/timeoutの扱いを確認する"
+      - "ログ方針、実機送信の有無、停止条件、復旧方法を確認する"
