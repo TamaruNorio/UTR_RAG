@@ -53,6 +53,12 @@ frontmatterの最低限の必須キーを確認する場合は、以下を実行
 python scripts/validate_frontmatter.py
 ```
 
+Markdownリンクと `related_docs` の参照先を確認する場合は、以下を実行してください。
+
+```text
+python scripts/check_doc_links.py
+```
+
 ## RAGチャンク生成
 
 ベクトルDBへの登録用データを作る場合は、以下を実行してください。
