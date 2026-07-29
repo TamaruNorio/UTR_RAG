@@ -101,3 +101,7 @@ GitHub SettingsやReleaseを変更した場合は、PRまたはIssueに次を記
 ## Issue templates
 
 `.github/ISSUE_TEMPLATE/` には、文書改善、RAGメタデータ・パイプライン、セキュリティ・データ取扱相談用のIssue templateを用意しています。
+
+## Labels
+
+GitHub labels は `docs/LABELS_SPEC.md` を確認し、必要なものだけGitHub上で手動作成します。
