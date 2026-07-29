@@ -1,0 +1,43 @@
+name: RAG metadata or pipeline issue
+description: frontmatter、リンク、チャンク生成、RAG品質確認に関する問題
+title: "[RAG] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        RAG用メタデータ、検証スクリプト、チャンク生成、golden queryに関する問題を記録します。
+        機密情報、実機ログ、raw EPC / UII / TID、認証情報、実IPアドレスは貼らないでください。
+  - type: input
+    id: target
+    attributes:
+      label: 対象スクリプトまたは対象文書
+      description: "例: scripts/build_rag_chunks.py, qa/golden_queries.yaml, docs/current/..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 実行したコマンドや確認手順を書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待結果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際結果
+      description: エラーがある場合は、機密情報を含まない範囲で貼ってください。
+    validations:
+      required: true
+  - type: textarea
+    id: related_files
+    attributes:
+      label: 関連ファイル
+      description: 関係するファイルパスを列挙してください。
+    validations:
+      required: false

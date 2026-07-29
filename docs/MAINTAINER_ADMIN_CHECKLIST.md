@@ -97,3 +97,7 @@ GitHub SettingsやReleaseを変更した場合は、PRまたはIssueに次を記
 - 変更した設定
 - 変更理由
 - 確認結果
+
+## Issue templates
+
+`.github/ISSUE_TEMPLATE/` には、文書改善、RAGメタデータ・パイプライン、セキュリティ・データ取扱相談用のIssue templateを用意しています。
