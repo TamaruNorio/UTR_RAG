@@ -32,6 +32,16 @@ UTR_RAG は、タカヤ製 UTR-S201シリーズの通信プロトコル理解、
 7. `docs/current/commands/cards/` - 個別コマンドカード
 8. 必要に応じて、ROM、RF安全、パラメータ確認の文書
 
+## AI/Codexで実装する場合の推奨参照順
+
+AI/Codexに実装を依頼する場合は、接続方式を先に決めてから参照先を分けてください。
+
+USB/COM接続で実装する場合は、まずこのリポジトリの `docs/current/AI_CONTEXT_INDEX.md`、`docs/current/AI_IMPLEMENTATION_GUARDRAILS.md`、`docs/current/COMMAND_MASTER_V117.md`、`docs/current/RESPONSE_AND_NACK_MASTER.md` を確認し、その後に対象コマンドカードと USB接続版サンプル `UTR_USB_Python_CodeX` を参照してください。
+
+LAN/TCP接続で実装する場合は、まずこのリポジトリの `docs/current/AI_CONTEXT_INDEX.md`、`docs/current/AI_IMPLEMENTATION_GUARDRAILS.md`、`docs/current/COMMAND_MASTER_V117.md`、`docs/current/RESPONSE_AND_NACK_MASTER.md` を確認し、その後に対象コマンドカードと LAN(TCP)接続版サンプル `UTR_LAN_Python_CodeX` を参照してください。
+
+複数アンテナ対応アプリを実装する場合は、個別コマンドカード単体だけを見て実装しないでください。特に `UHF_Inventory` の単純ループだけでアンテナ切替を実装せず、アンテナ番号、アンテナ自動切替、ACK/NACK、timeout、設定依存レスポンスを併せて確認してください。
+
 ## 公式PDFの扱い
 
 公式PDFが一次情報です。このリポジトリは公式PDFの代替ではありません。PDF原本は、社内の正式な配布場所または管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。
