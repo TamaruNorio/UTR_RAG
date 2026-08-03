@@ -12,6 +12,8 @@ UTR_RAG は、タカヤ製 UTR-S201シリーズ通信プロトコルの理解、
 
 主な公開知識は `docs/current/` 配下の文書と `docs/current/commands/cards/` 配下のコマンドカードです。コマンド一覧、ACK/NACK、レスポンス分類、アンテナ番号体系、ROM判定、実装時の安全確認を、AIが直接参照しやすい形に整理しています。
 
+V100では、過去経緯ではなく、現在利用する文書とコマンドカードを中心に整理します。ACK/NACK、RFタグ応答、読取完了ACK、アンテナ切替完了ACK、キャリア検知ACKの実装入口は `RESPONSE_AND_NACK_MASTER.md` と `RESPONSE_CLASSIFICATION_MATRIX.md` を確認してください。
+
 ## 3. このリポジトリが提供しないもの
 
 このリポジトリは、ベクトル検索APIや対話型RAGサービスそのものではありません。
