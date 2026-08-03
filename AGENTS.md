@@ -12,6 +12,7 @@
 6. `docs/current/RESPONSE_AND_NACK_MASTER.md`
 7. `docs/current/RESPONSE_CLASSIFICATION_MATRIX.md`
 8. `docs/current/commands/cards/TEST_STATUS_INDEX.md`
+9. `docs/current/EXAMPLE_IMPLEMENTATION_REQUEST.md`（機種を限定しないGUIアプリなど、複数の落とし穴がある実装を依頼する場合の実例）
 
 対象コマンドが決まっている場合は、`docs/current/COMMAND_MASTER_V117.md` から該当する `docs/current/commands/cards/` 配下のコマンドカードへ進んでください。
 
