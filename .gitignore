@@ -9,3 +9,6 @@ Thumbs.db
 *.pdf
 runtime_logs/
 rag_chunks/
+!rag_chunks/
+rag_chunks/*
+!rag_chunks/README.md
