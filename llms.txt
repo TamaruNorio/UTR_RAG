@@ -3,6 +3,7 @@
 このリポジトリは、UTR-S201シリーズ制御プログラムのAIペアプログラミング支援用ドキュメントです。
 
 AIが最初に読む文書:
+- docs/current/AI_CONTEXT_INDEX.md
 - docs/current/V100_USAGE_GUIDE.md
 - docs/current/COMMAND_MASTER_V117.md
 - docs/current/RESPONSE_AND_NACK_MASTER.md
@@ -10,6 +11,10 @@ AIが最初に読む文書:
 - docs/current/commands/cards/TEST_STATUS_INDEX.md
 - docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md
 - docs/current/PARAMETER_CONFIRMATION_GUIDE.md
+- docs/current/ANTENNA_NUMBERING_SCHEMES.md
+- docs/current/EXAMPLE_IMPLEMENTATION_REQUEST.md
+- docs/current/UTR_TAG_GUI_IMPLEMENTATION_FEEDBACK.md
+- docs/current/KNOWN_AI_FAILURE_PATTERNS.md
 - docs/current/commands/cards/
 
 公式PDFが一次情報です。PDF原本は別途準備してください。GitHubにはPDF原本をアップロードしないでください。
