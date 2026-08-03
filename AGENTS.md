@@ -25,6 +25,7 @@ LAN接続で実装する場合は、LAN/TCP接続であることを作業指示�
 
 複数アンテナ機種を実装する場合は、`docs/current/commands/cards/55_10_uhf_inventory.md` 単体で判断しないでください。少なくとも次のカードを併せて確認してください。
 
+- `docs/current/ANTENNA_NUMBERING_SCHEMES.md` - 内部アンテナ番号・外部アンテナ番号・RFタグ応答フレームのADRバイトの混同防止
 - `docs/current/commands/cards/55_48_read_active_antenna.md` - 使用アンテナ番号の読み取り
 - `docs/current/commands/cards/55_38_write_active_antenna.md` - 使用アンテナ番号の書き込み
 - `docs/current/commands/cards/55_47_read_external_antenna_auto_switch.md` - 外部アンテナ自動切替設定の読み取り
