@@ -35,6 +35,10 @@ tags:
 - 完了レスポンス
 - 自動読み取りやRFタグ応答に伴う非同期レスポンス
 
+### 2.1 呼称の統一
+
+本文、コマンドカード、frontmatterでは、`ACK` / `NACK` / `TIMEOUT` / `NO_RESPONSE` / `COMPLETION` / `RF_TAG_DATA` / `ANT_SWITCH_COMPLETE` / `CARRIER_DETECTED` などの呼称を、可能な限り同じ意味で統一してください。同義表現を使う場合は、初出で正規呼称を併記し、frontmatterと本文で意味がズレないようにしてください。
+
 RFタグ通信系では、1回の送信に対して複数フレームを受信する場合があります。単純な「1送信1応答」と決め打ちしないでください。
 
 ## 3. ACK解釈の前提
