@@ -9,6 +9,7 @@ result_status: "N/A"
 related_docs:
   - COMMAND_MASTER_V117.md
   - RESPONSE_AND_NACK_MASTER.md
+  - UTR_TAG_GUI_IMPLEMENTATION_FEEDBACK.md
   - commands/cards/55_10_uhf_inventory.md
   - commands/cards/55_38_write_active_antenna.md
   - commands/cards/55_44_uhf_check_antenna.md

@@ -6,7 +6,8 @@ manual: "TDR-MNL-PRC-UTR-S201-117"
 manual_version: "1.17"
 verification_status: "DOCUMENTATION_CURRENT"
 result_status: "V100_FINAL_DOCUMENTATION"
-related_docs: []
+related_docs:
+  - UTR_TAG_GUI_IMPLEMENTATION_FEEDBACK.md
 tags:
   - "utr-s201"
   - "guide"
