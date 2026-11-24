@@ -25,3 +25,13 @@
 実機ログ由来のraw EPC / UII / TID、パスワード、顧客固有値を含むHex、または安全確認を省略して実機へそのまま送信できるコードは、このディレクトリには追加しません。
 
 Kill Password / Access Password の具体値は、PDF掲載例であっても `<PASSWORD_BYTES>` などに置き換える場合があります。EPC / UII / TID などタグ固有値に見える値も、`<EPC_BYTES>` や `<TID_BYTES>` などに置き換える場合があります。この場合、その行のSUM値はプレースホルダ置換後の再計算値ではありません。
+
+## 3. カードを探す
+
+- [全54コマンドとレスポンス分類](../../RESPONSE_CLASSIFICATION_MATRIX.md)
+- [用途別参照ガイド](../../TASK_READING_GUIDE.md)
+- [確認状態索引](TEST_STATUS_INDEX.md)
+- [AI検索用索引](AI_RETRIEVAL_INDEX.md)
+- [操作レベル索引](OPERATION_LEVEL_INDEX.md)と[安全性索引](SAFETY_INDEX.md)
+
+確認状態の意味は[記録方針](../../VERIFICATION_POLICY.md)、原典との照合範囲・回答待ちは[原典照合一覧](../../SOURCE_REVIEW_STATUS.md)で確認してください。

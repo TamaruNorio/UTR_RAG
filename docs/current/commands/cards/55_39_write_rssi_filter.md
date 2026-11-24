@@ -14,26 +14,34 @@ operation_profile: "settings-change"
 operation_level: "write/configuration"
 rf_emission: false
 write_operation: true
-flash_operation: false
+flash_operation: true
 tag_memory_operation: false
 requires_rom_check: true
 requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "55_49_read_rssi_filter.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../RESPONSE_MODE_APPLICABILITY.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "55_33_04_write_rf_tag_comm_params.md"
+  - "55_43_04_read_rf_tag_comm_params.md"
+  - "55_14_uhf_inventory_read.md"
+  - "55_39_write_rssi_filter_raw.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-setting"
   - "write-operation"
-  - "pass-with-notes"
+  - "specification-reference"
   - "write-rssi-filter"
 ---
 
@@ -48,8 +56,10 @@ tags:
 - 確認区分: `settings-change`
 - 操作レベル: write/configuration
 - コマンドバイト: `55h` / 詳細コマンド: `39h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -61,7 +71,7 @@ tags:
 
 判定: `SUPPORTED`
 
-このコマンドはPDF Ver.1.17のコマンド一覧に含まれるため、仕様上の対象コマンドとして扱います。
+このコマンドはROM Ver.2.100以降が対象です（読取り§7.4.14 p.182、書込み§7.4.30 p.247）。機種とROMを確認し、旧ROMへ適用しません。
 
 ただし、仕様に存在することと、実機へ送信してよいことは別です。実機送信前には、対象機種、ROMバージョン、接続先、パラメータ、影響範囲、復旧方法、停止条件を確認してください。
 
@@ -71,7 +81,7 @@ tags:
 |---|---|
 | RF送信 | なし |
 | 書き込み操作 | あり |
-| FLASH操作 | なし |
+| FLASH操作 | あり（FLASHのみ） |
 | タグメモリ操作 | なし |
 | ROM確認 | あり |
 | アンテナ条件確認 | なし |
@@ -94,172 +104,105 @@ tags:
 
 ## 6. PDF仕様フィールド定義
 
-PDF原文の全文転記は `55_39_write_rssi_filter_raw.md` を参照してください。
+PDF原文の全文転記は[原典転記](55_39_write_rssi_filter_raw.md)を参照してください。p.253の閾値表現の不一致は第8節と[OPEN-019](../../SOURCE_REVIEW_STATUS.md)に分けて記録しています。
 このカードには、実装判断に必要な要点とAI向け構造化情報のみを残します。
 
 ## 7. コマンド形式の扱い
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
-## 8. レスポンス処理
+## 8. 要求・応答と解釈の補足
 
-レスポンス処理では、以下を区別してください。
+### 8.1 書込み要求とレコードを含まないACK
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+根拠: §7.4.30 p.247–248。書込み要求はCMD=55h・LEN=5+12nで、先頭5 byteの後へ12 byteレコードをn個続けます。n=1～10、最大LEN=125（7Dh）・総132 byteです。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+ACKはCMD=30h・LEN=05h、総12 byte固定です。DATA[0]=39h、[1]=動作設定、[2]=開始No.、[3]=件数、[4]=予約（通常00h）で、フィルタレコードは含みません。共通フレームと長さを検証し、詳細・動作設定の定義bit・開始No.・件数を要求へ対応づけます。ACKの動作設定bit0・bit3–7は0固定です。固定値から外れる応答は原典との差分として記録し、意味を補いません。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+[読取り](55_49_read_rssi_filter.md)で同じ範囲の有効bit・マスク・比較データ・RSSI閾値を照合します。ACKだけで全レコードの内容を確認済みにしません。ADRはリーダライタIDであり、非同期タグ通知やTID付加設定から設定ACKを解釈しません。
 
-### 8.1 ACK/レスポンス例（設定変更成功時）
+### 8.2 先頭5 byteと12 byteレコード
 
-| 項目 | 内容 |
+根拠: 読取りACKはp.183、書込み要求はp.247。DATA[0]は読取りACKで49h、書込み要求で39hです。DATA[1]は動作設定、[2]は開始No.、[3]は件数n、[4]は予約（通常00h）です。DATA[1]はサブコマンドやRAM／FLASH種類ではありません。
+
+| 動作設定 | 意味 |
 |---|---|
-| ACK構造 | `02 ADR 30 05 39 <filter_flags> <start_no> <count> 00 03 SUM 0D` |
-| `CMD` | `30h`（ACK） |
-| `LEN` | `05h` |
-| `DATA[0]` | `39h`（詳細コマンド: RSSIフィルタ設定書込） |
-| `DATA[1]` | RSSIフィルタ設定: bit1 判定対象データ、bit2 条件不一致データ、bit0/bit3-7予約 |
-| `DATA[2]` | 書き込み開始フィルタNo. |
-| `DATA[3]` | 書き込みフィルタ数 |
-| `DATA[4]` | 予約（通常 `00h`） |
-| PDF掲載レスポンス例 | `02 00 30 05 39 00 01 0A 00 03 7E 0D` |
-| 注意 | 成功ACKには個別フィルタ本体の全内容は返りません。開始No.と件数、RSSIフィルタ設定を確認し、必要に応じて `55h 49h` で読戻してください。 |
+| bit1 | 0=指定MemBank、1=TID。初期値0 |
+| bit2 | 有効な個別条件すべてに不一致のデータを0=破棄、1=返す。初期値0 |
+| bit0、bit3–7 | 予約。書込み要求は0固定、読取りACKは通常0 |
 
-設定変更後は、対応する読み取りコマンドで読戻し確認し、RAM変更の場合は終了時に開始値へ復元してください。FLASH変更の場合は再起動後の保持も確認対象です。
+動作設定はフィルタ全体の設定で、各No.の有効／無効とは別です。レコードi（0始まり）のDATA基点は `b=5+12*i` です。
 
-### 8.2 NACK例（フォーマットエラーの例）
+| DATA位置 | byte数 | 内容 |
+|---|---:|---|
+| b | 1 | bit0–3=フィルタNo.（1～10）、bit7=0無効／1有効。bit4–6は予約 |
+| b+1～b+4 | 4 | マスク値、MSBファースト |
+| b+5～b+8 | 4 | 比較データ、MSBファースト |
+| b+9～b+10 | 2 | RSSI閾値×10の符号付き16 bit、下位byte先（表の定義） |
+| b+11 | 1 | 予約。書込みは00h固定、読取りACKは通常00h |
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 39 44 00 00 00 00 00 00 00 00 03 BD 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+書込みではレコード先頭のbit4–6も0固定です。初期状態は各No.無効、マスクFF FF FF FF、比較データ00 00 00 00、閾値76 FD（-65.0 dBm）です。81hはNo.1有効、01hはNo.1無効で、No.を7 bitとして取り出しません。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+### 8.3 閾値の表現と原典の不一致
 
-### 8.3 設定依存の注意
+p.183・247の表はRSSI閾値を2 byteで定義し、p.184の0C FEは符号付き値-500、10で割って-50.0 dBmです。p.247・256の76 FDは-650、-65.0 dBmです。マスク・比較データのMSB先と、閾値の下位byte先を分けて解析します。共通RSSIの1 byte符号付き整数を流用しません。
 
-- 設定変更またはタグメモリ変更後は、対応する読み取りコマンドで読戻し確認してください。
+p.253の本文には「符号付き8 bit、-65はBFh」と異なる記載があります。[OPEN-019](../../SOURCE_REVIEW_STATUS.md)で上の表に合わせる訂正を確認中です。原典転記は保持し、表の配置説明と本文訂正の確定を区別します。16 bitで表現できる全値が機器で設定可能とは断定せず、実際の閾値の許容上下限は未確認です。
 
+### 8.4 共通から個別へ、最初の一致で終了
 
-### 8.4 AI実装用レスポンス定義
+根拠: p.249・251–253。個別機能の対象はUHF_InventoryRead／UHF連続インベントリリードで、UHF_Inventory／UHF連続インベントリは対象外です。[共通RSSIフィルタ](55_33_04_write_rf_tag_comm_params.md)が有効なら先に判定し、そこで抑制されたデータを個別設定で復活させません。
 
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+個別は有効なNo.の小さい順に、`読取りデータ AND マスク値 = 比較データ` を照合します。不一致なら次の有効No.へ進みます。最初に一致したNo.でRSSIを判定し、返す場合も破棄する場合も終了します。例えばNo.3とNo.5の両方に一致する場合、No.3の閾値で破棄されてもNo.5へは進みません。
 
-#### 共通フレームoffset
+p.249・251・253の詳細説明は「閾値以上で返す／未満で破棄」です。p.182の「上回る」と不一致のため、[OPEN-020](../../SOURCE_REVIEW_STATUS.md)で訂正確認中です。例えば閾値-50.0なら、詳細説明では-50.1は破棄、-50.0と-49.9は返します。この境界例は詳細説明に基づく期待値で、実機検証結果ではありません。
 
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
+### 8.5 全条件不一致と全件無効
 
-#### 受信分類ルール
+有効な個別フィルタがあり、そのいずれのマスク条件にも一致しなかったときだけ、動作設定bit2を使います。bit2=1でも、既に共通RSSIや最初に一致した個別RSSIで破棄されたデータは返りません。
 
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `39h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 39h` の成功応答としてPDF該当節を読む |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-| `CMD=30h` だが書込値の反映を確認していない | `ACK_PENDING_VERIFY` | 必要に応じて対応する読出コマンドで読戻し確認する |
+全10件のフィルタ処理が無効の場合は個別判定の対象外です（p.251）。bit2=0というだけで全タグを破棄する設定ではありません。共通RSSIが有効なら、その判定は引き続き関係します。フィルタの不通知を物理的なタグ0枚やRF交信禁止と同一視せず、タグメモリ書込みの対象保護として使いません。
 
-対象識別子: コマンド `55h` / 詳細 `39h` / サブ `なし`。
+### 8.6 先頭32 bit・マスク・TID非付加
 
+根拠: p.250・252。判定対象は指定MemBankの読取り結果またはTIDの先頭32 bitです。p.182の「任意のbit長」を任意長レコードや任意の開始bit指定へ拡張しません。4 byteマスクの1が比較対象、0が比較対象外で、比較データ側へ自動的に同じマスクを適用する定義ではありません。
 
-#### ACK/データ部offset
-成功ACK `CMD=30h` は `LEN=05h` の設定反映型ACKです。
+p.252例では `AB CD 12 34 AND F8 FF 00 FF = A8 CD 00 34` です。この結果と比較データ全体を比べます。比較データのマスク対象外bitが1のままなら一致できないため、ゼロへ揃えます。マスク全0・比較データ全0はこの式では常に一致し、フィルタ無効の代用にはなりません。
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail` | `39h`: RSSIフィルタ設定書込 |
-| 1 | `filter_flags` | bit1: 判定対象データ、bit2: 条件不一致データ、bit0/bit3-7予約 |
-| 2 | `start_filter_no` | 書き込み開始フィルタNo. |
-| 3 | `filter_count` | 書き込みフィルタ数 |
-| 4 | reserved | 通常 `00h` |
+指定MemBankを1 Wordだけ読む場合、比較対象の後半16 bitが不定なので、マスクの後半16 bitを0にします（例FF FF 00 00）。比較データの同部分もAND結果に合わせて0にします。
 
-`LEN=05h`、`DATA[0]=39h` を満たさない場合は、このコマンドの通常成功ACKとして扱わないでください。
+判定対象がTIDなら、「TID付加しない」設定でも内部ではTIDを読み、フィルタ判定に使います。ただし上位へ返すレスポンスにはTIDを付加しません。内部の判定と[InventoryRead](55_14_uhf_inventory_read.md)の出力レイアウトを混同しません。
 
-設定書き込み系は、ACK受信後に必要なら対応する読出コマンドで読戻しし、RAM/FLASHの反映範囲と復元要否を別管理してください。
+### 原典の10タグ例（p.254–255）
 
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
+共通閾値-60.0でタグNo.5・9を破棄し、個別No.1の閾値-45.0でタグNo.1・2、個別No.2の閾値-55.0でタグNo.6・7を返します。タグNo.3・4・8は個別閾値未満、No.10はデータ条件不一致で破棄され、計4枚が返ります。フィルタNo.と例のタグNo.は別の番号です。原典の想定例であり、本整備での実機試験結果ではありません。
 
+### 8.7 範囲指定と未記載の異常条件
 
-#### NACK分類
+開始No. aと件数nで連続範囲を指定し、各レコードにもNo.を持ちます（p.247・251）。設計上はNo.1～10内の `a+n-1<=10` とし、レコード数nとLENを一致させ、各No.をその連続範囲に揃えます。0件を全消去指定として使いません。
 
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
+p.251は件数と実データ個数が不一致のときNACKとなり設定が実行されない場合があると記載します。特定のエラー値や全失敗の原子性を追加しません。ヘッダ範囲と各No.が矛盾する指定、重複・順不同・範囲超過で何が優先されるかは未確認です。非連続更新を許容する仕様として解釈しません。
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 39h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
+### 8.8 FLASH保存と復元
 
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
+p.247と§3.12.4 p.75ではFLASHのみの設定です。電源OFFでも保持され、RAMだけの一時変更やRAM／FLASHの種類選択はありません。各No.を無効にする書込みもFLASH変更です。設定コマンド自体のRF送信やタグメモリ書込みと、後続の読取り通知への影響を分けます。
 
-#### 最小疑似コード
+変更前に動作設定と全10件を記録し、部分更新でも全体の判定対象・条件不一致設定を初期値で上書きしません。個別の有効bitと全体設定は別に保持します。復旧は必要なFLASH設定を書き戻すもので、再起動だけで以前の値へ戻りません。
 
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
+部分更新時の未指定枠の保持保証と、途中失敗時の反映単位は明示確認できていません。変更した範囲だけでなく必要に応じ全10件を読戻し、設定前後の差分を確認します。これは影響確認の設計上の注意で、試験結果ではありません。
 
-#### 推奨パーサ出力
+### 8.9 NACK・timeoutと残項目
 
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
+CMD=31hは[共通NACK](../../RESPONSE_AND_NACK_MASTER.md)へ渡します。Encode等の追加コードを転用せず、timeoutをNACKや未変更の証明にしません。応答を失った場合は設定状態を読戻し、再送・復元の要否を判断します。設定ACK、読戻し一致、再起動後保持、現場でのフィルタ効果は別の確認です。
 
-#### 設定スナップショット必須項目
+ROM Ver.2.100以降が対象（p.247）。機種ごとの全ROM条件、未記載の異常指定・NACK、閾値の実際の許容範囲、現場での効果は残項目です。原典の2点の不一致はOPEN-019／020で確認中です。
 
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 9. 実機確認
 
 実機確認区分: `settings-change`
@@ -304,5 +247,14 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- `55_49_read_rssi_filter.md`
+- `../../RAM_FLASH_IMPACT_MATRIX.md`
+- `../../RESPONSE_MODE_APPLICABILITY.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `55_33_04_write_rf_tag_comm_params.md`
+- `55_43_04_read_rf_tag_comm_params.md`
+- `55_14_uhf_inventory_read.md`
+- `55_39_write_rssi_filter_raw.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

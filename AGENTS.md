@@ -4,6 +4,8 @@
 
 ## 最初に読む文書
 
+現在の作業方針は [文書整備計画](docs/IMPROVEMENT_PLAN.md) に従ってください。UTR_RAGの文書整備を先行し、USB/LANサンプル・GUI・通信ライブラリ等のプログラム改修はその後に扱います。メーカーSDKは必須とせず、公開プロトコルを直接利用する前提です。不明な仕様や公開可能な試験範囲は変更前に保守者へ確認してください。
+
 1. `README.md`
 2. `RELEASE_SCOPE.md`
 3. `llms.txt`
@@ -15,6 +17,8 @@
 9. `docs/current/EXAMPLE_IMPLEMENTATION_REQUEST.md`（機種を限定しないGUIアプリなど、複数の落とし穴がある実装を依頼する場合の実例）
 
 対象コマンドが決まっている場合は、`docs/current/COMMAND_MASTER_V117.md` から該当する `docs/current/commands/cards/` 配下のコマンドカードへ進んでください。
+
+用途から探す場合は [用途別参照ガイド](docs/current/TASK_READING_GUIDE.md) を使用してください。[確認状態の記録方針](docs/current/VERIFICATION_POLICY.md) と [原典照合一覧](docs/current/SOURCE_REVIEW_STATUS.md) に従い、PDF照合、ソフトウェア試験、実機試験を区別します。過去の制作記録は仕様の根拠にせず、既存のPASSラベルだけで未記録の実機確認範囲を補わないでください。
 
 ## 接続方式別の参照先
 

@@ -13,6 +13,8 @@ tags:
   - "raw-reference"
 ---
 
+原典転記は保持しています。要求の長さ・実行条件・p.305例2の確認待ち（OPEN-017）・ゼロ化前の認証条件（OPEN-018）は[Encodeカード](55_1e_uhf_encode.md)と[原典照合一覧](../../SOURCE_REVIEW_STATUS.md)を併せて確認してください。マスク済みHexのSUMを置換後の値として使いません。
+
 ```text
 7.5.10 UHF_Encode
  1回のコマンド送信で、RFタグの複数のMemBankに対してデータを書き込むコマンドです。同時に
@@ -445,6 +447,15 @@ tags:
 
          上位機器                              リーダライタ                       RF タグ
 
+```
+
+## 従来方式の送受信図 1/6：Reserved書込み
+
+<a id="encode-conventional-1"></a>
+
+p.301の従来方式の図、全6段中1段目です。Encode内部順序の図ではありません。列は左から上位機器・リーダライタ・RFタグ。[次段](#encode-conventional-2)。
+
+```text
  UHF_BlockWrite コマンド    送信
     (※Reserved 領域)           コマンド     受信
                                             内部処理
@@ -456,6 +467,15 @@ tags:
                                             内部処理
                                       送信
  受信処理 ※ユーザ側処理          受信     レスポンス
+```
+
+## 従来方式の送受信図 2/6：EPC/UII書込み
+
+<a id="encode-conventional-2"></a>
+
+p.301の従来方式の図、全6段中2段目です。Encode内部順序の図ではありません。列は左から上位機器・リーダライタ・RFタグ。[前段](#encode-conventional-1) / [次段](#encode-conventional-3)。
+
+```text
  UHF_BlockWrite コマンド   送信
     (※EPC(UII)領域)            コマンド     受信
                                             内部処理
@@ -467,6 +487,15 @@ tags:
                                             内部処理
                                       送信
  受信処理 ※ユーザ側処理          受信     レスポンス
+```
+
+## 従来方式の送受信図 3/6：User書込み
+
+<a id="encode-conventional-3"></a>
+
+p.301の従来方式の図、全6段中3段目です。Encode内部順序の図ではありません。列は左から上位機器・リーダライタ・RFタグ。[前段](#encode-conventional-2) / [次段](#encode-conventional-4)。
+
+```text
  UHF_BlockWrite コマンド   送信
      (※User 領域)              コマンド     受信
                                             内部処理
@@ -478,11 +507,29 @@ tags:
                                             内部処理
                                       送信
  受信処理 ※ユーザ側処理          受信     レスポンス
+```
+
+## 従来方式の送受信図 4/6：Lock前のAccess設定
+
+<a id="encode-conventional-4"></a>
+
+p.301の従来方式の図、全6段中4段目です。Encode内部順序の図ではありません。列は左から上位機器・リーダライタ・RFタグ。[前段](#encode-conventional-3) / [次段](#encode-conventional-5)。
+
+```text
  Access パスワードの書き込み     送信
                              コマンド     受信
                                             内部処理
                                       送信
  受信処理 ※ユーザ側処理          受信     レスポンス         Access パスワードの書き込み
+```
+
+## 従来方式の送受信図 5/6：Lock
+
+<a id="encode-conventional-5"></a>
+
+p.301の従来方式の図、全6段中5段目です。Encode内部順序の図ではありません。列は左から上位機器・リーダライタ・RFタグ。[前段](#encode-conventional-4) / [次段](#encode-conventional-6)。
+
+```text
  UHF_Lock コマンド         送信
                              コマンド     受信
                                             内部処理
@@ -494,12 +541,27 @@ tags:
                                             内部処理
                                       送信
  受信処理 ※ユーザ側処理          受信     レスポンス
+```
+
+## 従来方式の送受信図 6/6：Lock後のAccess設定
+
+<a id="encode-conventional-6"></a>
+
+p.301の従来方式の図、全6段中6段目です。Encode内部順序の図ではありません。列は左から上位機器・リーダライタ・RFタグ。[前段](#encode-conventional-5) / 図の完了。
+
+```text
  Access パスワードの書き込み     送信
                              コマンド     受信
                                             内部処理
                                       送信
  受信処理 ※ユーザ側処理          受信     レスポンス         Access パスワードの書き込み
                    完了
+```
+
+## Encode一括送信方式以降の原典転記
+
+```text
+
 
 
 ● UHF_Encode コマンドを使用した処理方法 （複数コマンドの一括送信）
@@ -671,6 +733,15 @@ tags:
     ・書き込み後は、リーダライタの Access パスワードは[<PASSWORD_WORDS>]h となります。
 
 
+```
+
+## Encode例2の設定表 1/3：前提と制御パラメータ
+
+<a id="encode-example2-1"></a>
+
+p.305例2の同じ設定表です。列順はデータ種類・数値／パラメータ・コマンド列。表の並びは内部実行順序を表しません。[表2](#encode-example2-2) / [表3](#encode-example2-3)と[補足](#encode-example2-notes)を併読。訂正は[OPEN-017／018](../../SOURCE_REVIEW_STATUS.md)で保留。
+
+```text
     (例 2) UHF_Encode コマンドを使用して以下のパラメータを書き込む場合
      ※ RF タグを再使用する際の初期化を想定
       ・例 1 で作成した RF タグの Lock を解除し、全 MemBank の内容を 0 に戻す際の書き込
@@ -683,6 +754,15 @@ tags:
        Reserved 領域書き込み時              bit2… 0: 発行しない          = 09h
        EPC(UII) 領域書き込み時              bit3… 1: 発行する
        User 領域書き込み時                  bit4… 0: 発行しない
+```
+
+## Encode例2の設定表 2/3：Reserved・EPC/UIIの書込み欄
+
+<a id="encode-example2-2"></a>
+
+p.305例2の同じ設定表です。列順はデータ種類・数値／パラメータ・コマンド列。表の並びは内部実行順序を表しません。[表1](#encode-example2-1) / [表3](#encode-example2-3)と[補足](#encode-example2-notes)を併読。訂正は[OPEN-017／018](../../SOURCE_REVIEW_STATUS.md)で保留。
+
+```text
        MemBank 00:Reserved
          データ長(書き込み Word 数= 4)        4×2+2 = 10 = 0Ah        0A
          書き込み開始 Word アドレス            0                       00 00
@@ -692,6 +772,15 @@ tags:
          データ長(書き込み Word 数= 4)        4×2+2 = 10 = 0Ah        0A
          書き込み開始 Word アドレス            2                       00 02
          書き込みデータ                     00 00 00 00 00 00 00 00
+```
+
+## Encode例2の設定表 3/3：User・Lockとデータ長
+
+<a id="encode-example2-3"></a>
+
+p.305例2の同じ設定表です。列順はデータ種類・数値／パラメータ・コマンド列。表の並びは内部実行順序を表しません。[表1](#encode-example2-1) / [表2](#encode-example2-2)と[補足](#encode-example2-notes)を併読。訂正は[OPEN-017／018](../../SOURCE_REVIEW_STATUS.md)で保留。
+
+```text
        MemBank 11:USER
          データ長(書き込み Word 数= 2)        2×2+2 = 6 = 06h         06
          書き込み開始 Word アドレス            0                       00 00
@@ -700,6 +789,16 @@ tags:
          Lock コマンドの使用                03h: 使用する               03
          Lock の処理内容                  ※以下を参照                  88 00 00
       ※データ長は、6 + 10 + 10 + 6 + 3 = 35 = 23h となります。
+```
+
+## Encode例2の補足と送受信例（原典転記）
+
+<a id="encode-example2-notes"></a>
+
+[設定表の先頭](#encode-example2-1)から続きます。[内部順序と送受信列](#encode-example2-sequence)も併読してください。Lock値と終了時パスワードの訂正は[OPEN-017](../../SOURCE_REVIEW_STATUS.md)で保留中です。
+
+```text
+
 
     ※Lock 情報：EPC Memory、Access Password の Password ロック解除
   データ種類      処理対象／処理種別                処理種別          フラグ     コマンド列
@@ -709,6 +808,15 @@ tags:
   パラメータ 2          指定なし                 ―――          ―   (00000000)b= 00h
   パラメータ 3          指定なし                 ―――          ―   (00000000)b= 00h
 
+```
+
+## Encode例2の内部順序と送受信列（原典転記）
+
+<a id="encode-example2-sequence"></a>
+
+[設定表](#encode-example2-1)と[Lock補足](#encode-example2-notes)に対応します。終了時パスワード等の訂正は[OPEN-017／018](../../SOURCE_REVIEW_STATUS.md)で保留中です。
+
+```text
   RF タグに書き込む Access パスワードに[0000 0000]h を指定しているので、内部のコマンド処理
   は、EPC 領域→User 領域→Lock 処理→Reserved 領域の順になります。
   （※＜注意事項＞ コマンド内部の処理手順を参照）

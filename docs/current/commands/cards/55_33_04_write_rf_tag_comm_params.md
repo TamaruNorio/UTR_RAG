@@ -14,26 +14,35 @@ operation_profile: "settings-change"
 operation_level: "write/configuration"
 rf_emission: false
 write_operation: true
-flash_operation: false
+flash_operation: true
 tag_memory_operation: false
 requires_rom_check: true
 requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "55_43_04_read_rf_tag_comm_params.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../RESPONSE_MODE_APPLICABILITY.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "55_33_02_write_frequency.md"
+  - "55_43_02_read_frequency.md"
+  - "55_31_uhf_set_inventory_param.md"
+  - "55_30_uhf_set_select_param.md"
+  - "55_39_write_rssi_filter.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-setting"
   - "write-operation"
-  - "pass-with-notes"
+  - "specification-reference"
   - "write-rf-tag-comm-params"
 ---
 
@@ -48,8 +57,10 @@ tags:
 - 確認区分: `settings-change`
 - 操作レベル: write/configuration
 - コマンドバイト: `55h` / 詳細コマンド: `33h` / サブコマンド: `04h`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -71,7 +82,7 @@ tags:
 |---|---|
 | RF送信 | なし |
 | 書き込み操作 | あり |
-| FLASH操作 | なし |
+| FLASH操作 | あり（種類02hの場合） |
 | タグメモリ操作 | なし |
 | ROM確認 | あり |
 | アンテナ条件確認 | なし |
@@ -341,161 +352,109 @@ tags:
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
-## 8. レスポンス処理
+## 8. 要求・応答と解釈の補足
 
-レスポンス処理では、以下を区別してください。
+### 8.1 書込み要求と値を含まないACK
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+根拠: §7.4.24 p.228・232。要求はCMD=55h・LEN=06h、総13 byteです。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
-
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
-
-### 8.1 ACK/レスポンス例（設定変更成功時）
-
-| 項目 | 内容 |
-|---|---|
-| ACK構造 | `02 ADR 30 03 33 04 <param_type> 03 SUM 0D` |
-| `CMD` | `30h`（ACK） |
-| `LEN` | `03h` |
-| `DATA[0]` | `33h`（詳細コマンド） |
-| `DATA[1]` | `04h`（詳細サブコマンド: RFタグ通信関連パラメータ書込） |
-| `DATA[2]` | パラメータ種類: `00h` コマンドモード / `01h` 自動読み取りモード / `02h` FLASH |
-| PDF掲載レスポンス例 | `02 00 30 03 33 04 02 03 71 0D` |
-| 注意 | 成功ACKにはRFタグ通信関連パラメータ本体は返りません。反映確認は `55h 43h 04h` で読戻してください。 |
-
-設定変更後は、対応する読み取りコマンドで読戻し確認し、RAM変更の場合は終了時に開始値へ復元してください。FLASH変更の場合は再起動後の保持も確認対象です。
-
-### 8.2 NACK例（フォーマットエラーの例）
-
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 33 44 00 00 00 00 00 00 00 00 03 B7 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
-
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
-
-### 8.3 設定依存の注意
-
-- 設定変更またはタグメモリ変更後は、対応する読み取りコマンドで読戻し確認してください。
-
-
-### 8.4 AI実装用レスポンス定義
-
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
-
-#### 共通フレームoffset
-
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
-
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
+| DATA位置 | 書込み要求 | 成功ACK |
 |---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `33h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 33h 04h` の成功応答としてPDF該当節を読む |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-| `CMD=30h` だが書込値の反映を確認していない | `ACK_PENDING_VERIFY` | 必要に応じて対応する読出コマンドで読戻し確認する |
+| [0]／[1] | 33h／04h | 33h／04h |
+| [2] | PARAM_KIND: 00h=コマンド用RAM、01h=自動用RAM、02h=FLASH | 要求と同じ種類 |
+| [3] | PARAM1 | 存在しない |
+| [4] | RSSI閾値 | 存在しない |
+| [5] | RETRY | 存在しない |
 
-対象識別子: コマンド `55h` / 詳細 `33h` / サブ `04h`。
+ACKはCMD=30h・LEN=03h、総10 byte固定です。共通フレームの長さ・STX／ETX／CR／SUM、CMD、LEN、33h／04h、要求した種類を照合します。詳細33hだけで別設定のACKを成功扱いにしません。ACKには設定値がないため、同じ種類の[読取り](55_43_04_read_rf_tag_comm_params.md)でPARAM1・RSSI・RETRYを照合します。ACKのADRはリーダライタIDで、TIDや非同期通知による可変長にはなりません。
 
+設定コマンド自体はタグへRF送信・タグメモリ書込みを行いませんが、後続のRF動作を変えます。flash_operation=trueは02hのFLASH書込みを含むためで、00h／01hもFLASHへ保存するという意味ではありません。
 
-#### ACK/データ部offset
-成功ACK `CMD=30h` は `LEN=03h` の固定長ACKです。RFタグ通信関連パラメータ本体はACKには含まれません。
+### 8.2 パラメータ3 byteの意味
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail` | `33h`: 設定書込系 |
-| 1 | `sub` | `04h`: RFタグ通信関連パラメータ書込 |
-| 2 | `parameter_type` | `00h` コマンドモード / `01h` 自動読み取りモード / `02h` FLASH |
+根拠: §7.4.8 p.172、§7.4.24 p.228–232。読取りACKと書込み要求では、DATA[3..5]の配置が同じです。
 
-`LEN=03h`、`DATA[0]=33h`、`DATA[1]=04h` を満たさない場合は、このコマンドの通常成功ACKとして扱わないでください。
+| フィールド | 位置・意味 | 初期値 |
+|---|---|---|
+| PARAM1 bit0、bit5–7 | 予約。通常0。未定義の機能を割り当てない | 0 |
+| PARAM1 bit1 | 共通RSSIフィルタ: 0=使用しない、1=使用する | 0 |
+| PARAM1 bit3:bit2 | 左が上位bit。00=指定周波数固定、01=周波数ホッピング、10=キャリアセンス優先、11=予約 | 10b |
+| PARAM1 bit4 | Inventory Target A/B自動切替: 0=無効、1=有効。機能は自動読み取り用 | 1 |
+| RSSI | 符号付き8 bit閾値、-128～127 | BFh（-65） |
+| RETRY bit0–3 | インベントリ処理のリトライ回数、0～15 | 0 |
+| RETRY bit4–7 | リードライト処理のリトライ回数、0～15 | 0 |
 
-設定書き込み系は、ACK受信後に必要なら対応する読出コマンドで読戻しし、RAM/FLASHの反映範囲と復元要否を別管理してください。
+PARAM1の初期値18hは、フィルタOFF・スキャン10b・Target切替ONです。RETRY=12hはInventoryが2、Read/Writeが1で、逆ではありません。RSSIの符号変換は、受信byteが128未満ならその値、128以上なら256を引きます。BFhを191として比較しません。
 
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
+### 8.3 保存先と機能の適用を分ける
 
+§3.12 p.71–74では、この設定は両RAMへ相互反映します。00h／01hのどちらを書いてもコマンド用・自動用RAMが同じ設定となり、FLASHは変更しません。02hはFLASHと両RAMへ直ちに反映します。起動・リスタート時もFLASHから両RAMへコピーされます。
 
-#### NACK分類
+同じ値が保存されることは、全機能が両モードで有効なことを意味しません。Target A/B自動切替は自動読み取りモード限定（§3.8 p.58）。コマンドモードではbit4を有効にしていても、Inventoryの設定Targetを使います。[RAM影響](../../RAM_FLASH_IMPACT_MATRIX.md)と[モード別適用範囲](../../RESPONSE_MODE_APPLICABILITY.md)も確認します。
 
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
+### 8.4 共通RSSIフィルタの対象と境界
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 33h 04h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
+§7.4.24 p.229の対象は、コマンドモードのUHF_Inventory／UHF_InventoryReadと、UHF連続インベントリ／UHF連続インベントリリードです。有効時、タグRSSIが閾値より小さい場合に上位機器へのタグ読取りレスポンスを抑制します。閾値-65なら-66は抑制、-65と-64はこの段階を通過します。
 
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
+RFタグとの交信自体を禁止する機能や、Select・Accessによる対象保護ではありません。受信データがないだけで物理的なタグ0枚と判定せず、Write等の全ACKへ適用しません。p.229のRSSIのおおよその観測範囲-70～-20は、設定可能範囲や距離保証ではありません。マルチパスや使用周波数でも変わります。
 
-#### 最小疑似コード
+### 8.5 個別RSSIフィルタとの関係
 
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
+§7.4.30 p.249–250では、共通設定と[個別RSSIフィルタ](55_39_write_rssi_filter.md)は独立で、共通を先に判定します。共通で抑制されたデータを個別条件で復活させません。共通を通過しても、有効な個別条件の判定が続くため、必ず上位へ返るとは限りません。
 
-#### 推奨パーサ出力
+個別設定の対象はInventoryRead／連続インベントリリードで、Inventory／連続インベントリとは異なります。個別のNo.1～10・比較条件・不一致データの扱い・FLASH保存は別カードで確認し、この3 byteへ詰め込みません。個別の構造・判定順は別カードの部分照合へ進みました。閾値表現と等号の不一致は[OPEN-019／020](../../SOURCE_REVIEW_STATUS.md)で確認中です。
 
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
+### 8.6 スキャン3方式と機種差
 
-#### 設定スナップショット必須項目
+根拠: p.229–230。使用周波数の許可マスク・開始チャンネルは[周波数設定](55_33_02_write_frequency.md)で確認します。
 
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
+| bit3:bit2 | 使用周波数 | キャリアセンスにかかった場合 |
+|---|---|---|
+| 00b 固定 | 指定した開始チャンネルのみ | 同じ周波数でセンスを繰り返す |
+| 01b ホッピング | キャリア送信開始ごとに許可周波数を順次切替 | 許可周波数を切り替えて再センス |
+| 10b キャリアセンス優先 | かかるまでは前回の周波数を継続 | 許可周波数を切り替えて再センス |
+
+ホッピング時、UTR-SUN02-4CHは一連のアンテナ切替中は同一周波数ですが、キャリアセンスにかかった場合を除きます。UTR-SUN02V-8CH／UTR-SUN02-8CHは内部・外部ともアンテナ切替ごとに周波数を切り替えます。
+
+11bは予約で、どの設定もキャリアセンスを省略する指定ではありません。ここでの繰返しは機器内のRF制御です。§3.1.2 p.23–25の待ち時間・機種／ROM条件を確認し、ホストでの無期限待機や無制限の再送へ読み替えません。
+
+### 8.7 Target A/Bの開始値・再開値
+
+根拠: §3.8 p.58、p.230–231。下表は自動読み取りモードです。コマンドモードへ自動切替を適用しません。
+
+| bit4 | Inventory設定のTarget | InventoryごとのTarget | キャリア休止後の最初 |
+|---|---|---|---|
+| 1 有効 | A | A→B→A→… | A |
+| 1 有効 | B | B→A→B→… | B |
+| 0 無効 | A | A→A→A→… | A |
+| 0 無効 | B | B→B→B→… | B |
+
+変更するのはリーダライタのInventory Targetです。タグのInventoriedフラグを強制的に戻す機能ではありません。再読取りには[Inventory設定](55_31_uhf_set_inventory_param.md)のSession・Targetと[Select設定](55_30_uhf_set_select_param.md)も関係します。
+
+切替OFF・Select不使用・S2／S3の「1回読み取り」はフラグ保持条件に依存します。永久に読めなくなる意味ではありません。S0の給電OFFによる復帰と、S2／S3の保持・時間経過を分けて扱います（§8.3 p.325–326）。
+
+### 8.8 2種類のリトライとホストtimeout
+
+根拠: §3.10 p.66、p.231–232。下位4 bitがInventory、上位4 bitがRead/Writeで、それぞれ0～15、FLASH初期値0です。Q=0のInventoryでは設定回数に関係なく1枚読めた時点でリトライを終了し、常に指定回数を使い切るわけではありません。
+
+Read/Writeの設定は、RFタグから応答を取得できない場合のリトライです。タグからエラーコードを含むNACKが返った場合、このリトライは行いません。RFタグ→リーダライタのNACKとリーダライタ→ホストの共通NACKを区別し、ホストの自動再送指示にしません。p.66では設定0でもコマンドやタグ応答により内部リトライがあります。0をRF送信1回や固定時間と断定しません。
+
+リトライ増加は処理時間を延ばす可能性があります。小さすぎるQや恒常的な干渉を解消する保証はなく、通信距離も延びません。Read等のハンドル取得失敗では、読書き前のInventory段階を確認します。両nibbleをUSB/LANのホスト再送回数・受信timeoutへ直接換算しません。
+
+### 8.9 読戻し・復元と失敗時の扱い
+
+変更前に00h／01h／02hの設定を区別して記録します。1項目だけを変更する場合も、他の値を初期値で補いません。変更後は同じ種類を読戻し、必要な影響先も確認します。FLASHを復元すると両RAMも変わるため、変更前のRAM値がFLASHと異なる場合はFLASH復元後にRAM値も復元します。ACK、読戻し一致、再起動後保持は別の確認です。
+
+CMD=31hは[共通NACK](../../RESPONSE_AND_NACK_MASTER.md)として解析し、Encode等の追加コードを転用しません。ホストtimeoutはNACKでも未変更の証明でもないため、読戻して状態を確認してから再送・復元を判断します。非同期タグ通知で設定要求を成功終了しません。これらは応答・保存仕様から導く設計上の注意で、実機試験の結果ではありません。
+
+全機種・ROMの適用条件、各NACKの発生条件、環境ごとのフィルタ・リトライ効果は未確認です。実機変更前に対象・地域・現場条件、変更値、停止・復旧方法を確認します。
+
 ## 9. 実機確認
 
 実機確認区分: `settings-change`
@@ -540,5 +499,15 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- `55_43_04_read_rf_tag_comm_params.md`
+- `../../RAM_FLASH_IMPACT_MATRIX.md`
+- `../../RESPONSE_MODE_APPLICABILITY.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `55_33_02_write_frequency.md`
+- `55_43_02_read_frequency.md`
+- `55_31_uhf_set_inventory_param.md`
+- `55_30_uhf_set_select_param.md`
+- `55_39_write_rssi_filter.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

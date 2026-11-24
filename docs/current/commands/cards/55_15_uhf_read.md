@@ -15,14 +15,14 @@ operation_level: "RF read"
 rf_emission: true
 write_operation: false
 flash_operation: false
-tag_memory_operation: false
+tag_memory_operation: true
 requires_rom_check: true
 requires_antenna: true
 requires_tag: true
-requires_access_password: false
+requires_access_password: true
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
@@ -31,6 +31,14 @@ related_docs:
   - "../../RF_SAFETY_AND_CARRIER_RULES.md"
   - "../../PARAMETER_CONFIRMATION_GUIDE.md"
   - "../../AI_IMPLEMENTATION_GUARDRAILS.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../TID_MEMORY_AND_UNITS.md"
+  - "../../ANTENNA_NUMBERING_SCHEMES.md"
+  - "55_33_03_write_access_password.md"
+  - "55_30_uhf_set_select_param.md"
+  - "55_31_uhf_set_inventory_param.md"
+  - "55_16_uhf_write.md"
 tags:
   - "utr-s201"
   - "command-card"
@@ -39,7 +47,7 @@ tags:
   - "rf-emission"
   - "requires-antenna"
   - "requires-tag"
-  - "pass-with-notes"
+  - "specification-reference"
   - "uhf-read"
 ---
 
@@ -53,12 +61,14 @@ tags:
 - 確認区分: `rf-read`
 - 操作レベル: RF read
 - コマンドバイト: `55h` / 詳細コマンド: `15h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
-このコマンドの目的は、**UHF_Read** です。
+1枚のRFタグから、指定MemBank・Wordアドレスの1～32 Wordを読み取ります。
 
 詳細なフィールド定義、データ長、レスポンス形式は公式PDFを一次情報として確認してください。このカードは、公式PDFを置き換えるものではなく、AIに実装やレビューを依頼するときの補助資料です。
 
@@ -77,11 +87,11 @@ tags:
 | RF送信 | あり |
 | 書き込み操作 | なし |
 | FLASH操作 | なし |
-| タグメモリ操作 | なし |
+| タグメモリ操作 | あり（読取り） |
 | ROM確認 | あり |
 | アンテナ条件確認 | あり |
 | タグ条件確認 | あり |
-| Accessパスワード確認 | なし |
+| Accessパスワード確認 | あり（非ゼロ設定・ロック条件。§8.3参照） |
 | パラメータ確認 | あり |
 | 明示許可 | 不要または通常不要 |
 
@@ -225,153 +235,72 @@ tags:
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
-## 8. レスポンス処理
+## 8. 要求・応答の照合ポイント
 
-レスポンス処理では、以下を区別してください。
+ここからはPDF §7.5.3 p.271–273の補足整理です。DATAは0起点で、共通フレームのoffset 4から始まります。§6の原典転記は保持しています。
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+### 8.1 要求はWord単位
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+CMD=55h、LEN=07h、総14 byteです。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+| DATA位置 | 長さ | 内容 |
+|---|---:|---|
+| 0 | 1 | 詳細15h |
+| 1 | 1 | bit1..0がMemBank: 00=Reserved、01=EPC/UII、10=TID、11=User。bit2..7は予約、通常0 |
+| 2..5 | 4 | 開始Wordアドレス、MSB先行 |
+| 6 | 1 | 読取りWord数m、1～32 |
 
-### 8.1 ACK/レスポンス例（PDF掲載例）
+1 Word=16 bit=2 byteです。Selectのbitアドレスや応答のbyte数と区別します。32 Wordはコマンドの上限であり、各タグ・各bankに32 Word存在する保証ではありません。0を「全領域」の指定として使いません。TIDの範囲や個体識別性は[単位・TIDガイド](../../TID_MEMORY_AND_UNITS.md)とタグ仕様で確認します。
 
-| 種別 | Hex |
-|---|---|
-| TX | `02 00 55 07 15 01 00 00 00 02 01 03 7A 0D` |
-| RX | `02 00 30 04 15 02 <READ_DATA_BYTES> 03 B2 0D` |
+### 8.2 ACKの二つの長さ
 
-ACKデータ部は15h、読み取りデータ長、読み取りデータです。例ではEPC領域1Wordの読み取りデータが返っています。
+成功ACKはCMD=30hです。読取りデータのbyte数をnとすると、LEN=n+2、総フレーム長=n+9です。
 
-### 8.2 NACK例（フォーマットエラーの例）
+| DATA位置 | 長さ | 内容 |
+|---|---:|---|
+| 0 | 1 | 詳細15h |
+| 1 | 1 | 読取りデータのbyte数n（Word数ではない） |
+| 2..n+1 | n | 読取りデータ、2～64 byte、MSB先行 |
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 15 44 00 00 00 00 00 00 00 00 03 99 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+1. 共通フレームのLEN＋7、STX・ETX・CR・SUMを検査する。
+2. CMD=30h、LENが4～66、DATA[0]=15hであることを確認してから可変領域を読む。
+3. nが2～64の偶数、LEN=n+2、さらにn=2×要求Word数mであることを確認する。
+4. MemBank・開始位置はACKに返らないため要求と対応づける。1 Wordなら総11 byte、32 Wordなら総73 byteとなる。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+p.273の掲載例はEPC領域Word 02hから1 Wordを読み、DATA[1]=02hに続くE2 80を得ています。E2 80だけでEPC全体やタグの一意性を確認したことにはなりません。別途のEPC・TID・RSSI・枚数フィールドを付加して解析しません。
 
-### 8.3 設定依存の注意
+ADRは§5.2 p.99の規則に従います。RFタグの読取りデータを返す応答ではアンテナID出力有効時に読取りアンテナ番号となり、それ以外はリーダライタIDです。[アンテナ番号ガイド](../../ANTENNA_NUMBERING_SCHEMES.md)を参照してください。これはDATAの位置や長さが変わる設定ではありません。自動読み取り用の完了通知設定を、このACKの省略条件へ転用しません。
 
-- アンテナID出力ON/OFFにより、レスポンスのアドレス位置がリーダライタIDまたは読み取りANT番号に変わります。
-- 読取完了応答、アンテナ切替完了応答、キャリア検知応答のON/OFFで、後続ACKの有無が変わります。
-- TID付加、EPC/UII応答設定、読み取りWord数により、可変長データの長さが変わります。
+### 8.3 対象タグとAccessパスワード
 
+PDF §3.10.3 p.64、§7.5.3–4 p.271–275に従い、SelectとQueryの条件で対象を1枚に絞ります。Read／Write内部のQueryは設定Q値によらずQ=0です。Q=0は対象の一意性を保証せず、複数タグが応答すると別タグへの実行や失敗があり得ます。
 
-### 8.4 AI実装用レスポンス定義
+リーダライタに非ゼロのAccessパスワードが設定されていれば、MemBankに関係なくAccessを発行します。不一致ならNACKとなり、未ロック領域でも誤ったパスワード設定を無視できません。ゼロ設定ではAccessを発行しませんが、ロックを解除・迂回する意味ではありません。対象タグのAccess対応と、読取り／書込みそれぞれのロック条件を確認します。
 
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+[Accessパスワード設定](55_33_03_write_access_password.md)はリーダライタのRAM設定であり、タグのパスワードを書き換えません。再起動・電源再投入でゼロへ戻り、設定値は読戻せません（§7.4.23 p.226–227）。本カードの`requires_access_password: true`はこの依存条件の確認を表し、常に非ゼロの秘密値が必要という意味ではありません。不要になった設定は同節に従ってゼロへ戻す運用を決めます。秘密値は公開ログに残しません。
 
-#### 共通フレームoffset
+### 8.4 NACKと再試行
 
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
+共通NACKはCMD=31h、LEN=0Ah、総17 byteです。DATA[0]で要求の詳細コマンドとの対応、DATA[1]でエラーコード1を確認し、コード1=0Ahの場合だけDATA[2]のエラーコード2を解釈します。DATA[3]以降のEncode／BlockWrite2用追加コードを本コマンドへ転用しません。予約byteもSUMの計算対象です。
 
-#### 受信分類ルール
+PDF §7.6 p.317ではコード1=04hは「RFタグ無応答」です。コード1=0Ahの場合、コード2の[04h: メモリロック]、[81h: ハンドル取得失敗]、[82h: Accessパスワードエラー]を参照します。コード1とコード2の04hを混同しません。
 
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]=15h` | `ACK` | UHF_Read成功応答。読み取りデータ長と読み取りデータをDATA内で解析する |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期タグ応答の可能性として分類し、要求応答と混同しない |
-| `CMD=30h` かつ `DATA[0]=10h` `DATA[1]=02h` | `CARRIER_DETECTED` | キャリア検知応答ON時の非同期イベント候補 |
+p.64・65の欄名は、2026-09-09の保守者訂正により「エラーコード2」で確定しました。p.64の名称は「ハンドル取得失敗」とし、81hはQuery実行時にRFタグのハンドル情報を取得できなかったことを表します。コードと名称は半角スペースで区切ります。訂正本文は[原典照合一覧](../../SOURCE_REVIEW_STATUS.md)のOPEN-013（解決済み）を参照してください。
 
-対象識別子: コマンド `55h` / 詳細 `15h` / サブ `なし`。
+NACK・timeoutをInventoryの「タグ0枚の正常完了」へ置き換えません。指定領域が存在するか、アクセス可能か、選別条件に一致するかを分けて確認します。未規定の範囲外条件へエラー値や自動再試行回数を割り当てません。
 
+### 8.5 Readに固有の運用条件
 
-#### ACK/データ部offset
-成功ACK `CMD=30h` / `DATA[0]=15h`:
+キャリア維持中のReadでNACKとなると、取得済みRFハンドルを破棄する条件がp.272にあります。再試行時に以前と同じタグのハンドルが残っていると仮定せず、対象を1枚に絞る条件を維持します。
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail` | `15h`: UHF_Read |
-| 1 | `read_length` | 後続の読み取りデータ長 |
-| 2.. | `read_data` | `read_length` byte。実機タグ固有値は公開ログへ載せない |
+複数タグの読取りには[InventoryRead](55_14_uhf_inventory_read.md)を検討できますが、同コマンドはAccessを発行しません。Password Read Lockされた領域を読むReadの代替にはできません（p.227）。読取り成功、対象タグの同定、全領域の取得完了は別々に記録します。
 
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
-
-
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 15h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 9. 実機確認
 
 実機確認区分: `rf-read`
@@ -411,6 +340,15 @@ AIへ依頼するときは、次の前提を明示してください。
 実装言語は限定しません。Python、C#、C++、JavaScriptなど、対象環境に合わせて選択してください。
 
 ## 11. 参照ドキュメント
+
+- [SOURCE_REVIEW_STATUS](../../SOURCE_REVIEW_STATUS.md)
+- [RAM_FLASH_IMPACT_MATRIX](../../RAM_FLASH_IMPACT_MATRIX.md)
+- [TID_MEMORY_AND_UNITS](../../TID_MEMORY_AND_UNITS.md)
+- [ANTENNA_NUMBERING_SCHEMES](../../ANTENNA_NUMBERING_SCHEMES.md)
+- [55_33_03_write_access_password](55_33_03_write_access_password.md)
+- [55_30_uhf_set_select_param](55_30_uhf_set_select_param.md)
+- [55_31_uhf_set_inventory_param](55_31_uhf_set_inventory_param.md)
+- [55_16_uhf_write](55_16_uhf_write.md)
 
 - `../../COMMAND_MASTER_V117.md`
 - `../../TRACEABILITY_INDEX_V117.md`

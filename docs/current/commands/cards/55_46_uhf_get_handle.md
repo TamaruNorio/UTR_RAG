@@ -10,19 +10,19 @@ command_name: "UHF_GetHandle"
 command_byte: "55h"
 detail_command: "46h"
 subcommand: null
-operation_profile: "rf-read"
-operation_level: "RF diagnostic"
-rf_emission: true
+operation_profile: "read-only"
+operation_level: "read-only"
+rf_emission: false
 write_operation: false
 flash_operation: false
 tag_memory_operation: false
 requires_rom_check: true
-requires_antenna: true
+requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: false
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
@@ -31,13 +31,19 @@ related_docs:
   - "../../RF_SAFETY_AND_CARRIER_RULES.md"
   - "../../PARAMETER_CONFIRMATION_GUIDE.md"
   - "../../AI_IMPLEMENTATION_GUARDRAILS.md"
+  - "4e_9e_rf_carrier_control.md"
+  - "55_10_uhf_inventory.md"
+  - "55_31_uhf_set_inventory_param.md"
+  - "55_30_uhf_set_select_param.md"
+  - "4e_00_10_write_reader_mode.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "55_ff_uhf_through_cmd.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-control"
-  - "rf-emission"
-  - "requires-antenna"
-  - "pass-with-notes"
+  - "read-only"
+  - "specification-reference"
   - "uhf-get-handle"
 ---
 
@@ -48,15 +54,17 @@ tags:
 
 - PDF章番号: `7.3.12`
 - コマンド分類: リーダライタ制御
-- 確認区分: `rf-read`
-- 操作レベル: RF diagnostic
+- 確認区分: `read-only`
+- 操作レベル: 読み取り専用
 - コマンドバイト: `55h` / 詳細コマンド: `46h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
-このコマンドの目的は、**UHF_GetHandle** です。
+リーダライタ内部に保持している、RFタグから最後に取得した16 bitのHandleを読みます（p.150）。新しいHandleの取得やタグ側との一致確認を、この要求単独で実行するという意味ではありません。
 
 詳細なフィールド定義、データ長、レスポンス形式は公式PDFを一次情報として確認してください。このカードは、公式PDFを置き換えるものではなく、AIに実装やレビューを依頼するときの補助資料です。
 
@@ -68,16 +76,22 @@ tags:
 
 ただし、仕様に存在することと、実機へ送信してよいことは別です。実機送信前には、対象機種、ROMバージョン、接続先、パラメータ、影響範囲、復旧方法、停止条件を確認してください。
 
+p.108の機種別対応表では、UTR-S201・UTR-SHR201・UTR-SUN02-4CHはROM 2.040以前が非対応、2.050以降／2.100以降が対応です。UTR-SUN02-8CH・UTR-SUN02V-8CHは「全バージョン」列が対応です。複数列に該当する場合は最も右の列を使用し、4CHを8CHの列へ含めません。未掲載ROMの空白範囲は推測で埋めません。
+
+両コマンドともp.19–20の連続モード65h／66h中の受付例外ではありません。[モード書込み](4e_00_10_write_reader_mode.md)で00hへ戻す条件を確認します。
+
+p.150冒頭の「ROM 2.050以降」という注意と、上記の機種別対応表を併せて参照してください。
+
 ## 4. 安全性・影響分類
 
 | 項目 | 判定 |
 |---|---|
-| RF送信 | あり |
+| RF送信 | 本要求は内部保持値の読取り。前後のRF処理は別 |
 | 書き込み操作 | なし |
 | FLASH操作 | なし |
 | タグメモリ操作 | なし |
 | ROM確認 | あり |
-| アンテナ条件確認 | あり |
+| アンテナ条件確認 | 本要求単独は不要。Handle使用フローでは必要 |
 | タグ条件確認 | なし |
 | Accessパスワード確認 | なし |
 | パラメータ確認 | なし |
@@ -173,159 +187,47 @@ tags:
          [UHF_GetHandle]コマンドを実行し、Handle 値 = [52 90]h が返ってきた場合
 ```
 
-## 7. コマンド形式の扱い
+原典参照の補足（2026-09-08）: 上記の「5.4 SUM の計算方法」は、Ver.1.17では「5.3 SUM の計算方法」（p.100）を参照してください。§5.4はレスポンスの説明です。PDF転記は保持し、本注記を分けています。この時点ではSUM参照だけの照合でした。2026-09-14にp.150–151の主要条件を追加照合しました。全条件の実機確認ではありません。
 
-コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
+## 7. 要求と固定ACK
 
-このカードでは、以下を意図的に記載しません。
+DATA offsetは0起点です。要求はCMD=55h・LEN=01h・DATA[0]=46h、総8 byte。追加パラメータはありません（p.150）。ACKはCMD=30h・LEN=03h、総10 byteです（p.151）。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+| ACK DATA offset | 内容 |
+|---:|---|
+| 0 | 46h |
+| 1 | Handle上位byte |
+| 2 | Handle下位byte |
 
-AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
+HandleはMSB firstです。p.151の52 90は5290hで、9052hではありません。共通フレームの長さ・SUMと要求の対応を検査し、LEN=01hの空ACKへ読み替えません。掲載Hexは原典の説明例であり、実機への送信許可ではありません。
 
-## 8. レスポンス処理
+## 8. Handleの有効性と応答処理
 
-レスポンス処理では、以下を区別してください。
+### 8.1 保持値とタグ状態
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+ACKが返っても、返却Handleと現在のタグHandleの一致を保証する応答ではありません。タグがOpen／Securedから抜けるとHandleがクリア・再生成され得ます（p.150）。HandleをEPC/TIDのような恒久IDとして保存・再利用しません。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+GetHandleにRAM/FLASH選択、アンテナ指定、タグ探索パラメータはありません。メタデータread-only・rf_emission=falseは内部保持値を読む本要求の分類であり、実行中キャリアがOFFであることを保証しません。下記の準備・利用にはRF送信とタグが必要です。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+### 8.2 原典の使用フロー
 
-### 8.1 ACK/レスポンス例（RF処理成功時）
+1. [RF制御](4e_9e_rf_carrier_control.md)でキャリアON。
+2. [Inventory](55_10_uhf_inventory.md)をQ自動UP/DOWNなし、開始・最小・最大Qすべて0で実行し、タグをOpenへ移す。複数タグから1枚を扱う場合は事前に[Select](55_30_uhf_set_select_param.md)実行の設定も行う。
+3. 必要ならGetHandleで保持値を取得する。
+4. [ThroughCmd](55_ff_uhf_through_cmd.md)でカスタムコマンドを実行する。Handle自動付加なら手順3は不要だが、1・2は必要。
+5. 終了後は直ちにキャリアOFFにすることが原典の推奨。
 
-| 項目 | 内容 |
-|---|---|
-| 成功ACK構造例 | `02 ADR 30 01 46 <RF処理結果...> 03 7C 0D` |
-| ACK/応答データ部の先頭 | `46h` |
-| RFタグ応答 | コマンドにより、ACKとは別にRFタグデータ、読取完了ACK、またはエラーNACKが返ります。 |
+RF維持は出力開始から最大4秒です。OFF・4秒経過・新Handle取得・タグ読み書きNACK等の後に旧Handleを使い続けません。NACKによるHandle破棄とRF OFFは別です（p.129–135）。ThroughCmdの自動付加も古いHandleを有効に戻す機能ではありません。
 
-RF系では1送信1応答に固定しません。タグ応答、完了応答、NACK、timeoutを同じ受信ループで分類してください。
+### 8.3 応答の区別と未確認範囲
 
-### 8.2 NACK例（フォーマットエラーの例）
+このACKへInventoryのタグ別応答、読取完了、TID付加、アンテナID出力、キャリア検知通知の設定を適用しません。共通受信側で別の通知を受けてもGetHandleの完了と混同しません。
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 46 44 00 00 00 00 00 00 00 00 03 CA 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+CMD=31hは[共通NACK](../../RESPONSE_AND_NACK_MASTER.md)で解析し、timeout・不正フレームと分けます。Handle未取得・破棄済み時の返却値や固有NACK、0000hを無効とする判定、全ROMの保持期間はp.150–151だけでは確定しません。未確認状態で値から有効性を推測しません。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
-
-### 8.3 設定依存の注意
-
-- アンテナID出力ON/OFFにより、レスポンスのアドレス位置がリーダライタIDまたは読み取りANT番号に変わります。
-- 読取完了応答、アンテナ切替完了応答、キャリア検知応答のON/OFFで、後続ACKの有無が変わります。
-
-
-### 8.4 AI実装用レスポンス定義
-
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
-
-#### 共通フレームoffset
-
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
-
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]=46h` | `ACK` | 対象コマンド `55h 46h` の成功応答としてPDF該当節を読む |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期タグ応答候補。要求コマンドのACKと混同しない |
-| `CMD=30h` かつ `DATA[0]=10h` `DATA[1]=02h` | `CARRIER_DETECTED` | キャリア検知応答ON時のみイベントとして扱う |
-
-対象識別子: コマンド `55h` / 詳細 `46h` / サブ `なし`。
-
-
-#### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は、原則として `46h` またはPDF該当節の応答識別子として扱います。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail/status` | 対象コマンドの詳細識別子または状態識別子 |
-| 1.. | `payload` | PDF該当節の順序で読む。予約byteは独自解釈しない |
-
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
-
-
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 46h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 9. 実機確認
 
-実機確認区分: `rf-read`
+実機確認区分: `read-only`
 
 実機確認では、以下をログに残してください。
 
@@ -370,5 +272,13 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../RF_SAFETY_AND_CARRIER_RULES.md`
 - `../../PARAMETER_CONFIRMATION_GUIDE.md`
 - `../../AI_IMPLEMENTATION_GUARDRAILS.md`
+
+- `4e_9e_rf_carrier_control.md`
+- `55_10_uhf_inventory.md`
+- `55_31_uhf_set_inventory_param.md`
+- `55_30_uhf_set_select_param.md`
+- `4e_00_10_write_reader_mode.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `55_ff_uhf_through_cmd.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

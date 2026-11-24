@@ -1,0 +1,8 @@
+# Keep documentation byte hashes stable across Windows and Linux checkouts.
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+# Preserve Markdown hard breaks in the recorded model answers and their hashes.
+docs/evaluation/20260916/*.md whitespace=-blank-at-eol

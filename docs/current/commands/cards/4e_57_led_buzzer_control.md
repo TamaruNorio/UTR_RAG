@@ -10,7 +10,7 @@ command_name: "LED&ブザーの制御"
 command_byte: "4Eh"
 detail_command: "57h"
 subcommand: null
-operation_profile: "needs-metadata-confirmation"
+operation_profile: "reader-control"
 operation_level: "reader-control"
 rf_emission: false
 write_operation: false
@@ -21,19 +21,23 @@ requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "4f_9f_read_general_port.md"
+  - "42_buzzer_control.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-control"
   - "requires-parameters"
-  - "pass-with-notes"
+  - "specification-reference"
   - "led-buzzer-control"
 ---
 
@@ -45,11 +49,13 @@ tags:
 
 - PDF章番号: `7.3.3`
 - コマンド分類: リーダライタ制御
-- 確認区分: `needs-metadata-confirmation`
+- 確認区分: `reader-control`
 - 操作レベル: reader-control
 - コマンドバイト: `4Eh` / 詳細コマンド: `57h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -61,7 +67,9 @@ tags:
 
 判定: `SUPPORTED`
 
-このコマンドはPDF Ver.1.17のコマンド一覧に含まれるため、仕様上の対象コマンドとして扱います。
+p.108の対応表では、UTR-S201／UTR-SHR201／UTR-SUN02-4CHの掲載ROM区分（2.040以前・2.050以降・2.100以降）と、UTR-SUN02-8CH／UTR-SUN02V-8CHの全バージョン欄で対応です。コマンド対応と、LED・ブザーの実装／接続は別に確認します。
+
+本カードの`reader-control`は鳴動・表示を変える制御操作です。`write_operation: false`は設定保存やタグメモリ書込みの要求ではないという分類で、観測だけの操作を意味しません。RF送信・FLASH保存は行いません。
 
 ただし、仕様に存在することと、実機へ送信してよいことは別です。実機送信前には、対象機種、ROMバージョン、接続先、パラメータ、影響範囲、復旧方法、停止条件を確認してください。
 
@@ -88,7 +96,7 @@ tags:
 
 1. ROMバージョンを読み取り、シリーズ名と対象機種を確認する。
 2. 対象コマンドが、その機種・ROMで利用可能か確認する。
-3. 汎用ポート1および汎用ポート3の機能が、汎用ポートに設定されているか確認する。
+3. 汎用ポート1・3の両方の機能が汎用ポートか確認し、LED制御対象の方向が出力であることも確認する（p.40・126）。
 4. 汎用ポート7にブザーを接続して制御する場合は、汎用ポート7の機能と外部回路条件を確認する。
 5. 制御ポート、LED動作モード、LED動作値、ブザー音、ブザー動作値をPDF定義値から選ぶ。
 6. 実機送信が必要な場合は、接続先、タイムアウト、ログ保存先、停止条件を決める。
@@ -257,8 +265,8 @@ tags:
 
 | LED動作モード | データ部[3] | 意味 |
 |---|---|---|
-| `00h` 指定時間の点灯 | 任意設定値 | `設定値 × 200msec` の点灯 |
-| `01h` 常時点滅 | 任意設定値 | `設定値 × 200msec` 間隔の点滅 |
+| `00h` 指定時間の点灯 | 1 byteの時間値（境界動作は§8参照） | `設定値 × 200msec` の点灯 |
+| `01h` 常時点滅 | 1 byteの時間値（境界動作は§8参照） | `設定値 × 200msec` 間隔の点滅 |
 | `02h` 常時点灯または消灯 | `00h` | 消灯 |
 | `02h` 常時点灯または消灯 | `01h` | 常時点灯 |
 
@@ -272,7 +280,7 @@ tags:
 | `03h` | ピッピッピー | ブザー鳴動の有無 |
 | `04h` | ピーー | ブザー鳴動の有無 |
 | `05h` | ピーピーピーピー | ブザー鳴動の有無 |
-| `06h` | ピーーー | ブザー鳴動の有無 |
+| `06h` | ピーーーー | ブザー鳴動の有無 |
 | `07h` | ピッピッピッピッピッ | ブザー鳴動の有無 |
 | `08h` | ピッピッピッピッ | ブザー鳴動の有無 |
 | `FFh` | 時間指定連続音（ピー） | ブザー鳴動時間。`設定値 × 200msec` |
@@ -281,7 +289,7 @@ tags:
 
 | ブザー音 | データ部[5] | 意味 |
 |---|---|---|
-| `FFh` 時間指定連続音（ピー） | 任意設定値 | `設定値 × 200msec` の鳴動 |
+| `FFh` 時間指定連続音（ピー） | 1 byteの時間値（境界動作は§8参照） | `設定値 × 200msec` の鳴動 |
 | `FFh` 以外 | `00h` | 鳴動しない |
 | `FFh` 以外 | `01h` | 鳴動する |
 
@@ -306,145 +314,51 @@ tags:
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
-## 8. レスポンス処理
+## 8. レスポンス処理と動作条件
 
-レスポンス処理では、以下を区別してください。
+### 8.1 要求と固定ACK
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+要求は`CMD=4Eh / LEN=06h`、DATAは詳細57h・制御ポート・LEDモード・LED動作値・音番号・ブザー動作値の順で総13 byteです。成功ACKは`CMD=30h / LEN=01h / DATA[0]=57h`、総8 byteです（p.126–128）。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+[単独ブザー42h](42_buzzer_control.md)の応答要求00h／01hに相当するフィールドはありません。DATA[1]=00hはLEDを制御しない指定であり、ACKを省略する指定ではありません。ブザー動作値00hも応答要求ではありません。ACKには表示・鳴動の実行結果や動作値が返りません。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+### 8.2 ポート機能と出力条件
 
-### 8.1 ACK/レスポンス例（PDF掲載例）
+p.126は、汎用ポート1・3の両方の機能が汎用ポートであることを要求します。片方でも異なる場合、LED・ブザーとも制御できずNACKです。片方のLEDだけを選ぶ場合や制御ポート00hでも、この条件を免除する記載はありません。選択したポートだけの機能確認に縮めません。
 
-| 項目 | 内容 |
-|---|---|
-| TX | `02 00 4E 06 57 01 00 02 00 01 03 B4 0D` |
-| RX | `02 00 30 01 57 03 8D 0D` |
-| ACK CMD | `30h` |
-| ACK LEN | `01h` |
-| ACK DATA[0] | `57h`。詳細コマンド |
+[汎用ポート読取り](4f_9f_read_general_port.md)の機能byteではbit0（ポート1）とbit2（ポート3）が1、ブザーを鳴らすにはbit6（ポート7）が0です（p.177、342）。これは各bitの条件であり、他bitを含む機能byte全体を固定値で上書きする手順ではありません。
 
-ACKは通信上の正常受理を示します。実際にLEDが点灯したか、ブザーが鳴動したかは、汎用ポート設定、接続回路、対象機種の実装に依存します。
+p.40はLED制御に汎用機能と出力方向を要求しています。LEDの対象ポートは方向も確認し、p.126で方向への言及がないことを出力条件不要の根拠にしません。入力時のNACKコードや本コマンドが方向を自動変更する挙動は未確認です。ポート7が汎用機能のときのブザー制御不可を、ポート1・3条件違反と同じNACK保証には拡張しません。
 
-### 8.2 NACK例（フォーマットエラーの例）
+### 8.3 LED動作値の単位と制御対象
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 57 44 00 00 00 00 00 00 00 00 03 DB 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+制御ポートは00h（LED制御なし）、01h（ポート1・青）、04h（ポート3・赤）、05h（両方）の4値です。全8ポート向けの任意マスクにはしません。00hを既存LEDの消灯指定と解釈せず、消灯は対象ポートを指定したモード02h・動作値00hとして区別します。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+モード00hは点灯時間、01hは点滅間隔を`動作値×200ms`で指定します。02hでは動作値00h=消灯／01h=常時点灯で、200msを乗じません（p.127）。点滅間隔のON時間・OFF時間・一周期との対応や、時間値0の特別な意味は未確認です。1 byteの表現幅だけを根拠に、すべての値で動作を保証しません。
 
+p.128の例は動作値02hなので青LEDが400ms点灯して消灯します。制御ポート05hでは両LEDに共通のモード・動作値を指定します。LEDごとに別の時間を一つの要求へ詰め込みません。
 
-### 8.4 AI実装用レスポンス定義
+### 8.4 ブザー動作値の分岐
 
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+音00h～08hでは、動作値00h=鳴動しない／01h=鳴動するです。音FFhでは動作値が`値×200ms`の鳴動時間になります（p.127）。同じ動作値02hでも、FFhなら算術上400msですが、通常音では定義済みの鳴動有無値ではありません。
 
-#### 共通フレームoffset
+音00hは「ピー」であって消音ではなく、FFhは時間指定連続音であって無期限の鳴動ではありません。時間値0を停止命令・無期限へ読み替えません。通常音の動作値00hが既に鳴っている音も中断するか、再要求で音が上書きされるかは未確認です。
 
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
+### 8.5 機種と外部回路・保存設定
 
-#### 受信分類ルール
+p.126はUTR-SUN02-4CH等のLED・ブザー搭載据置機を主対象とし、UTR-S201基板モジュールも互換性のため実行可能とします。モジュールにはLED・ブザーがなく、ポート1／3にLED、7に他励式ブザーを接続する場合を説明しています。ポートでの直接駆動はできず、デジタルトランジスタ等を介し、電気的条件は製品仕様書で確認します。
 
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `LEN=01h` かつ `DATA[0]=57h` | `ACK` | 対象コマンド `4Eh 57h` の成功ACK |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
+機能はFLASH 30（1Eh）、方向は32（20h）、起動初期値は33（21h）で、制御要求とは別です。ブザー種別38（26h）bit4は0=標準（他励式）で、予約1はブザーが動作しなくなるため設定しません（p.342–343）。[保存と復元](../../RAM_FLASH_IMPACT_MATRIX.md)を参照し、機能変更や再起動を自動の前処理にしません。
 
-対象識別子: コマンド `4Eh` / 詳細 `57h` / サブ `なし`。
+### 8.6 ACK・実動作・復元を分ける
 
+[応答マスタ](../../RESPONSE_AND_NACK_MASTER.md)でフレーム・NACKを検査し、未完了要求と詳細57hを対応づけます。NACK理由の数値を、機能条件違反に対して独自に割り当てません。正常ACKを鳴動終了・点滅終了の通知とはみなしません。常時点滅・常時点灯に有限の終了時間を追加しません。
 
-#### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は `57h` です。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail_command` | `57h`。LED&ブザーの制御に対するACK |
-
-このACKにはLED/ブザー動作結果の詳細データは含まれません。動作成功を検証する場合は、事前の汎用ポート設定読戻しと実機観測を別に行ってください。
-
-
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `4Eh 57h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
-
-このコマンドでは、上記に加えて、汎用ポート1/3/7の機能設定、外部LED/ブザー接続条件、送信DATA[1]からDATA[5]の各パラメータをパーサへ渡してください。
+ポート現在値の一時点の読戻しでは、点滅間隔や鳴動パターン全体は検証できません。ACK、機能・方向の読戻し、時間を含む実機観測を分けて記録します。元の点滅モードや残り時間を現在値だけから復元できる前提にしません。timeout時の再送・割込み、動作終了時点とACKの関係、起動時を含む復元手順の実機確認は残項目です。
 
 ## 9. 実機確認
 
-実機確認区分: `needs-metadata-confirmation`
+実機確認区分: `reader-control`
 
 実機確認では、以下をログに残してください。
 
@@ -486,5 +400,10 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- `../../RAM_FLASH_IMPACT_MATRIX.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `4f_9f_read_general_port.md`
+- `42_buzzer_control.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

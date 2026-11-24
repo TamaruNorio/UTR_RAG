@@ -21,13 +21,18 @@ requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: false
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../RESPONSE_MODE_APPLICABILITY.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "4e_00_10_write_reader_mode.md"
+  - "42_buzzer_control.md"
 tags:
   - "utr-s201"
   - "command-card"
@@ -35,7 +40,7 @@ tags:
   - "read-only"
   - "reader-mode"
   - "startup-snapshot"
-  - "pass-with-notes"
+  - "specification-reference"
   - "read-reader-mode"
 ---
 
@@ -50,20 +55,22 @@ tags:
 - 確認区分: `read-only`
 - 操作レベル: 読み取り専用
 - コマンドバイト: `4Fh` / 詳細コマンド: `00h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
 このコマンドの目的は、**現在のリーダライタ動作モードとブザー設定を読み取ること** です。
 
-この読み取り結果は、起動時スナップショットや、`4Eh 00h 10h` の「リーダライタ動作モードの書き込み」後の読戻し確認に使います。ACKデータ部には詳細コマンド、動作モード、ブザーbit、予約byteが含まれるため、byte位置で正確にパースしてください。
+この読み取り結果は、コマンドモードで現在設定を記録し、動作モード書込み後の状態を確認するために使います。自動読み取り中は受付保証がなく、RAM／FLASHの読取り対象選択もありません。ACKデータ部には詳細コマンド、動作モード、ブザーbit、予約byteが含まれるため、byte位置で正確にパースしてください。
 
 ## 3. 使用可否・位置づけ
 
 判定: `SUPPORTED`
 
-このコマンドはPDF Ver.1.17のコマンド一覧に含まれるため、仕様上の対象コマンドとして扱います。
+p.109の対応表ではUTR-S201／UTR-SHR201／UTR-SUN02-4CHの掲載ROM区分と、UTR-SUN02-8CH／UTR-SUN02V-8CHの全バージョン欄で対応です。機種対応と、現在モードでの受付条件を分けて判断します。
 
 ただし、仕様に存在することと、実機へ送信してよいことは別です。実機送信前には、対象機種、ROMバージョン、接続先、パラメータ、影響範囲、復旧方法、停止条件を確認してください。
 
@@ -93,7 +100,7 @@ tags:
 3. ACKの `LEN=09h` と `DATA[0]=00h` を確認してから読戻し値を読む。
 4. `DATA[1]` の動作モードを `00h` / `65h` / `66h` として分類する。
 5. `DATA[3]` のbit4だけをブザー設定として扱い、予約bitは独自解釈しない。
-6. 書き込みコマンド後の確認では、RAM/FLASHどちらを読戻したいのかを送信コンテキストで管理する。
+6. 自動読み取り中の受付保証はない。書込み対象の情報だけで本応答をFLASH保存値の読戻しへ読み替えない。
 
 ## 6. PDF仕様フィールド定義
 
@@ -194,9 +201,9 @@ tags:
 
 | `DATA[1]` | モード | 意味 | 実装上の注意 |
 |---|---|---|---|
-| `00h` | コマンドモード | 上位機器からのコマンド待受を基本とする | 通常の安全な操作状態として扱いやすい |
-| `65h` | UHF連続インベントリモード | UHF連続インベントリ動作 | 非同期タグ応答など設定依存の受信を考慮する |
-| `66h` | UHF連続インベントリリードモード | UHF連続インベントリリード動作 | TID付加やEPC/UII応答設定、ANT ID出力設定の影響を併せて見る |
+| `00h` | コマンドモード | 上位機器からのコマンド待受を基本とする | 設定読取りの受付条件を確認する |
+| `65h` | UHF連続インベントリモード | UHF連続インベントリ動作 | この値の定義は連続中の読取り保証を意味しない |
+| `66h` | UHF連続インベントリリードモード | UHF連続インベントリリード動作 | 連続中の受付は保証外。自動応答の設定は別に確認 |
 
 ### 7.4 ブザー設定byte
 
@@ -215,134 +222,35 @@ PDF掲載例の `DATA[3]=10h` は、bit4だけが1で、ブザー「鳴らす」
 | 送信例 | `02 00 4F 01 00 03 55 0D` | リーダライタ動作モードを読み取る |
 | ACK例 | `02 00 30 09 00 00 00 10 00 00 00 00 00 03 4E 0D` | `DATA[1]=00h` コマンドモード、`DATA[3]=10h` ブザー鳴らす |
 
-## 8. レスポンス処理
+## 8. 応答解析と読取り可能な条件
 
-レスポンス処理では、以下を区別してください。
+### 8.1 固定ACKと予約領域
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- フレーム不正
-- ACKデータ長不一致
-- 予約byteの非0値
-- 自動読み取り系モード中の非同期応答
+要求はCMD=4Fh、LEN=01h、詳細00hで総8 byte。成功ACKはCMD=30h、LEN=09h、DATA[0]=00hで総16 byteです（p.152）。DATA[1]は動作モード、DATA[3]のbit4はブザー設定です。DATA[2]とDATA[4～8]は予約で、書込み側の予約3 byteとは長さが異なります。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+ブザーは`DATA[3] AND 10h`で判定し、byte全体が10hと等しいことを必須にしません。予約byte・bitは通常0ですが、非ゼロを別の機能や失敗と独自解釈しません。受信値は保持しSUM検査に含めます。未知のモード値も00hへ補正せず、未確認値として残します。
 
-### 8.1 受信分類ルール
+[書込み](4e_00_10_write_reader_mode.md)のACKはLEN=00h・DATAなしです。読取りACKのDATA[1]は書込み対象ではなくモードです。TID付加などで本ACKの長さを変えず、[応答マスタ](../../RESPONSE_AND_NACK_MASTER.md)に従って未完了要求と照合します。
 
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `LEN=09h` かつ `DATA[0]=00h` | `ACK` | PDF 7.4.1 の成功ACKとしてDATAを読む |
-| `CMD=30h` だが `LEN!=09h` | `UNEXPECTED_ACK_LENGTH` | このコマンドのACKとして固定解釈しない |
-| `DATA[2]` または `DATA[4..8]` が非0 | `RESERVED_NONZERO` | 予約領域として記録し、独自解釈しない |
-| `CMD=6Ch` などのタグ応答 | `RF_TAG_DATA_OR_ASYNC_EVENT` | 自動読み取り系モード中の非同期応答候補。通常ACKとは分離する |
+### 8.2 自動読み取り中の読戻しは保証されない
 
-対象識別子: コマンド `4Fh` / 詳細 `00h` / サブ `なし`。
+§2.4–2.5 p.19–20は、自動読み取り中に受け付ける例外を「動作モード書込み、ブザー制御、LED&ブザー制御、ROM読取り、チップバージョン読取り」の5コマンドとしています。本読取りは例外に含まれず、動作保証の対象外です。
 
-### 8.2 ACK/レスポンス例
+ACK表に65h／66hが定義されていることを、連続モード中の読取り保証と解釈しません。連続モードへ切り替えた直後の必須読戻しや、接続直後にモードを読むことを常に成功する手順にしません。読取り専用でも、モードによる受付条件はあります。
 
-| 項目 | 内容 |
-|---|---|
-| 代表TX Hex | `02 00 4F 01 00 03 55 0D` |
-| 代表ACK Hex | `02 00 30 09 00 00 00 10 00 00 00 00 00 03 4E 0D` |
-| ACKデータ長 | `LEN=09h` |
-| ACKデータ部 | `DATA[0]=00h`, `DATA[1]=動作モード`, `DATA[3].bit4=ブザー` |
+通常コマンドはコマンドモードへ戻してから実行します。ただし、そのための書込みは装置の動作を変更します。観測だけの依頼へ停止・モード変更を追加せず、復帰時のブザー値などが不明なら初期値で補いません。元のモードを変更後の読取りから復元できる前提にも立ちません。
 
-### 8.3 NACK例（フォーマットエラーの例）
+### 8.3 現在値・保存値・鳴動を分ける
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 00 44 00 00 00 00 00 00 00 00 03 84 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコード |
+要求にはRAM／FLASHの読取り対象指定がありません。4Fh/00hの応答を、ホストが保持する「FLASHを読みたい」という情報だけでFLASHの保存値として扱いません。保存モードの独立した読出し方法・アドレスは今回未確認で、存在しないtarget引数やアドレスを作りません。
 
-NACK時は、エラーコード1だけでなく、PDF定義の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+ブザーbitは鳴動設定であって、現在音が鳴っているという検出値ではありません。p.152・188だけから、[単独ブザー制御](42_buzzer_control.md)など全鳴動を一律に禁止する設定とも断定しません。モード設定内のbit4と、FLASH 38（26h）bit4のブザー種別は別です。
 
-### 8.4 AI実装用レスポンス定義
+### 8.4 起動・未知状態・非同期応答
 
-#### 共通フレームoffset
+p.17では電源起動・リスタート後はFLASHに保存したモードで起動します。工場初期値00hを使用中機器の現在値や保存値に流用しません。起動・リスタート直後は約2秒応答できず、リスタート後の次コマンドには2秒以上あける記載があります。この値を通常のモード変更の待機時間へ流用しません。
 
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
-
-#### ACK/データ部offset
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail_command` | `00h`。リーダライタ動作モード読み取りACK |
-| 1 | `reader_mode` | `00h`, `65h`, `66h` のいずれか |
-| 2 | `reserved_0` | 通常 `00h`。独自解釈しない |
-| 3 | `buzzer_bits` | bit4のみブザー設定。bit0-3/5-7は予約 |
-| 4..8 | `reserved_1_5` | 通常 `00h`。独自解釈しない |
-
-#### NACK分類
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象詳細コマンド `00h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR等の主エラー |
-| 2 | `error_code_2` | PDF定義がある場合のみ参照 |
-| 3 | `error_code_3` | PDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-send_read_reader_mode()
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30 and parsed.len == 9 and parsed.data[0] == 0x00:
-    return {
-        "reader_mode": parsed.data[1],
-        "buzzer_enabled": bool(parsed.data[3] & 0x10),
-        "reserved_nonzero": any_reserved_nonzero(parsed.data)
-    }
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | TIMEOUT | INVALID_FRAME | UNEXPECTED_ACK_LENGTH | RESERVED_NONZERO | RF_TAG_DATA_OR_ASYNC_EVENT",
-  "command": "リーダライタ動作モードの読み取り",
-  "command_bytes": "4F 00",
-  "tx_hex": "02 00 4F 01 00 03 55 0D",
-  "ack_hex_example": "02 00 30 09 00 00 00 10 00 00 00 00 00 03 4E 0D",
-  "reader_mode": "COMMAND(00h) | UHF_INVENTORY(65h) | UHF_INVENTORY_READ(66h) | unknown",
-  "buzzer_enabled": true,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前後に、ROM/機種、現在のリーダライタ動作モード、ブザー設定、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、物理アンテナ容量、接続OKアンテナ、現在ANTを確認してください。
+NACK、timeout、フレーム不正、別要求のACK、非同期タグ応答を分けます。無応答をコマンドモードの証明にせず、停止時には既受信・転送中のデータも切り分けて記録します。モード読取りの成功とRFが停止した時刻の実測は別です。全機種の起動・切替タイミングは実機未確認です。
 
 ## 9. 実機確認
 
@@ -388,5 +296,11 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- `../../RAM_FLASH_IMPACT_MATRIX.md`
+- `../../RESPONSE_MODE_APPLICABILITY.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `4e_00_10_write_reader_mode.md`
+- `42_buzzer_control.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

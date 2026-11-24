@@ -47,8 +47,8 @@ queries:
       - "docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
     must_include_facts:
       - "起動時または実機送信前のスナップショットに基づいてACKを解釈する"
-      - "同じ位置のバイトが設定により異なる意味を持つ場合がある"
-      - "ROM、機種、アンテナ設定、TID付加などを確認する"
+      - "対象コマンドのPDF定義と機種・ROM・設定の適用範囲を確認する"
+      - "TID付加や自動読み取りの通知設定を全コマンドのACKへ一般化しない"
 
   - id: GQ-006
     question: "RFタグ通信系の受信処理で、1送信1応答と決め打ちしてはいけないのはなぜですか。"
@@ -57,8 +57,8 @@ queries:
       - "docs/current/commands/cards/55_10_uhf_inventory.md"
     must_include_facts:
       - "RFタグ通信系では複数フレームを受信する場合がある"
-      - "タグ応答、完了ACK、アンテナ切替完了ACK、キャリア検知ACKが混在し得る"
-      - "設定がOFFの応答は返らないことを異常扱いしない"
+      - "単発コマンドの完了と、自動読み取り中のサイクル・切替・キャリア通知を分ける"
+      - "自動読み取りの通知OFFを、単発Inventoryの完了応答へ適用しない"
 
   - id: GQ-007
     question: "NACK、timeout、無応答は実装上どのように扱い分けるべきですか。"
@@ -97,8 +97,9 @@ queries:
       - "docs/current/commands/cards/TEST_STATUS_INDEX.md"
     must_include_facts:
       - "整理対象のカード枚数は54件"
-      - "REAL_DEVICE_VERIFIED_WITH_NOTES が54件"
+      - "SPECIFICATION_REFERENCE が54件"
       - "全54コマンドを個別に実機送信済みであることを示すものではない"
+      - "公式PDFを仕様上の期待結果の基準とする"
 
   - id: GQ-011
     question: "完成HexやSUM計算済み送信用コマンド例は、このリポジトリでどう扱いますか。"
@@ -153,3 +154,2845 @@ queries:
       - "対象機種、ROMバージョン、接続方式、対象コマンドを確認する"
       - "必要パラメータ、分類、ACK/NACK/timeoutの扱いを確認する"
       - "ログ方針、実機送信の有無、停止条件、復旧方法を確認する"
+
+  - id: GQ-016
+    question: "この資料を使うにはメーカーSDKとWindowsが必須ですか。"
+    expected_source_files:
+      - "README.md"
+      - "docs/current/TASK_READING_GUIDE.md"
+    must_include_facts:
+      - "メーカーSDKを必須とせず公開プロトコルから実装する"
+      - "USB/COMとLAN/TCPを区別する"
+      - "SDK不要という方針だけで全OSのドライバや接続手段の動作確認済みとはしない"
+
+  - id: GQ-017
+    question: "単発InventoryでNACK code1=68hが返りました。正常なタグ0枚として継続できますか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+      - "docs/current/commands/cards/55_10_uhf_inventory.md"
+    must_include_facts:
+      - "68hはアンテナ接続異常であり正常なタグ0枚ではない"
+      - "正常0枚は読み取り完了応答で扱う"
+      - "PDF Ver.1.17の7.5.1 p.263-264と7.6 p.317を根拠にする"
+
+  - id: GQ-018
+    question: "GUI制作記録の8 passedは、そこで説明されたNACK処理の正しさを証明しますか。"
+    expected_source_files:
+      - "docs/current/UTR_TAG_GUI_IMPLEMENTATION_FEEDBACK.md"
+      - "docs/current/VERIFICATION_POLICY.md"
+    must_include_facts:
+      - "過去の報告値であり今回再実行した結果ではない"
+      - "NACKをタグ未検知とした当時の期待値は誤り"
+      - "テスト成功だけでPDF仕様への適合を証明しない"
+
+  - id: GQ-019
+    question: "listen中には完了や枚数の応答が一切ないので、通知設定を確認しなくてよいですか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_MODE_APPLICABILITY.md"
+      - "docs/current/KNOWN_AI_FAILURE_PATTERNS.md"
+    must_include_facts:
+      - "自動読み取りでも設定によりサイクル終了時の枚数応答が返る"
+      - "通知OFF・ON・設定不明を区別する"
+      - "サイクル通知は継続受信全体の終了を意味しない"
+      - "PDF 7.1 p.114、7.2 p.120、7.4.25 p.233-234を参照する"
+
+  - id: GQ-020
+    question: "TIDの4 Wordは96 bitですか。UTRが最大6 Wordを付加するなら、すべてのTIDは最大96 bitですか。"
+    expected_source_files:
+      - "docs/current/TID_MEMORY_AND_UNITS.md"
+      - "docs/current/commands/cards/55_14_uhf_inventory_read.md"
+    must_include_facts:
+      - "GS1 Gen2の1 Wordは16 bit"
+      - "4 Wordは64 bit、6 Wordは96 bit"
+      - "UTRのTID付加機能の上限をTID一般の最大長としない"
+      - "原典転記とGS1に基づく訂正注記を区別する"
+
+  - id: GQ-021
+    question: "UTR-116.pdfとUTR-S201-117.pdfは、版番号の違いだけなのでコマンドカードの原典を一括置換できますか。"
+    expected_source_files:
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+      - "docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+    must_include_facts:
+      - "UTR-116はUTR-SU01-3CHとUTR-SN01-3CH用でUMP01を扱う"
+      - "UTR-S201-117とは対象機種・シリーズが異なる"
+      - "同名コマンドでも対象機種・ROM・該当仕様を確認して分ける"
+
+  - id: GQ-022
+    question: "Markdownの文字数がPDFより少なければ、クレジット削減と正確さの改善を実証済みと説明できますか。"
+    expected_source_files:
+      - "docs/QUALITY_EVALUATION_PLAN.md"
+      - "README.md"
+    must_include_facts:
+      - "文字数をトークン数やクレジット消費へ直接換算しない"
+      - "同じ条件で正答性・根拠・実際の利用量を比較する"
+      - "比較実験は未実施であり改善を実証済みとはしない"
+
+  - id: GQ-023
+    question: "公式PDF掲載の完成Hex例と、タグ値をマスクした構造例は、そのまま同じように送信できますか。"
+    expected_source_files:
+      - "README.md"
+      - "RELEASE_SCOPE.md"
+      - "docs/current/commands/cards/55_10_uhf_inventory.md"
+    must_include_facts:
+      - "PDF掲載例は仕様説明として記載できるが実機送信の許可ではない"
+      - "マスク・構造例は実行可能なフレームではない"
+      - "掲載SUMをマスク値の置換後の値として使わない"
+
+  - id: GQ-024
+    question: "自動読み取り用のサイクル通知をOFFにしました。単発InventoryとInventoryReadでも完了ACKを待たず成功としてよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_10_uhf_inventory.md"
+      - "docs/current/commands/cards/55_14_uhf_inventory_read.md"
+      - "docs/current/RESPONSE_MODE_APPLICABILITY.md"
+    must_include_facts:
+      - "自動読み取り用の通知OFFを単発コマンドへ適用しない"
+      - "単発の正常終了は対象コマンドの完了応答を確認する"
+      - "完了前に期限を過ぎた場合、観測済みタグと未完了の判定を分ける"
+
+  - id: GQ-025
+    question: "単発InventoryReadでTID付加をOFFにしたら、tid_lengthの1バイトも取り除いて解析できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_14_uhf_inventory_read.md"
+    must_include_facts:
+      - "TID長の1バイトは残り、値は0"
+      - "後続TIDデータが0バイトであることと、長さフィールドの省略は異なる"
+      - "PDF 7.5.2 p.268と3.9 p.59の付加OFF例を確認する"
+
+  - id: GQ-026
+    question: "単発Inventoryの完了ACKのDATA[1]は、成功ステータスですか。InventoryReadと同じ定義ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_10_uhf_inventory.md"
+      - "docs/current/commands/cards/55_14_uhf_inventory_read.md"
+    must_include_facts:
+      - "Inventoryでは予約領域で通常00h、成功・失敗の意味を与えない"
+      - "InventoryReadでは00h固定値として記載される"
+      - "両者ともCMD、LEN、詳細識別子と対象モードを確認して解釈する"
+
+  - id: GQ-027
+    question: "InventoryReadでタグデータ応答がありません。EPCを持つタグが物理的に存在しないと断定できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_14_uhf_inventory_read.md"
+    must_include_facts:
+      - "指定メモリや付加対象TIDが読めない場合、EPCが読めてもタグデータ応答は返らない"
+      - "タグデータ応答の不在だけで物理的なタグ不在を断定しない"
+      - "正常な完了0件とNACKと未完了を区別する"
+
+  - id: GQ-028
+    question: "Inventory設定とEPC/UII設定をパラメータ種類00hへ書くと、01hも同じ値になりますか。"
+    expected_source_files:
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+      - "docs/current/commands/cards/55_31_uhf_set_inventory_param.md"
+      - "docs/current/commands/cards/55_33_05_write_epc_uii_params.md"
+    must_include_facts:
+      - "Inventory設定の両RAMは独立し、指定RAMだけが変わる"
+      - "EPC/UII設定は両RAMへ同じ内容が反映される"
+      - "どちらもRAMへの書込みではFLASHを変更しない"
+      - "PDF 3.12.3 p.73-74を根拠にする"
+
+  - id: GQ-029
+    question: "Inventory設定をFLASHへ保存した場合、再起動までは動作中のRAMは変わらないので復元不要ですか。"
+    expected_source_files:
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "FLASH書込みは動作中の両RAMにも反映される"
+      - "起動・リスタート時もFLASHから両RAMへコピーされる"
+      - "FLASHの復元でも両RAMが変わるため、変更前RAM値が異なる場合はその復元も必要"
+      - "この2系統の規則を特殊な設定を含む全コマンドに一般化しない"
+
+  - id: GQ-030
+    question: "SetInventoryParamのACKでDATA[0]=31hが来ました。NACKですか。DATA[1]で成功や保存先を確認できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_31_uhf_set_inventory_param.md"
+      - "docs/current/commands/cards/55_41_uhf_get_inventory_param.md"
+    must_include_facts:
+      - "成功ACKはCMD=30h、LEN=01h、DATA[0]=31h"
+      - "NACKのCMD=31hとDATAの詳細識別子を混同しない"
+      - "DATA[1]は存在せず設定値や種類は返らない"
+      - "要求との対応を管理しGetInventoryParamで影響する保存先を読戻す"
+
+  - id: GQ-031
+    question: "EPC/UII設定読取りでCMD=30h、DATA[0]=43hなら、サブコマンドや要求した種類が違っても成功ですか。自動通知OFFならACK長も変わりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_05_read_epc_uii_params.md"
+      - "docs/current/commands/cards/55_33_05_write_epc_uii_params.md"
+    must_include_facts:
+      - "読取りACKはLEN=04h、詳細43h、サブ05h、要求した種類との一致を確認する"
+      - "bit1-3は自動読み取り用通知の設定で、単発コマンドの完了条件へ転用しない"
+      - "設定ACKの固定長は通知設定で変わらない"
+      - "書込みACKは詳細33hで、種類とflagsも返る"
+
+  - id: GQ-032
+    question: "GetInventoryParamのTID付加bitから単発InventoryReadを解析できますか。PDF記載の設定書込み先7.4.13へ進めばよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_41_uhf_get_inventory_param.md"
+      - "docs/current/commands/cards/55_31_uhf_set_inventory_param.md"
+      - "docs/current/commands/cards/55_14_uhf_inventory_read.md"
+    must_include_facts:
+      - "GetInventoryParamのACKはLEN=0Bhで要求した種類との一致を確認する"
+      - "パラメータ4と読み取り開始Word・Word数は連続インベントリリード用"
+      - "単発InventoryReadは自身のコマンド指定を使う"
+      - "Ver.1.17のSetInventoryParamは7.4.18で、原典転記と参照先補足を区別する"
+
+  - id: GQ-033
+    question: "8CH機で55h/43h/00hのアンテナ切替設定を読めたので、55h/33h/00hで同じ値を書き戻せますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_00_read_antenna_switching.md"
+      - "docs/current/commands/cards/55_33_00_write_antenna_switching.md"
+    must_include_facts:
+      - "PDF 6.2.2 p.109では読取りは8CH機も対応だが書込みは非対応"
+      - "7.4.20 p.212では8CH機で書込みを実行するとNACK"
+      - "読めることから同形式で書けると判断しない"
+
+  - id: GQ-034
+    question: "4CH機のFLASHにAnt0とAnt2を使用指定しました。コマンド用RAMがAnt0だけなら反映失敗ですか。"
+    expected_source_files:
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+      - "docs/current/commands/cards/55_33_00_write_antenna_switching.md"
+    must_include_facts:
+      - "FLASHへの複数指定は自動用RAMへ同じ選択、コマンド用RAMへ最小番号の1本が反映される"
+      - "この例のコマンド用RAMがAnt0だけなのは仕様通り"
+      - "全て不使用とコマンド用RAMへの複数指定はNACK"
+      - "使用有無のbit maskを単一のアンテナ番号と混同しない"
+
+  - id: GQ-035
+    question: "連続InventoryReadでCMD=30h、LEN=02h、DATA=[14h,01h]を受けました。ADRはアンテナ番号で、タグ0枚が確定したという意味ですか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_MODE_APPLICABILITY.md"
+      - "docs/current/ANTENNA_NUMBERING_SCHEMES.md"
+    must_include_facts:
+      - "これは連続InventoryReadのアンテナ切替終了通知"
+      - "通知ONと対象機種の切替条件を確認し、全使用アンテナの終了を各アンテナ終了と混同しない"
+      - "アンテナID出力ONでもADRはリーダライタID"
+      - "タグ読取り成否に依存せず、枚数フィールドもないため通知単独で0枚と断定しない"
+      - "設定要求のACKや継続受信全体の終了に代用しない"
+
+  - id: GQ-036
+    question: "通知の説明に『複数アンテナを一つとして扱う』とあるので、55h/33h/00hの切替方式10bを使い、コマンドモードで自動巡回できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_00_write_antenna_switching.md"
+      - "docs/current/RESPONSE_MODE_APPLICABILITY.md"
+    must_include_facts:
+      - "7.4.20では00bは制御しない、01bは制御する、10bと11bは予約"
+      - "通知節の説明から予約値へ意味を割り当てない"
+      - "このコマンドの自動切替は自動読み取りモード用で、コマンドモードでは行われない"
+
+  - id: GQ-037
+    question: "アンテナ切替設定読取りのACKはDATA[0]=43hだけで判定できますか。通知ONなら設定ACKの長さも変わりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_00_read_antenna_switching.md"
+      - "docs/current/commands/cards/55_33_00_write_antenna_switching.md"
+    must_include_facts:
+      - "CMD=30h、LEN=08h、詳細43h、サブ00h、要求したパラメータ種類の一致を確認する"
+      - "書込みACKは同じLEN=08hで詳細33h、サブ00h"
+      - "設定ACKの長さは通知やアンテナID出力の設定によって変わらない"
+      - "DATA[5..7]は予約で独自解釈しない"
+
+  - id: GQ-038
+    question: "使用アンテナ番号読取りの00hで得た値を保存すれば、変更前のコマンド用RAM設定を必ず復元できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_48_read_active_antenna.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "00hは現在選択中の内部・外部番号を返す"
+      - "コマンド用RAMに書き込んだ設定とは異なる場合がある"
+      - "現在値をそのまま元設定のバックアップや復元証明にしない"
+      - "01hは自動用RAM設定、02hはFLASH設定を返す"
+
+  - id: GQ-039
+    question: "使用アンテナ番号書込みの表には内部番号0～255とあるので、UTR-SUN02-8CHでANT256や外部ANT32を指定できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_38_write_active_antenna.md"
+      - "docs/current/ANTENNA_NUMBERING_SCHEMES.md"
+    must_include_facts:
+      - "対象8CH機の実在出力はANT1～ANT8で、内部番号は00h～07h"
+      - "表の表現範囲を実在ポート数とみなさない"
+      - "UTR-SUN02-8CHの外部番号は00h固定"
+      - "UTR-SUN02V-8CHの外部切替も対応アンテナと接続条件が必要"
+
+  - id: GQ-040
+    question: "使用アンテナ番号の自動読み取り用パラメータを設定すれば、自動切替の有効化と対象アンテナの指定も完了しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_38_write_active_antenna.md"
+      - "docs/current/commands/cards/55_37_write_external_antenna_auto_switch.md"
+    must_include_facts:
+      - "使用アンテナ番号だけで自動切替の有効化や全接続数の指定は済まない"
+      - "自動切替が無効なら自動用RAMに設定したアンテナを使用する"
+      - "有効なら設定アンテナを起点に、外部接続数で定まる対象を巡回する"
+      - "7.4.26 p.239の条件を確認する"
+
+  - id: GQ-041
+    question: "使用アンテナ番号読取りのACKでDATA[1]をサブコマンドと解釈できますか。タグ通知が来れば読取り要求を完了してよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_48_read_active_antenna.md"
+    must_include_facts:
+      - "ACKはCMD=30h、LEN=04h、DATA[0]=48h、DATA[1]が要求した種類と一致"
+      - "サブコマンドはなくDATA[1]はパラメータ種類"
+      - "DATA[2]は内部番号、DATA[3]は外部番号"
+      - "別の通知だけで要求を成功終了せず、期限内に対象応答がなければ未完了"
+
+  - id: GQ-042
+    question: "使用アンテナ番号の書込みACKはPDF表に48h、例に38hがあります。両方を無条件に成功として扱ってよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_38_write_active_antenna.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "2026-09-08の保守者確認により書込みACKは38hを採用する"
+      - "CMD=30h、LEN=04h、詳細38h、要求した種類との一致と返った番号を照合する"
+      - "48hは読取り識別子でもあり書込み成功として無条件に受け入れない"
+      - "PDF転記は保持し、保守者確認・過去ログ・今回の実機再試験を区別する"
+
+  - id: GQ-043
+    question: "外部接続数が3と読めたので、アンテナ3本の接続正常を確認でき、外部番号3まで巡回すると解釈できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_47_read_external_antenna_auto_switch.md"
+      - "docs/current/commands/cards/55_37_write_external_antenna_auto_switch.md"
+    must_include_facts:
+      - "接続数は設定値で、実配線や接続OKの検出結果ではない"
+      - "接続数は番号やbit maskではなく個数"
+      - "対応アンテナで接続数3なら外部番号0～2が対象"
+      - "巡回には自動読み取りと自動切替ONの条件が必要"
+
+  - id: GQ-044
+    question: "自動切替を止めたいので、外部接続数8個を全て0にしてよいですか。切替OFFなら接続数0の出力は使用されませんか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_37_write_external_antenna_auto_switch.md"
+    must_include_facts:
+      - "全8出力の接続数を0に設定するとNACKであり、停止操作に代用しない"
+      - "自動切替OFFでは接続数を参照せず、使用アンテナ番号の自動用設定を使う"
+      - "自動切替ONの巡回では接続数0の出力に切り替えない"
+      - "コマンドモードでは使用アンテナ番号のコマンド用設定を使う"
+
+  - id: GQ-045
+    question: "UTR-SUN02-8CHでも外部接続数の表が0～32なので、各出力に32本ずつ接続して制御できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_37_write_external_antenna_auto_switch.md"
+      - "docs/current/commands/cards/55_38_write_active_antenna.md"
+    must_include_facts:
+      - "UTR-SUN02-8CHは各出力1本のみで、接続数0/1で使用対象を構成する"
+      - "UTR-SUN02V-8CHと機種条件を混同しない"
+      - "表の値域だけで物理的な対応数や範囲外時の応答コードを断定しない"
+
+  - id: GQ-046
+    question: "外部アンテナ自動切替設定読取りでは、DATA[2]がサブコマンドで、接続数0の出力のバイトは省略されますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_47_read_external_antenna_auto_switch.md"
+      - "docs/current/commands/cards/55_37_write_external_antenna_auto_switch.md"
+    must_include_facts:
+      - "ACKはCMD=30h、LEN=0Ch、読取り詳細47hまたは書込み詳細37hを要求ごとに照合する"
+      - "DATA[1]は要求した種類、DATA[2]は予約でサブコマンドではない"
+      - "DATA[3]はflags、DATA[4..11]は8個の接続数"
+      - "接続数0のフィールドも残り、ACKのDATAは12byte固定"
+
+  - id: GQ-047
+    question: "外部アンテナ自動切替設定のflagsが02hなら、自動切替ONですか。書込み先02hのFLASHと同じ意味ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_47_read_external_antenna_auto_switch.md"
+      - "docs/current/commands/cards/55_37_write_external_antenna_auto_switch.md"
+    must_include_facts:
+      - "flagsのbit0は自動切替で、bit1は外部アンテナID出力"
+      - "flags=02hは自動切替OFF・ID出力ON"
+      - "パラメータ種類とflagsは別フィールドであり、同じ02hでも意味が違う"
+      - "FLASHへの書込みは両RAMにも反映され、RAMの片方への書込みは他方へ反映されない"
+
+  - id: GQ-048
+    question: "DATA中に03hや0Dhが来たら、その位置でフレームを区切れますか。受信が途中なら直ちに不正ですか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+    must_include_facts:
+      - "バイナリ形式でLENはDATAバイト数、総長はLEN+7"
+      - "ETXは4+LEN、SUMは5+LEN、CRは6+LENの位置を確認する"
+      - "DATAやSUM内の03h・0Dhを区切りにしない"
+      - "未完の受信片は蓄積し、1回の受信と1フレームが一致すると仮定しない"
+
+  - id: GQ-049
+    question: "SUM計算で13Fhになったらエラーですか。CRや予約バイトは計算に含めますか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+    must_include_facts:
+      - "PDF §5.3 p.100に従いSTXからETXまでの各バイトを加算する"
+      - "下位8 bitを採用するため13FhならSUMは3Fh"
+      - "SUM自身とCRは含めず、予約バイトは実際の値を含める"
+      - "Hex文字列の文字コードの加算やCRCではない"
+
+  - id: GQ-050
+    question: "NACKの追加エラーがないときはDATAを短くできますか。予約5バイトが非ゼロなら破棄しますか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+    must_include_facts:
+      - "§7.6 p.316のNACKはCMD=31h、LEN=0Ah、総長17 byte"
+      - "DATA[0]は詳細、DATA[1..4]はエラーコード1～4、DATA[5..9]は予約"
+      - "意味を持つ条件に該当しない追加コードもフィールド自体は削除しない"
+      - "予約は非ゼロの場合もあり、意味を無視するがSUMには含める"
+
+  - id: GQ-051
+    question: "NACKの04hは常にRFタグ無応答ですか。単発Inventoryの正常0枚として扱えますか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+      - "docs/current/commands/cards/55_10_uhf_inventory.md"
+    must_include_facts:
+      - "コード1の04hはRFタグ無応答"
+      - "コード1が0Ahのときコード2の04hはメモリロック"
+      - "コードの値だけでなくフィールド位置と解釈条件を確認する"
+      - "単発Inventoryの正常0枚は完了ACKの枚数0000で、NACKを代用しない"
+
+  - id: GQ-052
+    question: "UHF_BlockWrite2のエラーコード4を読む条件はコード1=0Ahですか。コード3の解釈も説明してください。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+    must_include_facts:
+      - "BlockWrite2のコード3には主エラーの表を使用する"
+      - "コード4の解釈条件はコード3=0Ahであり、コード1ではない"
+      - "条件成立時のコード4はコード2と同じ追加エラー表を使う"
+      - "共通NACKの解釈から、再試行や部分書込みの扱いを独自に補わない"
+
+  - id: GQ-053
+    question: "UHF_Encodeのコード3=02hはタグ受信中断ですか。04hの意味も連番で補えますか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+    must_include_facts:
+      - "Encodeのコード3は処理の失敗箇所で、02hはEPC/UIIへの書込み時のエラー"
+      - "01hはReserved、03hはUserへの書込み、05hはLockコマンド発行"
+      - "§7.6 p.318に04hの定義はなく、連番から意味を補わない"
+      - "BlockWrite2のコード3用の表を転用しない"
+
+  - id: GQ-054
+    question: "設定要求への応答が来なくても自動読取り通知が届き続ければ、成功またはタイムアウトなしとできますか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+    must_include_facts:
+      - "非同期通知と送った要求に対応する応答を分ける"
+      - "CMD=30hだけで成功にせず、長さ・詳細・要求の種類等を照合する"
+      - "必要な対象応答が期限内に揃わなければ通知受信中でも要求は未完了"
+      - "ホストのTIMEOUTとNACKの02h・60hは異なる層の結果"
+
+  - id: GQ-055
+    question: "出力設定の読戻しでF0 00が返ったら240mWですか。個別アンテナ出力設定にも同じ値を使えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_01_read_output_power.md"
+      - "docs/current/commands/cards/55_33_01_write_output_power.md"
+    must_include_facts:
+      - "2 byteのLSBファーストで整数240、単位はdBm×10なので24.0 dBm"
+      - "mWや240 dBmとして解釈しない"
+      - "キャリア送信・休止・センス待ちの3値はmsで、同じ倍率ではない"
+      - "アンテナ個別出力は整数dBmなので値をそのまま転用しない"
+
+  - id: GQ-056
+    question: "UTR-SUN02-4CHのROM2.052でも、出力読取りの表に1～4000とあるので送信時間1msが使えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_01_write_output_power.md"
+      - "docs/current/commands/cards/55_43_01_read_output_power.md"
+    must_include_facts:
+      - "§7.4.21 p.218の機種・ROM条件を確認する"
+      - "SUN02-4CHは2.052以前の下限が10ms、2.100以降は1ms"
+      - "基板UTR-S201は1.120以前の下限が10ms、2.100以降は1ms"
+      - "記載のないROM区間や機種・ROM不明時の対応を独自に補わない"
+
+  - id: GQ-057
+    question: "UTR-SHR201でも送信時間100ms・休止時間50msが出荷初期値ですか。PDFのどこを参照しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_01_read_output_power.md"
+      - "docs/current/commands/cards/55_33_01_write_output_power.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "p.218の機種別表ではSHR201の初期値は送信20ms・休止120ms"
+      - "p.167の100ms・50msを全機種共通と解釈しない"
+      - "p.167の参照7.4.16はVer.1.17では7.4.21へ案内する"
+      - "仕様上の初期値と実際の接続機の現在値を区別する"
+
+  - id: GQ-058
+    question: "基板UTR-S201をコマンドモードで使うとき、休止設定400msなら常に400ms休止しますか。常に50msですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_01_write_output_power.md"
+    must_include_facts:
+      - "コマンドモードでは休止時間の設定値を使わず、基本休止は50ms"
+      - "基板UTR-S201は間欠出力対象で、実際の休止は直前のON時間と50msの長い方"
+      - "間欠出力の対象は基板UTR-S201とSHR201で、SUN02系3機種は非対象"
+      - "§3.7 p.56–57を参照し、次のRF処理の遅延とホストの待機期限を考慮する"
+
+  - id: GQ-059
+    question: "自動読み取りの送信2000ms・休止50msという設定なら、すべてのS201シリーズで2000ms ON・50ms OFFですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_01_write_output_power.md"
+    must_include_facts:
+      - "間欠出力対象の基板UTR-S201・SHR201では、例の動作は2000ms ON・2000ms OFF"
+      - "SUN02系の非対象機種と同じ動作に一般化しない"
+      - "自動読み取りの間欠出力では直前の実際のON時間と休止設定値の長い方で休止する"
+      - "表の間欠出力ON/OFFは機種区分であり、本コマンドの切替設定項目ではない"
+
+  - id: GQ-060
+    question: "出力だけを一時変更したいので、FLASH指定で電力を変え、残り3値を初期値にしても現在のRAM動作には影響しませんか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_01_write_output_power.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "出力設定は電力と3つの時間をまとめて書くため、変更対象外の値も保持して扱う"
+      - "00hと01hのRAMは独立、02hのFLASH書込みは両RAMにも反映される"
+      - "現在のRAMに影響しないと判断せず、保存先別の変更前後を読戻す"
+      - "FLASH復元で両RAMも変わるため、元のRAMがFLASHと異なる場合はその復元も必要"
+
+  - id: GQ-061
+    question: "出力設定のACKは詳細33hまたは43hが合えば成功ですか。NACKのDATA[1]もサブコマンドですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_01_write_output_power.md"
+      - "docs/current/commands/cards/55_43_01_read_output_power.md"
+    must_include_facts:
+      - "ACKはCMD=30h、LEN=0Bh、総長18 byteで、書込み詳細33h・読取り詳細43hを区別する"
+      - "DATA[1]=01hとDATA[2]の要求した種類まで照合する"
+      - "DATA[3..10]の4つの2 byte値を読み、書込みでは要求値とも比較する"
+      - "NACKは固定LEN=0Ahの別形式で、DATA[1]はエラーコード1"
+      - "TID設定・アンテナ通知でこのACKの長さを変えず、通知だけで要求を成功終了しない"
+
+  - id: GQ-062
+    question: "キャリアセンス待ち時間は常に両モードへ適用され、その値をホストの通信timeoutにそのまま使えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_01_write_output_power.md"
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+    must_include_facts:
+      - "§7.4.21 p.220ではROM2.050未満はコマンドモードのみ、2.050以降は動作モードによらず有効"
+      - "機器がキャリアを開始できない場合の最大待ち時間で、ホストの受信期限とは別"
+      - "キャリア未検知を確認するセンス時間とも区別する"
+      - "設定ACKの解釈と、その後のRF処理のNACK・通知を混同しない"
+
+  - id: GQ-063
+    question: "周波数設定の5/11/17/23～37とは、5～37のすべてのチャンネルを指定できる意味ですか。1Ahは何を表しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_02_write_frequency.md"
+    must_include_facts:
+      - "PDFの書込み指定は5・11・17・23～37chの18チャンネルで、5～37の全整数ではない"
+      - "1Ahは十進26chで、921.0MHzに対応する"
+      - "MHz値とチャンネル番号と使用マスクのbit位置を区別する"
+      - "2026-09-09の保守者訂正により書込みACKの開始番号も5・11・17・23～37chを採用する"
+
+  - id: GQ-064
+    question: "周波数使用マスクC0 1F 00は何を使用しますか。3番目のbit2を38chに割り当ててよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_02_read_frequency.md"
+    must_include_facts:
+      - "C0 1F 00は26～32chの7チャンネルを使用する初期設定"
+      - "マスク1番目bit0は5ch、2番目bit0は28ch、3番目bit0は36ch"
+      - "3番目bit0・1は36・37ch、bit2～7は予約で38ch以降を割り当てない"
+      - "表の禁止はbit=0の設定上の意味であり、周波数自体の法的禁止を意味しない"
+
+  - id: GQ-065
+    question: "周波数を自動読み取り用RAMへ書けばコマンド用RAMは維持されますか。前の出力設定と同じですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_02_write_frequency.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "周波数設定は00h・01hのどちらへの書込みも両RAMへ相互反映する"
+      - "RAM書込みではFLASHは変わらず、02hならFLASHと両RAMへ反映する"
+      - "出力設定のRAM独立と混同しない"
+      - "保存先ごとに開始番号・使用マスクを確認し、一方だけ変更・復元したとみなさない"
+
+  - id: GQ-066
+    question: "周波数設定をFLASH指定で読んだDATA[4]はFLASHに保存された現在値ですか。書込みへそのままコピーできますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_02_read_frequency.md"
+      - "docs/current/commands/cards/55_33_02_write_frequency.md"
+    must_include_facts:
+      - "読取りDATA[3]は開始設定、DATA[4]は最後にキャリアを出力したチャンネル"
+      - "履歴がない電源投入直後やリスタート直後は開始番号が入る"
+      - "現在番号は今まさにRF送信中という証明ではなく、FLASH指定でも保存設定そのものではない"
+      - "書込み要求・書込みACKのDATA[4]は予約であり、読取り値をそのままコピーしない"
+
+  - id: GQ-067
+    question: "周波数設定の読取りと書込みは同じ長さなので同じACKパーサで成功にできますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_02_read_frequency.md"
+      - "docs/current/commands/cards/55_33_02_write_frequency.md"
+    must_include_facts:
+      - "どちらもCMD=30h・LEN=0Ch・総長19 byteだが、読取り詳細43hと書込み詳細33hを区別する"
+      - "サブ02hと要求したパラメータ種類の一致まで確認する"
+      - "DATA[4]は読取りが現在番号、書込みが予約で意味が異なる"
+      - "DATA[5..7]がマスク、DATA[8..11]は予約。予約も固定長に含める"
+      - "別設定ACKや非同期通知を本要求の成功にしない"
+
+  - id: GQ-068
+    question: "周波数の使用マスクを複数ONにすれば、毎回周波数を切り替えるホッピングが有効になりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_02_write_frequency.md"
+      - "docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md"
+    must_include_facts:
+      - "使用マスクとスキャン方式は別設定であり、複数bitだけでホッピング有効とはいえない"
+      - "方式はRFタグ通信関連パラメータの§7.4.24 p.229–230で確認する"
+      - "指定周波数固定は開始番号、キャリアセンス優先は検知まで前回の周波数を使う"
+      - "切替タイミングの機種・アンテナ条件も確認する"
+
+  - id: GQ-069
+    question: "周波数の開始番号35～37chへの書込みACKを、PDF p.224の上限34chだけでエラー確定してよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_02_write_frequency.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "書込み指定p.222–223と読取りp.169は37chまで、書込みACK表p.224だけ34chまでと記載される不一致"
+      - "2026-09-09の保守者訂正でOPEN-010は解決し、書込みACKも5・11・17・23～37chを採用する"
+      - "独自に34へ切り詰めたり、原典転記を黙って変更したりしない"
+      - "35～37chを上限34chの記述だけで除外せず、返った開始番号と要求値の一致を確認する"
+
+  - id: GQ-070
+    question: "個別出力を24 dBmにするには共通出力と同じ240を送りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_3a_write_antenna_output_power.md"
+      - "docs/current/commands/cards/55_4a_read_antenna_output_power.md"
+    must_include_facts:
+      - "個別出力は1 byteの整数dBm、10～24、初期値24（18h）"
+      - "共通出力の2 byte・dBm×10とは異なる"
+      - "ROM Ver.2.100以降で機種とROMを確認する"
+
+  - id: GQ-071
+    question: "個別出力をコマンド用RAMだけ変えて、再起動で元に戻せますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_3a_write_antenna_output_power.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "個別出力はFLASH保存で00h／01h／02hの保存先選択はない"
+      - "無効フラグ0への変更もRAM限定ではない"
+      - "フラグと対象範囲の全出力値を変更前に記録し、FLASHとして復旧する"
+
+  - id: GQ-072
+    question: "個別出力を有効にしたのにコマンドモードの出力が変わらないのはなぜですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_3a_write_antenna_output_power.md"
+      - "docs/current/commands/cards/55_4a_read_antenna_output_power.md"
+    must_include_facts:
+      - "個別出力が適用されるのは自動読み取りモード"
+      - "自動モードで無効なら共通出力の自動用設定を使う"
+      - "コマンドモードではフラグにかかわらず共通出力のコマンド用設定を使う"
+      - "適用条件を読取りコマンド自体の使用禁止と混同しない"
+
+  - id: GQ-073
+    question: "個別出力の読取りACKで無効フラグなら、後ろの値を省略してよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_4a_read_antenna_output_power.md"
+    must_include_facts:
+      - "無効でもn個の設定値が返る"
+      - "CMD=30h、詳細4Ah、n=1～250、LEN=5+n、総12+n byteを確認する"
+      - "開始番号と設定数を要求と照合し、DATA[5+i]を番号a+iへ対応づける"
+      - "n=250ではLEN=FFh、総262 byte"
+
+  - id: GQ-074
+    question: "個別出力を250個書いたACKには250個の出力値が返りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_3a_write_antenna_output_power.md"
+      - "docs/current/commands/cards/55_4a_read_antenna_output_power.md"
+    must_include_facts:
+      - "書込み要求はLEN=5+nだが書込みACKはLEN=05h、総12 byte固定"
+      - "詳細3Ah、有効フラグ・開始番号・設定数を要求と照合する"
+      - "出力値はACKに含まれず4Ahで全n個とフラグを読戻す"
+      - "ACK受信、読戻し一致、再起動後保持は別の確認"
+
+  - id: GQ-075
+    question: "非VのUTR-SUN02-8CHで個別出力を開始0・数7で読めば7ポート分ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_4a_read_antenna_output_power.md"
+      - "docs/current/ANTENNA_NUMBERING_SCHEMES.md"
+    must_include_facts:
+      - "対象は連続する設定番号0～6で物理7ポートではない"
+      - "非V機は外部0固定、内部0～7の設定番号は0・32・64・96・128・160・192・224"
+      - "内部×32＋外部の式を使い、使用アンテナ番号の内部番号をそのまま流用しない"
+      - "p.70の網掛け・抹消された欄を抽出文字だけで使用可能と判断しない"
+
+  - id: GQ-076
+    question: "個別出力の全256設定を1要求に入れたり、開始250・数10で折り返してよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_3a_write_antenna_output_power.md"
+      - "docs/current/commands/cards/55_4a_read_antenna_output_power.md"
+    must_include_facts:
+      - "設定数は1～250であり全256枠は分割する"
+      - "範囲内に収める設計条件としてa+n≤256を確認する"
+      - "範囲超過の実機応答や折返し、特定NACK値は未確認で推測しない"
+      - "複数書込みはフラグも毎回指定し、途中失敗時の一括取消しを仮定しない"
+
+  - id: GQ-077
+    question: "PDF p.261例3の内部アンテナ6は224で正しいですか。"
+    expected_source_files:
+      - "docs/current/ANTENNA_NUMBERING_SCHEMES.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+      - "docs/current/commands/cards/55_3a_write_antenna_output_power.md"
+    must_include_facts:
+      - "p.70の式では内部6・外部0は192、内部7・外部0は224"
+      - "訂正箇所は冒頭のAnt.0～6と、続く説明文の内部アンテナ番号6。アンテナ番号224・設定数225・掲載Hexは元の記載どおり"
+      - "2026-09-09の保守者訂正でOPEN-011は解決。冒頭はAnt.0～7、続く説明文は内部アンテナ番号7とし、原典転記は保持する"
+      - "225は連続する設定枠0～224の数であり225本の物理アンテナではない"
+
+  - id: GQ-078
+    question: "SelectのTruncateはbit1ですか。Enableを指定してACKが返れば使えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_30_uhf_set_select_param.md"
+      - "docs/current/commands/cards/55_40_uhf_get_select_param.md"
+    must_include_facts:
+      - "Truncateはパラメータ2のbit2で、bit0～1は予約"
+      - "旧RAG補助表のbit1は誤り"
+      - "UTR-S201はDisableのみ対応し、Enableは設定や実動作へ反映されない"
+      - "ACKだけでEnableの反映を判断せず、特定NACK値も推測しない"
+
+  - id: GQ-079
+    question: "SelectでEPC本体の先頭を指定するアドレスは02hですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_30_uhf_set_select_param.md"
+      - "docs/current/commands/cards/55_40_uhf_get_select_param.md"
+    must_include_facts:
+      - "開始位置は4 byte・MSBファーストのbitアドレス"
+      - "EPC本体先頭は20h（32 bit）、Wordアドレス02hとは単位が異なる"
+      - "EPCバンクの00hからはCRCとPCであり、EPC本体の先頭とは異なる"
+
+  - id: GQ-080
+    question: "TIDの先頭28 bitがE2 80 11 7のマスクはE2 80 11 70でよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_30_uhf_set_select_param.md"
+      - "docs/current/commands/cards/55_40_uhf_get_select_param.md"
+    must_include_facts:
+      - "p.194の正しいマスクデータはE2 80 11 07"
+      - "先頭から8 bitずつ区切り、最後の端数byteだけ下位側へ詰め上位0埋め"
+      - "b=28、n=4、書込み要求と読取りACKのLENは0Dh"
+      - "これはUTRホスト通信フィールドの規則で、開始アドレスのMSB順と混同しない"
+
+  - id: GQ-081
+    question: "GetSelectParamのACKはマスク16 byte固定として解析できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_40_uhf_get_select_param.md"
+    must_include_facts:
+      - "マスクbit数bは0～128、n=ceil(b/8)、LEN=9+n"
+      - "b=0ではマスク省略、LEN=09h、総16 byte"
+      - "b=128ではマスク16 byte、LEN=19h、総32 byte"
+      - "CMD=30h、詳細40h、要求種類一致を確認してbit数と実データ長を照合する"
+
+  - id: GQ-082
+    question: "Select設定を書いてマスク長を0にすると、Select送信を止められますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_30_uhf_set_select_param.md"
+      - "docs/current/commands/cards/55_40_uhf_get_select_param.md"
+    must_include_facts:
+      - "SetSelectParam自体はリーダライタ設定でRFタグへSelectを送らない"
+      - "Inventory設定のSelect使用が有効なら、長さ0でも空マスクのSelectを送る"
+      - "マスク0とSelect使用OFFは別の設定"
+      - "追加条件がある場合は拡張Selectの設定も別に確認する"
+
+  - id: GQ-083
+    question: "Select Target=SLで一致タグをSetにすれば、そのタグはすべて読み取れますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_30_uhf_set_select_param.md"
+      - "docs/current/commands/cards/55_41_uhf_get_inventory_param.md"
+    must_include_facts:
+      - "Select Targetは変更するフラグでInventory TargetのA/Bとは別"
+      - "Sel=SLではSL=Setに加え、指定SessionのInventoriedフラグとInventory Targetの一致が必要"
+      - "Sel=ALLでもSessionとInventory Targetの条件が残る"
+      - "Select Target=SLではS0～S3は一緒に変更されない"
+
+  - id: GQ-084
+    question: "SelectのActionは一致タグを選択する意味なら、000でも011でも同じですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_30_uhf_set_select_param.md"
+    must_include_facts:
+      - "Actionは一致と不一致に対する状態遷移を指定する"
+      - "Inventoried対象の000は一致をA・不一致をB、011は一致を反転・不一致を変更しない"
+      - "SL対象の000は一致Set・不一致Reset、011は一致を反転・不一致を変更しない"
+      - "反転の結果は変更前の状態に依存し、指定したTarget以外のフラグは変化しない"
+
+  - id: GQ-085
+    question: "SelectのMemBank=00でAccessパスワードをマスクに使えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_30_uhf_set_select_param.md"
+      - "docs/current/commands/cards/55_40_uhf_get_select_param.md"
+    must_include_facts:
+      - "SelectのMemBank=00は使用できないRFU"
+      - "タグReadのReservedバンク指定と混同しない"
+      - "KillパスワードもAccessパスワードもマスク条件に使えない"
+      - "MemBankは01=EPC/UII、10=TID、11=User"
+
+  - id: GQ-086
+    question: "SetSelectParamのACKで保存先と全マスクの反映を確認できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_30_uhf_set_select_param.md"
+      - "docs/current/commands/cards/55_40_uhf_get_select_param.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "ACKはCMD=30h、LEN=01h、DATA[0]=30h、総8 byteで種類や設定値は返らない"
+      - "要求種類を保持し、GetSelectParamで同じ種類を読戻す"
+      - "00hと01hのRAMは独立、02hはFLASHと両RAMに反映"
+      - "設定の読戻し一致はタグの選別結果やタグフラグの復元を証明しない"
+
+  - id: GQ-087
+    question: "PDF p.193例3の※注記は、保守者確認によりどのように訂正されましたか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_30_uhf_set_select_param.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "訂正箇所は例3の見出し直下の※注記"
+      - "Action値は001(1)から100(4)へ訂正"
+      - "Inventory フラグ(S2)をInventoried(S2)フラグへ、不一致を[不一致]へ訂正"
+      - "一致はS2=B、不一致はS2=Aで、SLやS2以外のInventoriedフラグは遷移しない"
+      - "2026-09-09の保守者確認でOPEN-012は解決済み。原典転記は保持し、訂正注記を併読する"
+
+  - id: GQ-088
+    question: "PDF p.200のInventoryフラグという用語はどう訂正しますか。コマンド名も変えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_31_uhf_set_inventory_param.md"
+      - "docs/current/commands/cards/55_31_uhf_set_inventory_param_raw.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "p.200下部のSel値がALLの場合の注意点の※注記が対象"
+      - "InventoryフラグをInventoriedフラグへ訂正する"
+      - "Select TargetとInventory側Sessionを対応させる説明の意味は変わらない"
+      - "UHF_SetInventoryParamやInventoryのTargetという名称は変更しない"
+      - "保守者訂正を補足に示し、原典転記は保持する"
+
+  - id: GQ-089
+    question: "拡張Selectの読取りACKのDATA[2]は取得件数ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_42_uhf_get_expand_select_param.md"
+    must_include_facts:
+      - "取得数nはACKに返らず要求側で保持する"
+      - "DATA[2]はSelect2のパラメータ1"
+      - "詳細42h、種類一致、LEN=2+23×要求nを確認する"
+      - "0起点j番目のブロック先頭はDATA[2+23×j]、Select(j+2)の条件"
+
+  - id: GQ-090
+    question: "拡張Selectのマスク4 bitは1 byteだけ送ればよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md"
+      - "docs/current/commands/cards/55_42_uhf_get_expand_select_param.md"
+    must_include_facts:
+      - "マスクデータ領域は各条件16 byte固定で、条件ブロックは23 byte"
+      - "端数の最後のbyteを下位側へ詰め、上位bitを0埋めした後、末尾00で16 byteにする"
+      - "p.211の4 bit値0011は03の後に00を15 byte、bit数は4のまま"
+      - "通常Selectの可変長マスクを流用しない"
+
+  - id: GQ-091
+    question: "Select4のマスク長が0でもSelect5が非ゼロなら実行されますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md"
+      - "docs/current/commands/cards/55_42_uhf_get_expand_select_param.md"
+    must_include_facts:
+      - "拡張枠で最初の0 bitに達すると、その枠も後続枠も送信されない"
+      - "Select使用が有効なら、p.207の0,96,16,0,32,0,0,0はSelect1～3を実行する"
+      - "通常Select1は0 bitでも空マスクを送るため拡張と意味が異なる"
+
+  - id: GQ-092
+    question: "拡張Selectをn=0で消去できますか。n=1で書けば後続枠も消えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md"
+      - "docs/current/commands/cards/55_42_uhf_get_expand_select_param.md"
+    must_include_facts:
+      - "nの指定範囲は1～7で0を全消去コマンドと解釈しない"
+      - "Select2のbit数0で拡張の実行を停止できる"
+      - "少ないnで未指定後続枠が保持・消去・初期化のどれになるかは未確認"
+      - "全7枠の読戻しで変更前後を確認し、実行停止と保存値消去を区別する"
+
+  - id: GQ-093
+    question: "7枠読むACKで途中のマスクbit数が0なら受信解析を終了しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_42_uhf_get_expand_select_param.md"
+    must_include_facts:
+      - "要求n枠すべてを23 byteずつ解析する"
+      - "0 bitでも16 byteのマスク領域があり、後続の保存設定も返る"
+      - "n=7ならLEN=A3h、総170 byte"
+      - "受信した保存設定と実行される条件数を区別する"
+
+  - id: GQ-094
+    question: "拡張SelectのAction001は常に通常条件とのORですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md"
+      - "docs/current/commands/cards/55_42_uhf_get_expand_select_param.md"
+    must_include_facts:
+      - "両TargetがSLで両Select実行、初回Action000と後続001ならP OR Q"
+      - "初回100と後続001ならNOT P OR Q"
+      - "p.210のP NAND NOT QはNOT P OR Qと等価で誤記ではない"
+      - "最初のAction、Target、順序とInventory側のQuery条件を確認する"
+
+  - id: GQ-095
+    question: "拡張SelectのAction000と100は常に禁止されてNACKになりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md"
+    must_include_facts:
+      - "同じTargetの後続000や100はそれまでの対象フラグの結果を上書きする"
+      - "p.206では初回とTargetが異なる場合に例外がある"
+      - "全Targetで禁止される値や必ずNACKになる値と解釈しない"
+      - "Actionは指定したTargetのフラグだけを変える"
+
+  - id: GQ-096
+    question: "拡張Selectの書込みACKで条件数と保存先を確認できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md"
+      - "docs/current/commands/cards/55_42_uhf_get_expand_select_param.md"
+    must_include_facts:
+      - "書込みACKはCMD=30h、LEN=01h、詳細32h、総8 byte固定"
+      - "種類・n・条件値はACKに返らない"
+      - "要求側で種類・n・全条件の順序を保持して42hで読戻す"
+      - "n=7の書込み要求はLEN=A4h、総171 byteで、読取りACKのA3hとは異なる"
+
+  - id: GQ-097
+    question: "拡張SelectのFLASH値を変えても動作中の両RAMはそのままですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "00hと01hのRAMは独立で一方から他方へ反映しない"
+      - "02hのFLASH書込みは両RAMにも反映される"
+      - "変更前後を種類と条件順を含めて記録する"
+      - "設定読戻し、再起動後保持、実機のタグ選別は別の確認"
+
+  - id: GQ-098
+    question: "拡張Selectの初期値85hは何を意味し、PDF p.161の説明先はどこですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md"
+      - "docs/current/commands/cards/55_42_uhf_get_expand_select_param.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "85hはMemBank=EPC/UII、Action001、Target=SL"
+      - "通常Selectの81hはAction000であり初期値を混同しない"
+      - "p.161の参照7.4.14はVer.1.17の7.4.19 p.204～211へ案内する"
+      - "p.162の[60]]hは保守者が誤記と確認し[60]hへ訂正。96 bitという値と掲載Hexは変わらない"
+
+  - id: GQ-099
+    question: "Readで1 Word読むと応答DATA[1]は1ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_15_uhf_read.md"
+    must_include_facts:
+      - "DATA[1]はbyte数nなので2"
+      - "要求Word数mは1～32、n=2×m、LEN=n+2"
+      - "1 Wordなら総11 byte、32 Wordなら総73 byte"
+      - "bankとWord位置はACKに返らず要求と対応づける"
+
+  - id: GQ-100
+    question: "ReadのWord数0は全メモリですか。32 Wordなら全タグで読めますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_15_uhf_read.md"
+    must_include_facts:
+      - "指定範囲は1～32 Wordで、0を全領域と解釈しない"
+      - "32 Wordはコマンド上限でタグの容量保証ではない"
+      - "Selectはbit、Readの位置と数はWord、ACKのnはbyte"
+
+  - id: GQ-101
+    question: "非ゼロの誤ったAccessパスワードが設定されていても、未ロック領域ならReadできますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_15_uhf_read.md"
+      - "docs/current/commands/cards/55_16_uhf_write.md"
+    must_include_facts:
+      - "ReadとWriteは非ゼロ設定ならbankによらずAccessを発行する"
+      - "不一致ならAccessパスワードエラーのNACK"
+      - "ゼロではAccessを発行しないがロックを迂回しない"
+      - "タグのAccess対応も確認する"
+
+  - id: GQ-102
+    question: "リーダライタのAccess設定はタグのパスワードを書き換え、再起動後も残りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_15_uhf_read.md"
+      - "docs/current/commands/cards/55_33_03_write_access_password.md"
+    must_include_facts:
+      - "55h33h03hはリーダライタのRAM設定でタグへの書込みではない"
+      - "FLASHへ保存せず再起動と電源再投入でゼロへ戻る"
+      - "リーダライタの設定値は読戻せない"
+      - "不要時のゼロ化を含む運用を決め秘密値を公開しない"
+
+  - id: GQ-103
+    question: "Qを大きくすればUHF_Writeで複数タグから安全に1枚選べますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_16_uhf_write.md"
+      - "docs/current/commands/cards/55_15_uhf_read.md"
+    must_include_facts:
+      - "ReadとWrite内部のQueryは設定QによらずQ=0"
+      - "SelectとQuery条件で対象を1枚にする必要がある"
+      - "Q=0は一意性の保証ではなく複数タグ応答は誤対象や失敗につながる"
+
+  - id: GQ-104
+    question: "UHF_Writeで2 Word書くにはWord数を2にすればよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_16_uhf_write.md"
+    must_include_facts:
+      - "Writeは1 WordのみでWord数フィールドがない"
+      - "要求LEN=08h、DATA[6]が上位byte、DATA[7]が下位byte"
+      - "複数WordのBlockWriteは別コマンドでありWrite要求を延長しない"
+
+  - id: GQ-105
+    question: "UHF_WriteのACKから書いた値やタグ番号を確認できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_16_uhf_write.md"
+    must_include_facts:
+      - "成功ACKはCMD=30h、LEN=01h、DATA[0]=16h、総8 byte"
+      - "bank・Word位置・値・枚数は返らない"
+      - "ACK受信と読戻し一致を別に記録する"
+      - "ADRは読取りデータのないこのACKではリーダライタID"
+
+  - id: GQ-106
+    question: "PDF p.275の30 00は新しいEPC本体を書き込む例ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_16_uhf_write.md"
+    must_include_facts:
+      - "EPC領域Word01hはPC領域でEPC本体はWord02hから"
+      - "30 00はEPC Lengthが6 WordとなるPC値の例"
+      - "EPC本体の12 byteを書き込む例ではない"
+      - "Word00hのStored CRCには書き込めない"
+
+  - id: GQ-107
+    question: "Writeがtimeoutなら元の値のままなので、Selectを外して再送してよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_16_uhf_write.md"
+    must_include_facts:
+      - "timeoutやNACKだけで未変更と保証しない"
+      - "結果不明として対象と状態を確認し無条件に再書込みしない"
+      - "変更箇所がSelectマスクに含まれると旧条件で選べなくなる可能性がある"
+      - "対象を一意に確認できる変更後条件と読戻し可否を事前に決める"
+
+  - id: GQ-108
+    question: "Password Read Lock領域のReadをInventoryReadに置き換えられますか。Read NACK後もハンドルは残りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_15_uhf_read.md"
+    must_include_facts:
+      - "InventoryReadはAccessを発行せずロック領域のReadを代替できない"
+      - "p.272にはキャリア維持中のRead NACKで取得済みハンドルを破棄する条件がある"
+      - "再試行時に同じタグのハンドルが残ると仮定しない"
+      - "ReadのNACKをInventoryの正常なタグ0枚に変換しない"
+
+  - id: GQ-109
+    question: "PDF p.64の81hとp.65の04hはエラーコード1ですか。正式な表記は何ですか。"
+    expected_source_files:
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+      - "docs/current/commands/cards/55_15_uhf_read.md"
+    must_include_facts:
+      - "保守者訂正により両箇所ともエラーコード2で、OPEN-013は解決済み"
+      - "この場合エラーコード1には0Ahが返る"
+      - "p.64は[81h: ハンドル取得失敗]で、名称にRFを付けずコロン後に半角スペースを入れる"
+      - "81hはQuery実行時にRFタグのハンドル情報を取得できなかったことを表す"
+      - "p.65は[04h: メモリロック]で、コード1の04h（RFタグ無応答）と区別する"
+
+  - id: GQ-110
+    question: "Access設定のDATA[2]を02hにすればFLASH保存できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_03_write_access_password.md"
+    must_include_facts:
+      - "DATA[2]は予約で通常00h、パラメータ種類ではない"
+      - "要求LEN=07h、詳細33h、サブ03h、DATA[3..6]がMSB先行の4 byte"
+      - "設定先はコマンドモード用RAMのみで再起動・電源再投入でゼロになる"
+
+  - id: GQ-111
+    question: "Access設定ACKが来れば、タグの認証成功とパスワードの読戻し一致が分かりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_03_write_access_password.md"
+    must_include_facts:
+      - "ACKはCMD=30h、LEN=03h、DATAが詳細33h・サブ03h・予約、総10 byte"
+      - "パスワードはACKに返らず設定値は読戻せない"
+      - "本コマンドはRF送信せず、タグ認証の成功を示さない"
+      - "設定・後続認証・終了時ゼロ化を分けて記録する"
+
+  - id: GQ-112
+    question: "Access設定コマンドでタグのKill Passwordも書けますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_03_write_access_password.md"
+      - "docs/current/commands/cards/55_17_uhf_kill.md"
+    must_include_facts:
+      - "Access設定はリーダライタRAMでタグ内のパスワードを書き換えない"
+      - "タグのReserved Word00h～01hがKill用、Word02h～03hがAccess用"
+      - "Kill要求の4 byteはKill PasswordでAccess用を代入しない"
+
+  - id: GQ-113
+    question: "Killのrequires_access_passwordがtrueなら、Kill要求にAccessパスワードを入れますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_17_uhf_kill.md"
+      - "docs/current/commands/cards/55_33_03_write_access_password.md"
+    must_include_facts:
+      - "Kill要求は詳細17hとMSB先行4 byteのKill Passwordのみ、LEN=05h、総12 byte"
+      - "p.226では非ゼロのリーダライタAccess設定時の発行対象にKillも含む"
+      - "trueは別のAccess設定条件の確認でありKill要求内の値や常時非ゼロ必須を意味しない"
+      - "p.276の内部処理列挙はAccess発行を否定していない"
+
+  - id: GQ-114
+    question: "タグのKill PasswordがゼロでもKillできますか。成功後はReadで確認しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_17_uhf_kill.md"
+    must_include_facts:
+      - "タグの非ゼロKill Passwordと要求値の一致が条件"
+      - "成功ACKはCMD=30h、LEN=01h、詳細17h、総8 byte"
+      - "Killed状態のタグは以降のRFタグ通信コマンドに応答しないため読戻しできない"
+      - "一度Killedとなったタグは元へ戻せない"
+
+  - id: GQ-115
+    question: "Kill後に無応答なら成功確定としてよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_17_uhf_kill.md"
+    must_include_facts:
+      - "無応答だけではKilled・圏外・選別条件不一致・通信障害を区別できない"
+      - "対象の事前同定と要求に対応する成功ACK、その後の観測を分ける"
+      - "timeout時に変更前の状態を保証せず、Killの再実行で成功確認しない"
+
+  - id: GQ-116
+    question: "Lockはリーダライタ側にAccessパスワードを設定するだけで実行できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_18_uhf_lock.md"
+    must_include_facts:
+      - "p.278ではタグ側Reserved Word02hから2 Wordとリーダライタ側のAccess値が非ゼロで一致することが条件"
+      - "リーダライタ側設定だけではタグのパスワードは変わらない"
+      - "Lock要求内にパスワード欄はない"
+      - "対象を1枚に絞り内部Q=0が一意性を保証しないことを確認する"
+
+  - id: GQ-117
+    question: "LockのUser PasswordWriteを設定・解除するMaskとActionはどこですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_18_uhf_lock.md"
+    must_include_facts:
+      - "要求は詳細18hとP1・P2・P3、LEN=04h、総11 byte"
+      - "User PasswordWriteのMaskはP2 bit7、ActionはP3 bit5"
+      - "p.282の00/80/20は設定、00/80/00は解除で他のMaskは0"
+      - "P3 bit0～3は0固定"
+
+  - id: GQ-118
+    question: "LockのMask=0、Action=1なら設定されますか。PermaLockをAction=0で戻せますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_18_uhf_lock.md"
+    must_include_facts:
+      - "Mask=0ならActionが0でも1でもその対象・種別は変更しない"
+      - "Mask=1の対象・種別だけActionを書き込む"
+      - "既に固定されたPermaLockはMask=1・Action=0でも解除できない"
+
+  - id: GQ-119
+    question: "PermaLockは常に全領域を読取りも書込みも不可にしますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_18_uhf_lock.md"
+      - "docs/current/commands/cards/55_33_03_write_access_password.md"
+    must_include_facts:
+      - "p.280はLockの設定状態と解除状態の恒久化を区別する"
+      - "Write Lock解除中に恒久化するとWrite可能なままLockを設定できなくなる"
+      - "EPC・TID・UserのPasswordWriteと、Access・Kill PasswordのPasswordRead/Writeは対象操作が異なる"
+      - "p.227の包括的な表現の訂正文はOPEN-014で確認中"
+
+  - id: GQ-120
+    question: "LockのACKには各領域の最終状態が入っていますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_18_uhf_lock.md"
+    must_include_facts:
+      - "成功ACKはCMD=30h、LEN=01h、詳細18h、総8 byte"
+      - "Mask・Action・各領域の状態は返らない"
+      - "要求とACKと許可された状態確認を別に記録する"
+      - "確認のために書込み・解除・恒久化を自動追加しない"
+
+  - id: GQ-121
+    question: "PasswordWrite Lock直後に書けたならLock失敗ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_18_uhf_lock.md"
+      - "docs/current/commands/cards/55_33_03_write_access_password.md"
+    must_include_facts:
+      - "p.281では正しいAccess設定がリーダライタに残ると認証下で書ける場合がある"
+      - "書けただけで直ちにLock失敗としない"
+      - "不要になったリーダライタのAccess設定をゼロへ戻す"
+      - "ゼロ化やリーダライタ再起動はタグのLock解除ではない"
+
+  - id: GQ-122
+    question: "BlockWriteでRF側BlockWriteを使用すれば32 Wordを一括送信しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1a_uhf_block_write.md"
+    must_include_facts:
+      - "使用する01hでも使用しない00hでもRF側は1 Wordずつ複数回書き込む"
+      - "上限32 Wordで内部リトライも1 Word単位"
+      - "RF側BlockWriteはタグのオプションコマンド"
+
+  - id: GQ-123
+    question: "BlockWriteで32 Word書くときの要求長と数の位置はどこですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1a_uhf_block_write.md"
+    must_include_facts:
+      - "DATA[3..6]は4 byte開始Word位置、DATA[7..8]はMSB先行2 byte Word数"
+      - "データはDATA[9]から2n byte、LEN=9+2n、総16+2n"
+      - "32 WordではLEN=49h、総80 byte"
+      - "0 Wordの意味は未確認で全領域指定にしない"
+
+  - id: GQ-124
+    question: "BlockWriteがNACKなら全Wordが元のままですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1a_uhf_block_write.md"
+    must_include_facts:
+      - "p.284に途中まで書込み済みの場合があると明記"
+      - "ACKにもNACKにも成功Word数は定義されていない"
+      - "原子的な更新や自動的な巻戻しを保証せず確認なしに再送しない"
+
+  - id: GQ-125
+    question: "p.328のBlockWrite例ではACK詳細16hを返す例外がありますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1a_uhf_block_write.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "p.285のACK定義とp.331の使用しない例は詳細1Ah"
+      - "p.328の詳細16h・SUM4Chとの不一致はOPEN-015で訂正確認待ち"
+      - "訂正案は詳細1Ah・SUM50hだが保守者確認前に確定しない"
+      - "16hも成功として受け入れる例外を追加しない"
+
+  - id: GQ-126
+    question: "BlockWrite2はBlockWriteの上限だけ124に変えれば実装できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1d_uhf_block_write2.md"
+      - "docs/current/commands/cards/55_1a_uhf_block_write.md"
+    must_include_facts:
+      - "BlockWrite2は開始位置2 byte、Word数1 byteでRF側コマンド選択欄がない"
+      - "DATA[2..3]がMSB先行開始Word位置、DATA[4]が数、データはDATA[5]から"
+      - "RF側BlockWriteで一括送信するがタグの対応数を確認する"
+
+  - id: GQ-127
+    question: "BlockWrite2の最大フレーム長は255 byte以下ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1d_uhf_block_write2.md"
+    must_include_facts:
+      - "LEN=5+2nで最大124 WordならFDh=253 byte"
+      - "総フレーム長はLEN+7なので260 byte"
+      - "1 byteのLENはDATA長でありフレーム総長ではない"
+      - "タグが124 Wordの一括書込みに対応する保証ではない"
+
+  - id: GQ-128
+    question: "BlockWrite2のNACKコード3=0Ahの詳細はコード2ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1d_uhf_block_write2.md"
+    must_include_facts:
+      - "コード3はコード1と同じp.317上段の表"
+      - "コード3=0Ahなら詳細はコード4でありコード2ではない"
+      - "コード1と2、コード3と4をそれぞれの条件で解釈する"
+      - "Encodeの失敗領域表や成功Word数として解釈しない"
+
+  - id: GQ-129
+    question: "BlockWrite2の20msをLAN受信timeoutに設定すればよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1d_uhf_block_write2.md"
+    must_include_facts:
+      - "RF側応答待ちとホストの受信期限を区別する"
+      - "5Chはp.344でROM Ver.2.030以降、初期値20ms"
+      - "内部処理・リトライ・USB/LAN通信時間を含めてホスト側の条件を決める"
+      - "リーダライタからのNACK受信とホストtimeoutを区別する"
+
+  - id: GQ-130
+    question: "HiggsECの64msというBlockWrite2の例は、全タグ共通の実行時間ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1d_uhf_block_write2.md"
+    must_include_facts:
+      - "p.290のHiggsEC User領域8 Wordの平均測定例"
+      - "BlockWrite使用89ms、Write使用109ms、BlockWrite2使用64ms"
+      - "全タグの速度保証や本整備での実測結果ではない"
+      - "一部タグは2 Wordや3 Word以上のRF側BlockWriteに未対応"
+
+  - id: GQ-131
+    question: "BlockEraseなら必ず00hで埋まり、未対応なら自動でWriteに替えてよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1b_uhf_block_erase.md"
+    must_include_facts:
+      - "消去後の値はタグのデータシートで確認し00hやFFhに固定しない"
+      - "BlockEraseは一部タグのみが対応するオプションコマンド"
+      - "BlockWriteやEncodeでの代用は別操作であり値・範囲・許可条件を確認する"
+      - "失敗を契機に自動で代用コマンドを送らない"
+
+  - id: GQ-132
+    question: "BlockEraseは2 byteの数なので65535 Wordまで、0なら全消去ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1b_uhf_block_erase.md"
+    must_include_facts:
+      - "数はDATA[6..7]のMSB先行2 byteだが、有効な上限と0の意味は当該節で未確認"
+      - "表現できる数を有効な消去範囲と同一視しない"
+      - "要求はLEN=08h、総15 byteで消去データ欄はない"
+
+  - id: GQ-133
+    question: "BlockWrite2の124 Wordを書いた後、Read1回で全範囲を検証できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1d_uhf_block_write2.md"
+      - "docs/current/commands/cards/55_15_uhf_read.md"
+    must_include_facts:
+      - "BlockWrite2の処理ACKは8 byteで値やWord数を返さない"
+      - "Readは1回最大32 Wordなので長い領域は範囲を分ける確認計画が必要"
+      - "タグの読取り可否・Access条件と変更後の対象同定を確認する"
+
+  - id: GQ-134
+    question: "p.287のBlockErase送信例がSUM検査で不一致です。計算規則を変えるべきですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1b_uhf_block_erase.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+      - "docs/current/RESPONSE_AND_NACK_MASTER.md"
+    must_include_facts:
+      - "掲載SUMはE9hだが、STXからETXまでの加算下位1 byteは81h"
+      - "応答例のSUM51hは計算と一致する"
+      - "OPEN-016で送信例のE9hから81hへの訂正確認待ち"
+      - "計算規則や受信検査に例外を追加せず、原典転記と計算結果を区別する"
+
+  - id: GQ-135
+    question: "EncodeでReservedを書かずEPC/UIIだけ書く場合、Reservedの長さ欄と開始位置は省略できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "要求内はReserved、EPC/UII、Userの固定順でbank番号やTID書込み枠はない"
+      - "未書込みは長さ0の1 byteを残し、開始Word位置とデータだけ省略する"
+      - "書く場合の長さは2n+2 byteで、2 byteのMSB先行Wordアドレスを含む"
+
+  - id: GQ-136
+    question: "Encodeの3 bankとLockのDATA位置と全体LENはどう計算しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "DATA[0]が1Eh、DATA[1]がflags、DATA[2]がLr"
+      - "Leの位置は3+Lr、Luは4+Lr+Le、Lkは5+Lr+Le+Lu"
+      - "LEN=6+Lr+Le+Lu+Lkで、長さ欄を再加算しない"
+      - "L=2の0 Word、全枠省略、Lockだけの実行可否は未確認"
+
+  - id: GQ-137
+    question: "Encodeで各bankに123 Wordずつ書けますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "各bankの記載上限123 Wordと全体LEN最大255 byteを同時に満たす必要がある"
+      - "1 bank123 WordだけならLEN254、Lock3 byteを加えると257で不可"
+      - "Reserved4、EPC/UII7、User109 WordとLockならLEN255、総262 byte"
+      - "フレームで表現可能な数とタグの容量・対応は別"
+
+  - id: GQ-138
+    question: "EncodeのBlockWrite使用bitを1にすれば全Wordを原子的に書けますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "bit0=1はRF側BlockWrite、0はWriteを使用"
+      - "どちらもRF側1 Wordずつで、BlockWrite2の一括送信とは異なる"
+      - "途中失敗のNACKでも一部書込み済みの可能性がある"
+      - "タグのBlockWrite対応を確認する"
+
+  - id: GQ-139
+    question: "EncodeのLock長を1にしてTIDも書き換えられますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "Lock長は00hなら後続省略、03hならパラメータ1から3を付加する"
+      - "MaskとActionはLockカードと同じ10組、パラメータ3のbit0から3は0固定"
+      - "TIDのLock対象はあるがTID書込み枠はない"
+      - "PermaLockは恒久化で解除手段にしない"
+
+  - id: GQ-140
+    question: "EncodeのACKにbank別の成否や新パスワードは返りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "p.300のCMD30h、LEN01h、詳細1Eh、総8 byte"
+      - "DATA[1]以降はなく、bank別成否・成功Word数・書込み値・パスワードは返らない"
+      - "内部BlockWriteやLockのACKを上位へ順次返す形式ではない"
+      - "自動読み取りの完了通知OFFをACK省略条件にしない"
+
+  - id: GQ-141
+    question: "EncodeのNACKの8 byte目が05hなら5 Word成功ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "コード3はDATA[3]、フレームoffset7で失敗箇所を示す"
+      - "01hはReserved、02hはEPC/UII、03hはUser、05hはLock発行"
+      - "04hは未定義で、成功Word数や失敗Word位置ではない"
+      - "コード4をBlockWrite2用の追加情報として解釈しない"
+
+  - id: GQ-142
+    question: "EncodeのNACKコード3が02hならReservedは必ず書込み済みですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "非ゼロAccessを書き込む場合はReserved、EPC/UII、User、Lockの順"
+      - "ゼロを書き込む場合はEPC/UII、User、Lock、Reservedの順"
+      - "同じ02hでもReservedの前か後かが異なる"
+      - "要求の領域順と内部処理順を区別する"
+
+  - id: GQ-143
+    question: "Encodeの保持bit1=1はタグのパスワードを変更しない指定ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "保持対象は実行前のリーダ側Access設定"
+      - "ACKとNACKのどちらでもリーダ側は旧値へ戻る"
+      - "タグへの書込みやLockを取り消さない"
+      - "タグのパスワードが変わると後続Read等でリーダ側と不一致になり得る"
+
+  - id: GQ-144
+    question: "Encodeで保持しないを選び、Access領域を書かず成功したらリーダ側の値は残りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "p.295のACK条件ではリーダ側はゼロになる"
+      - "Access領域を書いて成功した場合はタグに書いた新値になる"
+      - "p.296のNACKでAccess領域を書かない場合は旧値に戻る"
+      - "ACKとNACKの保持規則を同じにしない"
+
+  - id: GQ-145
+    question: "Encodeで保持しないを選び、Reserved途中失敗のNACKになった場合、旧パスワードで再送できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "Reserved書込み失敗または実行前に失敗ならリーダ側は旧値に戻る"
+      - "Access領域書込み指定がありReservedが成功済みならNACKでも新値になる"
+      - "リーダ側が旧値でもタグの一部が変更済みの可能性があり一致を保証しない"
+      - "同じ要求を状態確認なしに自動再送しない"
+
+  - id: GQ-146
+    question: "Encodeの複数bankでAccess発行を指定したら毎bank認証しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "p.297ではAccess発行は最初の1回で、Secured後の書込みやLockで再発行不要"
+      - "ReservedのAccessには実行時のリーダ側設定を使用する"
+      - "EPC/UII・User・Lockの認証値はp.298から299の優先順位を確認する"
+      - "ゼロを書き換える際の認証値の説明はOPEN-018で確認待ち"
+
+  - id: GQ-147
+    question: "Encodeは実行前のAccess設定がゼロなら必ず使えませんか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "メタデータtrueはAccessの適用・保持条件を確認する意味"
+      - "p.304例1は事前値ゼロで未ロックのタグに新パスワードを書きLockする例"
+      - "全Encodeで事前の非ゼロ値が必須とはしない"
+      - "ゼロ化する要求と事前値ゼロを混同しない"
+
+  - id: GQ-148
+    question: "Encode終了後は常にキャリアOFFとなりハンドルが破棄されますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+    must_include_facts:
+      - "p.302では実行前ON維持なら終了後もON維持"
+      - "保持中のハンドルを使い、未保持ならQ=0で取得"
+      - "実行前OFFなら内部でONにして取得・維持し、終了時にOFFへ戻して破棄"
+      - "ホストTIMEOUTで終了処理完了を推測しない"
+
+  - id: GQ-149
+    question: "p.305 Encode例2のLock値88と終了時パスワードは確定した仕様ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "上段88 00 00に対し下段Mask表と掲載送信列は28 00 00"
+      - "保持bit1=0でAccess領域をゼロへ書きACKとなる条件はp.295で新値保持"
+      - "OPEN-017で28への訂正と終了値ゼロへの訂正案を記録し、確定は保留"
+      - "原典転記を保持し、例外仕様として実装しない"
+
+  - id: GQ-150
+    question: "Encode例2でゼロ化する前の認証にも要求内のゼロを使い、115msで受信を打ち切ってよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_1e_uhf_encode.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "p.298から299の要求内パスワード優先にはゼロ時の条件が不足している"
+      - "p.299のゼロでは認証不可という理由・Reserved後回しとp.305例2を併せて確認する"
+      - "ゼロ化前は実行前非ゼロ値を使うという補足案はOPEN-018で確認待ちであり、認証手順を推測で確定しない"
+      - "115ms対261msはp.303のMonza4QTの原典例でホストtimeoutの保証値ではない"
+
+  - id: GQ-151
+    question: "RFタグ通信設定は詳細43hなら成功として読み取れますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md"
+    must_include_facts:
+      - "CMD=30h、LEN=06h、詳細43h、サブ04h、要求した種類を照合する"
+      - "総13 byteでDATA[3]はPARAM1、[4]はRSSI閾値、[5]はRETRY"
+      - "読取り要求にも00h／01h／02hの種類指定が必要"
+      - "TIDや通知設定でACK長を変えない"
+
+  - id: GQ-152
+    question: "RFタグ通信設定の書込みACKのDATA[3]以降を保存値として使えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+      - "docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md"
+    must_include_facts:
+      - "成功ACKはLEN=03h・総10 byteで33h、04h、種類のみ"
+      - "設定値は含まれない"
+      - "同じ種類の読取りでPARAM1・RSSI・RETRYを照合する"
+      - "ACKと読戻し一致と再起動後保持を区別する"
+
+  - id: GQ-153
+    question: "RFタグ通信設定を00hへ書けば自動用RAMには影響しませんか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "00hと01hはどちらも両RAMへ同じ内容を反映しFLASHは変更しない"
+      - "02hはFLASHと両RAMへ直ちに反映する"
+      - "起動・リスタート時はFLASHから両RAMへコピーする"
+      - "FLASH復元後に元のRAM値が異なる場合はRAM値も復元する"
+
+  - id: GQ-154
+    question: "RFタグ通信設定の初期値18hとリトライ12hはどう解釈しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md"
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+    must_include_facts:
+      - "18hはRSSIフィルタOFF、スキャン10bのキャリアセンス優先、Target自動切替ON"
+      - "スキャンの左は上位bit3、右はbit2で11bは予約"
+      - "RETRY下位4 bitがInventoryで2、上位4 bitがRead/Writeで1"
+      - "それぞれ0から15、FLASH初期値0"
+
+  - id: GQ-155
+    question: "RF通信設定のRSSIがBFhなら191ですか。閾値-65では-65も捨てますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md"
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+    must_include_facts:
+      - "RSSIは符号付き8 bitでBFhは-65"
+      - "設定範囲は-128から127で観測例の-70から-20とは異なる"
+      - "共通フィルタ有効時は閾値未満を抑制し-66は抑制、-65と-64は通過"
+      - "共通を通過しても有効な個別フィルタの判定があれば必ず通知されるとは限らない"
+
+  - id: GQ-156
+    question: "RSSIフィルタでタグ応答が来なければ、タグは存在せず書込み対象にもなりませんか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+      - "docs/current/RESPONSE_MODE_APPLICABILITY.md"
+    must_include_facts:
+      - "共通フィルタはInventory／InventoryReadと対応する連続モードの上位へのタグ読取り応答を抑制する"
+      - "RF交信自体を禁止する機能やSelect・Accessによる保護ではない"
+      - "不通知だけで物理的なタグ0枚を断定しない"
+      - "すべてのWrite等のACKへ適用しない"
+
+  - id: GQ-157
+    question: "個別RSSIの閾値を緩くすれば、共通フィルタで落ちたタグを返せますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+      - "docs/current/RESPONSE_MODE_APPLICABILITY.md"
+    must_include_facts:
+      - "共通と個別は独立設定で共通を先に判定する"
+      - "共通で抑制したデータを個別で復活させない"
+      - "個別はInventoryRead／連続インベントリリードが対象"
+      - "Inventory／連続インベントリでは個別フィルタは動作しない"
+
+  - id: GQ-158
+    question: "周波数スキャンの固定・ホッピング・キャリアセンス優先はどう違いますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+      - "docs/current/commands/cards/55_33_02_write_frequency.md"
+    must_include_facts:
+      - "固定は指定開始チャンネルだけを使い混雑時も同じ周波数でセンスする"
+      - "ホッピングはキャリア開始ごとに許可周波数を切り替える"
+      - "キャリアセンス優先はかかるまで前回周波数を使う"
+      - "ホッピングと優先は混雑時に許可周波数を切り替えて再センスする"
+      - "予約11bをキャリアセンス省略や第四のモードとして使わない"
+
+  - id: GQ-159
+    question: "4CHと8CHでアンテナを切り替えると、ホッピングの周波数も毎回変わりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+    must_include_facts:
+      - "UTR-SUN02-4CHは一連のアンテナ切替中は同じ周波数でキャリアセンスにかかった場合を除く"
+      - "UTR-SUN02V-8CH／UTR-SUN02-8CHは内部・外部ともアンテナ切替ごとに周波数を変える"
+      - "機器内部のセンス繰返しをホストの無期限待機や無制限再送に読み替えない"
+
+  - id: GQ-160
+    question: "Target A/B自動切替ONをコマンド用RAMに書けば単発Inventoryも交互になりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+      - "docs/current/RESPONSE_MODE_APPLICABILITY.md"
+    must_include_facts:
+      - "RAM相互反映と機能の有効モードは別"
+      - "Target自動切替は自動読み取りモード限定"
+      - "コマンドモードではInventoryの設定Targetを使用する"
+      - "自動用でTarget BならBから交互となりキャリア休止後もBから再開する"
+      - "リーダ側Targetを変えるのでありタグのInventoriedフラグを強制復元する機能ではない"
+
+  - id: GQ-161
+    question: "Target切替OFF・Select不使用・S2/S3の一回読み取りは永久に再読取りできない意味ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+    must_include_facts:
+      - "一回読み取りはSessionのInventoriedフラグ保持条件に依存する"
+      - "永久に読めなくなる意味ではない"
+      - "S0の給電OFFによる復帰とS2/S3の保持・時間経過を区別する"
+
+  - id: GQ-162
+    question: "RFタグ通信設定のリトライ0は必ずRF送信1回ですか。タグNACKには設定回数まで再送しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md"
+    must_include_facts:
+      - "p.66ではRead/Write設定0でもコマンドやタグ応答により内部リトライがある"
+      - "Read/Writeはタグ応答を取得できない場合にリトライしタグのエラーコード付きNACKでは行わない"
+      - "Q=0のInventoryは1枚読めた時点で設定回数に関係なく終了する"
+      - "回数をホストの再送回数や固定timeoutへ直接換算しない"
+      - "リトライ増加は通信距離を延ばさず恒常的な干渉やQ不足の解決を保証しない"
+
+  - id: GQ-163
+    question: "個別RSSI設定をRAMだけに書き、再起動で戻せますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_49_read_rssi_filter.md"
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "ROM Ver.2.100以降が対象"
+      - "FLASHのみで電源OFFでも保持しRAM／FLASH種類指定はない"
+      - "各No.の無効化もFLASH変更"
+      - "設定読取りと実際の機能の有効モードを区別する"
+
+  - id: GQ-164
+    question: "個別RSSIを10件読むACKと10件書くACKは同じ長さですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_49_read_rssi_filter.md"
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "読取り要求はLEN=05h・総12 byte"
+      - "読取りACKと書込み要求はLEN=5+12nで10件なら125・総132 byte"
+      - "書込みACKはLEN=05h・総12 byteでレコード本体を含まない"
+      - "開始No.・件数・詳細と共通フレームを照合してからレコードを解析する"
+
+  - id: GQ-165
+    question: "個別RSSIの2件目レコードはどこから始まり、81hはNo.129ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_49_read_rssi_filter.md"
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "レコードiのDATA基点は5+12iで2件目はDATA[17]"
+      - "先頭byteのbit0から3がNo.、bit7が有効／無効"
+      - "81hはNo.1有効でbit4から6は予約"
+      - "マスクと比較データは各4 byte、RSSIは2 byte、末尾予約1 byte"
+
+  - id: GQ-166
+    question: "個別RSSIの0C FEと76 FDを共通RSSIと同じ1 byte単位で読んでよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_49_read_rssi_filter.md"
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "p.183・247の表はRSSI値の10倍の符号付き16 bitで下位byte先"
+      - "0C FEは-500から-50.0 dBm、76 FDは-650から-65.0 dBm"
+      - "マスク・比較データはMSB先なので全項目に同じbyte順を使わない"
+      - "p.253の8 bit記述との不一致はOPEN-019で確認待ち"
+      - "表現可能な型の範囲を設定許容範囲の保証にしない"
+
+  - id: GQ-167
+    question: "個別RSSIでは閾値と同じ-50.0なら破棄しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_49_read_rssi_filter.md"
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "p.249・251・253の詳細は閾値以上で返す"
+      - "詳細説明に従うと-50.1は破棄、-50.0と-49.9は返す"
+      - "p.182の上回るとの不一致はOPEN-020で訂正確認中"
+      - "原典転記と訂正の確定、実機試験を区別する"
+
+  - id: GQ-168
+    question: "個別RSSIの比較データにもマスクを掛け、対象外bitを無視してよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "判定式は読取りデータANDマスク値の結果と比較データ全体の一致"
+      - "AB CD 12 34とF8 FF 00 FFのANDはA8 CD 00 34"
+      - "比較データ側にも自動的に同じマスクを掛ける仕様ではない"
+      - "比較データのマスク対象外bitは0に揃える"
+
+  - id: GQ-169
+    question: "個別RSSIのNo.3で一致してRSSI不足ならNo.5で救済できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "有効なNo.の小さい順に判定"
+      - "最初にデータ条件が一致したNo.の閾値で終了"
+      - "RSSI不足で破棄した場合も後続No.へ進まない"
+      - "共通RSSIで破棄したデータも個別で復活させない"
+
+  - id: GQ-170
+    question: "個別RSSIが全件無効で条件不一致は破棄なら全タグが消えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "全10件無効なら個別判定の対象外"
+      - "有効な条件がある場合の全不一致と全件無効は異なる"
+      - "共通RSSIが有効ならその判定は残る"
+      - "無効化の書込み自体はFLASHへ保存される"
+
+  - id: GQ-171
+    question: "個別RSSIの条件不一致を返すにすると閾値未満も返りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "有効なすべてのマスク条件に不一致のときだけ動作設定bit2を使う"
+      - "既に一致した個別条件で閾値未満なら破棄して終了"
+      - "共通で破棄したデータも返さない"
+      - "全体の動作設定とNo.ごとの有効bitを区別する"
+
+  - id: GQ-172
+    question: "TIDを付加しない設定ならTIDによる個別RSSIフィルタは動作しませんか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+      - "docs/current/RESPONSE_MODE_APPLICABILITY.md"
+    must_include_facts:
+      - "判定対象TIDなら非付加設定でも内部でTIDを読む"
+      - "内部の判定に使うが上位レスポンスにはTIDを付加しない"
+      - "InventoryReadと連続インベントリリードが対象"
+      - "Inventoryと連続インベントリには個別フィルタは動作しない"
+
+  - id: GQ-173
+    question: "MemBankを1 Word読む個別RSSIにFF FF FF FFのマスクを使えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "後半16 bitが不定なのでマスク後半は0にする"
+      - "例はFF FF 00 00"
+      - "比較データの後半もAND結果に合わせ0にする"
+      - "判定対象は読取り結果の先頭32 bitで任意開始位置・可変長レコードへ拡張しない"
+
+  - id: GQ-174
+    question: "No.5だけの個別RSSI変更なら動作設定を00hで補ってよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "動作設定の判定対象と条件不一致は全体に対する設定"
+      - "部分変更でも全体設定を初期値で補わない"
+      - "変更前に全体設定と10件を記録して同じ範囲を読戻す"
+      - "未指定枠の保持・失敗時反映単位は未確認なので必要な全範囲も確認する"
+
+  - id: GQ-175
+    question: "個別RSSIの開始No.9・件数3や重複No.は自動的に補正して送ってよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_49_read_rssi_filter.md"
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "10枠内に収めるためa+n-1が10以下となるよう入力を検査する"
+      - "開始No.と各レコードNo.を連続範囲で揃える"
+      - "範囲超過・重複・順不同・ヘッダとの矛盾時の実動作は未確認"
+      - "件数とレコード数不一致のNACKについて特定コードや原子的な取消しを補わない"
+
+  - id: GQ-176
+    question: "原典p.254から255の10タグ例では誰が返りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_39_write_rssi_filter.md"
+    must_include_facts:
+      - "共通閾値-60.0でNo.5と9を破棄"
+      - "個別No.1の-45.0でタグNo.1と2、個別No.2の-55.0でタグNo.6と7を返す"
+      - "タグNo.10は条件不一致で破棄し合計4枚"
+      - "原典の想定例であり本リポジトリの実機試験結果ではない"
+
+  - id: GQ-177
+    question: "汎用ポートの読み書きは詳細9FhのACKなら同じ処理でよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_9f_read_general_port.md"
+      - "docs/current/commands/cards/4e_9f_write_general_port.md"
+    must_include_facts:
+      - "読取り要求は4Fh・LEN=01hで総8 byte"
+      - "読取りACKは30h・LEN=05hで現在値・機能・方向・初期値を含む総12 byte"
+      - "書込みACKは30h・LEN=01h・9Fhのみの総8 byteで値を含まない"
+      - "共通フレームと要求を対応づけ詳細だけで成功にしない"
+
+  - id: GQ-178
+    question: "汎用ポートの現在値BAhはどのポートがHighですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_9f_read_general_port.md"
+    must_include_facts:
+      - "bit0がポート1でbit7がポート8"
+      - "BAhではポート2・4・5・6・8がHigh、1・3・7がLow"
+      - "現在値は観測値で表の初期値B8hと異なるだけで異常ではない"
+      - "起動初期値FFhと現在値を混同しない"
+
+  - id: GQ-179
+    question: "汎用ポート方向設定が00hならLED制御信号もすべて入力ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_9f_read_general_port.md"
+      - "docs/current/commands/cards/4e_9f_write_general_port.md"
+    must_include_facts:
+      - "ポート1・2・3・7の方向設定は機能が汎用ポートの場合だけ有効"
+      - "専用機能を方向byteだけで入力と解釈しない"
+      - "機能byteはbit0・1・2・6に機能選択がありbit3から5とbit7は予約"
+      - "方向bitを1にするだけで専用機能から汎用出力へ切り替わらない"
+
+  - id: GQ-180
+    question: "汎用ポートの指示05h・設定04hは他ポートをすべてLowにしますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9f_write_general_port.md"
+    must_include_facts:
+      - "指示05hはポート1と3だけを書込み対象にする"
+      - "設定04hによりポート1はLow、ポート3はHigh"
+      - "指示bitが0なら設定bitは0でも1でも書込みしない"
+      - "対象ポートが出力であることと該当するポートの汎用機能を事前確認する"
+
+  - id: GQ-181
+    question: "工場初期設定のまま汎用ポート値を書けば自動でLED制御用の出力になりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_9f_read_general_port.md"
+      - "docs/current/commands/cards/4e_9f_write_general_port.md"
+    must_include_facts:
+      - "値書込みでは機能・方向を変更しない"
+      - "初期機能00hではポート1と3は専用機能"
+      - "ポート1・3の汎用制御は機能=汎用ポートかつ方向=出力を確認する"
+      - "機能変更や再起動を無断で前処理へ追加しない"
+
+  - id: GQ-182
+    question: "汎用ポートを書いた後、読取り現在値全体が設定byteと同じなら成功ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9f_write_general_port.md"
+    must_include_facts:
+      - "書込みACKには現在値が含まれないので4Fh/9Fhで読戻す"
+      - "送信指示マスクの対象bitだけを設定値と比較する"
+      - "対象外入力や専用機能の状態は別要因で変化し得る"
+      - "ACK・読戻し一致・外部負荷の実動作確認を区別する"
+
+  - id: GQ-183
+    question: "汎用ポート値の書込みで起動時初期値も保存されますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9f_write_general_port.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "値書込みの要求にFLASHアドレス・種類・機能・方向・初期値はない"
+      - "機能はFLASH30/1Eh、方向32/20h、初期値33/21hの別設定"
+      - "現在値変更を起動初期値更新とみなさない"
+      - "再起動だけで作業開始前の出力へ戻るとは判断しない"
+
+  - id: GQ-184
+    question: "据置機のポート1を汎用入力にすると青LEDは必ず消灯しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_9f_read_general_port.md"
+      - "docs/current/commands/cards/4e_9f_write_general_port.md"
+    must_include_facts:
+      - "p.40は入力設定で逆流によりLEDが暗く点灯する場合を記載する"
+      - "汎用入力はこのLED制御の本来の使用方法ではない"
+      - "汎用出力なら0で消灯し1で対応LEDが点灯する"
+      - "電源投入直後や故障時は別条件で全機種の端子構成へ一般化しない"
+
+  - id: GQ-185
+    question: "汎用ポート書込みのtimeoutや入力指定に対するNACKはどう扱いますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9f_write_general_port.md"
+    must_include_facts:
+      - "timeoutを未変更の証明にせず状態を確認する"
+      - "入力設定や専用機能への指示のACK／NACK・無視の詳細は未確認"
+      - "未記載のNACKコードや同時反映保証を追加しない"
+      - "読取りと書込みは詳細9Fhが共通なのでNACKも未完了要求と対応づける"
+
+  - id: GQ-186
+    question: "p.43と44ではポート1をHighにするとBLUEが赤くなる仕様ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_9f_read_general_port.md"
+      - "docs/current/commands/cards/4e_9f_write_general_port.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "本文のBLUEが赤色に点灯という記載は同ページの表とp.40の青点灯に不一致"
+      - "OPEN-021に赤色から青色への訂正候補を記録し確定は保留"
+      - "現在値やLED点灯をタグ検出・通信成功の証明にしない"
+
+  - id: GQ-187
+    question: "拡張ポートの読取りと書込みは詳細A0hだけでACKを判別できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_a0_read_extended_port.md"
+      - "docs/current/commands/cards/4e_a0_write_extended_port.md"
+    must_include_facts:
+      - "読取りACKはCMD=30h・LEN=05h・A0hで総12 byte"
+      - "書込みACKはCMD=30h・LEN=01h・A0hで総8 byte、値は返らない"
+      - "未完了要求と対応づけ、汎用ポートの詳細9Fhとも区別する"
+
+  - id: GQ-188
+    question: "4CH機に外部アンテナを増設すれば拡張ポートコマンドを使えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_a0_read_extended_port.md"
+      - "docs/current/commands/cards/4e_a0_write_extended_port.md"
+    must_include_facts:
+      - "p.179と243はアンテナポート8CH仕様のリーダライタに限定する"
+      - "アンテナ増設数だけで機種の8CH仕様条件を満たすと判断しない"
+      - "requires_antenna=falseを全機種対応と解釈しない"
+
+  - id: GQ-189
+    question: "拡張ポートを有効にするには機能bitを1にしますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_a0_read_extended_port.md"
+      - "docs/current/commands/cards/4e_a0_write_extended_port.md"
+    must_include_facts:
+      - "機能byteは全bit0固定でFLASH34/22hも予約0固定"
+      - "汎用ポートの機能選択やLED条件を流用しない"
+      - "p.180の方向有効条件の注記は選択値不明のためOPEN-022で保留"
+      - "0固定だから方向無効という独自条件も作らない"
+
+  - id: GQ-190
+    question: "拡張ポート現在値7Fh、方向00h、初期値FFhはどの状態ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_a0_read_extended_port.md"
+    must_include_facts:
+      - "bit0がポート1でbit7がポート8"
+      - "現在値はポート1から7がHighで8がLow"
+      - "方向表は0=入力、初期値FFhと現在値7Fhの違いだけで異常としない"
+      - "p.180の例を全8CH機の工場設定に一般化しない"
+
+  - id: GQ-191
+    question: "UTR-SUN02V-8CHとUTR-SUN02-8CHの拡張ポート初期設定は全入力ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_a0_read_extended_port.md"
+    must_include_facts:
+      - "p.343の※6では方向0Fh、起動初期値F0h"
+      - "ポート1から4は出力・初期Low、5から8は入力・初期High"
+      - "上記以外の8CH仕様機は※7により方向00h・初期値FFh"
+      - "工場初期値で使用中の機器設定や入力現在値を補わない"
+
+  - id: GQ-192
+    question: "拡張ポート指示05h・設定04hは8ポートをどう変更しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_a0_write_extended_port.md"
+    must_include_facts:
+      - "ポート1をLow、3をHighに変更する"
+      - "指示bit=0の他ポートは設定bitが0でも1でも書込みしない"
+      - "書込み対象ポートの方向が出力であることを先に確認する"
+      - "値書込み自体で方向を変更しない"
+
+  - id: GQ-193
+    question: "拡張ポート書込み後は現在値byte全体を設定値と比較しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_a0_write_extended_port.md"
+    must_include_facts:
+      - "ACKに現在値は含まれず4Fh/A0hで読戻す"
+      - "現在値AND指示マスクと設定値AND指示マスクを比較する"
+      - "対象外入力の変化を出力失敗と混同しない"
+      - "ACK・対象bit一致・外部負荷の実動作を区別する"
+
+  - id: GQ-194
+    question: "拡張ポート値を書けば起動初期値も保存されますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_a0_read_extended_port.md"
+      - "docs/current/commands/cards/4e_a0_write_extended_port.md"
+    must_include_facts:
+      - "要求に機能・方向・起動初期値・FLASHアドレス・種類の指定はない"
+      - "FLASHの機能34/22h、方向36/24h、初期値37/25hは別設定"
+      - "汎用ポートのFLASHアドレスを流用しない"
+      - "現在出力とFLASHの復元を分け、再起動だけで作業前の出力へ戻ると判断しない"
+
+  - id: GQ-195
+    question: "入力の拡張ポートへ書いた場合のNACKとtimeout時の再送はどう扱いますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_a0_write_extended_port.md"
+    must_include_facts:
+      - "入力への指示が無視かNACKかは未確認で固定コードを作らない"
+      - "timeoutを未変更の証明にせず現在の状態を確認する"
+      - "複数bitの同時反映や失敗時の反映単位は未確認"
+      - "NACKの詳細A0hだけでは読取りと書込みを区別できず未完了要求と対応づける"
+
+  - id: GQ-196
+    question: "拡張ポート読取りにはポート番号やRAM/FLASH種類を指定しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_a0_read_extended_port.md"
+    must_include_facts:
+      - "要求DATAは詳細A0hのみ、LEN=01hで総8 byte"
+      - "ACKは現在値・機能・方向・初期値の順に各1 byte"
+      - "TID付加などのタグ応答設定で固定ACKの長さを変えない"
+      - "マニュアルVer.1.12のコマンド追加記録を一律の最低対応ROMとは断定しない"
+
+  - id: GQ-197
+    question: "42hで応答要求00hを指定し何も受信しなければ、timeout失敗ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/42_buzzer_control.md"
+    must_include_facts:
+      - "正常時はレスポンスなしなのでACK待ち失敗にしない"
+      - "SUM値エラーなどではNACKが返り受信を無効化しない"
+      - "無応答だけでは到達や鳴動成功を証明しない"
+
+  - id: GQ-198
+    question: "42hのACKにはDATA[0]=42hが返りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/42_buzzer_control.md"
+    must_include_facts:
+      - "応答要求01hならCMD=30h・LEN=00hでDATAなし、総7 byte"
+      - "詳細コマンドなしの要求でACKのDATA[0]を読まない"
+      - "未完了要求と照合し、ACKなしを正常無応答へ読み替えない"
+
+  - id: GQ-199
+    question: "単独ブザー42hとLED&ブザー57hの音番号と応答指定を共用できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/42_buzzer_control.md"
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "42hは応答要求と音00hから08hを指定する"
+      - "57hには応答要求フィールドがなく固定ACKが返る"
+      - "時間指定音FFhと追加の動作値は57hだけで42hへ流用しない"
+      - "音00hはピーで消音ではない"
+
+  - id: GQ-200
+    question: "57hで青LEDだけ、またはブザーだけを動かすならポート3の機能は未確認でよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "p.126はポート1と3の両方の機能が汎用ポートであることを要求する"
+      - "片方でも異なればLEDとブザーとも制御できずNACK"
+      - "片方選択や制御ポート00hを条件免除の根拠にしない"
+
+  - id: GQ-201
+    question: "LED&ブザー制御で汎用ポート1と3の機能だけ確認すればよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "p.40によりLED制御対象の出力方向も確認する"
+      - "機能byteはbit0とbit2が1、ブザー用ポート7のbit6は0"
+      - "機能byte全体を固定値で上書きしない"
+      - "入力方向の異常応答や自動で出力へ変える動作は未確認"
+
+  - id: GQ-202
+    question: "57hの制御ポート00hはLED消灯か、応答不要の指定ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "LEDを制御しない指定で消灯や応答不要ではない"
+      - "消灯は対象ポートを指定しLEDモード02h・動作値00h"
+      - "制御ポートは00h・01h・04h・05hの4値で任意8ポートマスクではない"
+
+  - id: GQ-203
+    question: "LED動作値02hは常に400msという意味ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "LEDモード00hなら400ms点灯、01hなら400ms間隔"
+      - "モード02hは動作値00h消灯・01h常時点灯で02hを時間として扱わない"
+      - "時間値0の挙動と点滅間隔の一周期への対応は未確認"
+
+  - id: GQ-204
+    question: "57hのブザー動作値02hで通常音を2回鳴らせますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "通常音00hから08hの動作値は00h鳴動なし・01h鳴動あり"
+      - "音FFhなら02hは400msの時間指定"
+      - "通常音で02hを回数や時間として扱わない"
+      - "鳴動なし00hが実行中の音を中断するかは未確認"
+
+  - id: GQ-205
+    question: "57hのACKが来ればLED点灯やブザー鳴動は終了していますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "ACKはCMD=30h・LEN=01h・詳細57hで総8 byte、実動作値なし"
+      - "ACK返却と動作終了の関係は未確認"
+      - "常時点灯と常時点滅に有限の終了時間を作らない"
+      - "現在値の一回の読戻しでは点滅間隔や鳴動パターン全体を検証できない"
+
+  - id: GQ-206
+    question: "UTR-S201モジュールにLEDとブザーを直接つないで57hを使えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "コマンドは互換性のため実行可能だがモジュールにはLEDとブザーが未実装"
+      - "ポート出力による直接駆動は不可でデジタルトランジスタ等を介する"
+      - "p.126はポート1と3にLED、7に他励式ブザーの構成"
+      - "対応表と実装回路を分け、電気的条件は製品仕様書で確認する"
+
+  - id: GQ-207
+    question: "ブザーを有効にするためFLASH38のbit4を1にし、時間制御を保存しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/42_buzzer_control.md"
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "FLASH38/26hのbit4は0が標準の他励式、1は予約で動作しなくなるため設定しない"
+      - "制御要求はFLASHに時間やパターンを保存する要求ではない"
+      - "機能変更や再起動を制御の自動前処理にしない"
+      - "元の点滅モードや残り時間を現在値だけで復元できない"
+
+  - id: GQ-208
+    question: "42hのNACK先頭DATAを42h、57hの機能違反をFORMAT_ERRORと固定してよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/42_buzzer_control.md"
+      - "docs/current/commands/cards/4e_57_led_buzzer_control.md"
+    must_include_facts:
+      - "共通NACK形式と具体的なエラー値の根拠を分ける"
+      - "42hのNACK先頭DATAの具体値は今回未確認"
+      - "57hのポート1・3機能条件違反はNACKだが数値コードを独自に割り当てない"
+      - "受信値と未完了要求を記録し未知値を成功に読み替えない"
+
+  - id: GQ-209
+    question: "動作モード書込みの4Eh・00h・10hは3つのコマンドbyteですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "DATA[0]の00h=RAMと10h=FLASHは同じ1 byteの選択肢"
+      - "サブコマンドはなく10hを00hの後へ追加しない"
+      - "要求LEN=07hで総14 byte、DATA[1]がモード"
+
+  - id: GQ-210
+    question: "動作モード読取りにFLASH対象を指定すると保存モードを取得できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_00_read_reader_mode.md"
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "要求は詳細00hだけでRAM/FLASH選択フィールドがない"
+      - "送信コンテキストだけで現在値をFLASH保存値の独立読戻しにできない"
+      - "保存モードの独立した読出し方法・アドレスは今回未確認"
+
+  - id: GQ-211
+    question: "動作モード読取りACKの位置と長さを教えてください。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_00_read_reader_mode.md"
+    must_include_facts:
+      - "CMD=30h・LEN=09h・DATA[0]=00hで総16 byte"
+      - "DATA[1]がモード、DATA[3]のbit4がブザー設定"
+      - "DATA[2]とDATA[4から8]は予約"
+      - "TID付加などで固定ACKの長さを変えない"
+
+  - id: GQ-212
+    question: "モード読取りACKのブザーbyteが10hと完全一致しなければ鳴動OFFですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_00_read_reader_mode.md"
+    must_include_facts:
+      - "DATA[3] AND 10hでbit4を判定する"
+      - "予約byte・bitの非ゼロを独自の失敗や機能と解釈しない"
+      - "ブザーbitは設定であって現在の鳴動を検出した値ではない"
+
+  - id: GQ-213
+    question: "連続モードへ切り替えたら4Fh/00hで必ず読戻し確認しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_00_read_reader_mode.md"
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "p.19と20の受付例外に動作モード読取りは含まれず保証外"
+      - "ACK表の65h/66hを連続中の受付保証と解釈しない"
+      - "切替ACK・指定値・実際の非同期応答を分ける"
+      - "00hへ戻した後の読取りは以前の連続モードを直接検証しない"
+
+  - id: GQ-214
+    question: "連続インベントリ65hから連続インベントリリード66hへ直接変更してよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "p.17により一度00hのコマンドモードを経由する"
+      - "自動読み取りパラメータは開始前に設定する"
+      - "通常コマンドもコマンドモードに戻してから実行する"
+
+  - id: GQ-215
+    question: "自動読み取り中に受け付けるコマンドは何ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_00_read_reader_mode.md"
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "動作モード書込み・ブザー制御・LED&ブザー制御・ROM読取り・チップバージョン読取りの5つ"
+      - "それ以外は基本的に受け付けず動作保証なし"
+      - "設定読取りやリスタートを例外へ追加しない"
+
+  - id: GQ-216
+    question: "動作モード書込みACKには対象とモードが返りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "CMD=30h・LEN=00hで総7 byte、DATAなし"
+      - "単独ブザーなどの同形ACKと未完了要求で対応づける"
+      - "ACKには書込み対象・モード・ブザー値は返らない"
+
+  - id: GQ-217
+    question: "動作モードをFLASHへ書くと次の再起動まで現在RAMは保持されますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "DATA[0]=10hではFLASH保存後に装置がFLASHを自動再読込みしてRAMを上書きする"
+      - "モード以外のRAMへの影響も確認対象にする"
+      - "上書きされる全項目と順序は未照合"
+      - "元RAMとFLASHが異なる場合はFLASH復元だけで元RAMへ戻ったとしない"
+
+  - id: GQ-218
+    question: "RAMへコマンドモードを書けば、次回起動もコマンドモードですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+      - "docs/current/commands/cards/4f_00_read_reader_mode.md"
+    must_include_facts:
+      - "起動・リスタート時はFLASH保存モードを使う"
+      - "RAM00hへの復帰だけではFLASHの起動モードを変更しない"
+      - "工場初期値00hを使用中の保存値に流用しない"
+
+  - id: GQ-219
+    question: "ホストがlistenするだけなら65h/66hへの切替でRFは送信されませんか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "装置が自律的にRFタグへ繰り返し送信する"
+      - "切替によるRFとアンテナ確認の条件付き影響を考慮する"
+      - "66hは自動読み取り用Inventory設定のMemBank・TID等を使う"
+      - "RF開始前に対象機種・ROM・アンテナ・出力・周波数・停止方法を確認する"
+
+  - id: GQ-220
+    question: "接続直後に元モードとブザーを読めない場合、初期値で停止してからスナップショットを作れますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_00_read_reader_mode.md"
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "連続中は読取り保証がなく元設定を取得できない場合がある"
+      - "停止のモード書込み自体が動作変更で観測だけの依頼へ自動追加しない"
+      - "取得できない元モードやブザーを初期値で補わない"
+      - "変更後の読取りから元状態を復元できる前提にしない"
+
+  - id: GQ-221
+    question: "モード書込みがtimeoutなら同じFLASH要求を再送すればよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "timeoutは未変更の証明にならない"
+      - "FLASH再送は保存書込みとRAM再読込みを繰り返す"
+      - "未完了要求・通信状態・非同期応答を確認して再送を判断する"
+      - "未知の反映単位やNACKコードを追加しない"
+
+  - id: GQ-222
+    question: "モード切替は2秒待てば必ずRF停止と受信完了を確認できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_00_read_reader_mode.md"
+      - "docs/current/commands/cards/4e_00_10_write_reader_mode.md"
+    must_include_facts:
+      - "p.17の約2秒は電源起動とリスタートの応答不能時間で通常切替へ流用しない"
+      - "通常切替の最長時間やACKと自動応答の厳密な順序は未確認"
+      - "コマンドモード読戻しと物理RF停止時刻・転送中データの消尽は別に確認する"
+
+  - id: GQ-223
+    question: "FLASH 1 byte読取りACKから、対象アドレスと値をどう取得しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_b4_read_flash_settings.md"
+    must_include_facts:
+      - "CMD=30h・LEN=02h・DATA[0]=B4h、総9 byte"
+      - "DATA[1]は値で対象アドレスはACKに返らない"
+      - "要求DATA[1]のアドレスと応答DATA[1]の値を区別する"
+      - "未完了要求のアドレスを保持してデコードする"
+
+  - id: GQ-224
+    question: "FLASH 1 byte書込みのACKに、保存先と変更後の値は含まれますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+      - "docs/current/commands/cards/4f_b4_read_flash_settings.md"
+    must_include_facts:
+      - "CMD=30h・LEN=01h・DATA[0]=B4h、総8 byte"
+      - "アドレスも値も含まれない"
+      - "同じB4hでもLEN=02hの読取りACKと区別する"
+      - "同じアドレスの読戻し一致と実動作への反映は別"
+
+  - id: GQ-225
+    question: "設定アドレス30へ書くとき、フレームADRを30にしてASCIIの1Eを送りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+    must_include_facts:
+      - "通信フレームADRと要求DATA[1]の設定メモリアドレスは別"
+      - "十進30のメモリアドレスは1 byteの1Eh"
+      - "ASCIIの1Eの2文字や30hへ置き換えない"
+
+  - id: GQ-226
+    question: "FLASHアドレスは1 byteなので、0から255まで全番地を利用できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_b4_read_flash_settings.md"
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+    must_include_facts:
+      - "1 byte幅は全番地の利用保証ではない"
+      - "p.342–344の定義・対象機種・ROM・予約条件を確認する"
+      - "未掲載領域を推測で読み書きしない"
+      - "未掲載アドレスに対する具体的なNACK値は未確認"
+
+  - id: GQ-227
+    question: "FLASH一覧の81（51h）へ書いた値も、再起動後に永続保存されますか。"
+    expected_source_files:
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+    must_include_facts:
+      - "51hはRAMとして動作する例外"
+      - "50h変更時と電源再投入・リスタート時に50hから51hへ反映される"
+      - "51h読戻しを永続保存の確認に使わない"
+      - "flash_operation=trueから全アドレスがFLASHと一般化しない"
+
+  - id: GQ-228
+    question: "ROM 2.030以降でも50hと51hでInventoryタイムアウトを変更できますか。"
+    expected_source_files:
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "1.120以前ではInventoryタイムアウトとして使用し値×10ms"
+      - "2.030以降では機能未実装で実動作に使われない"
+      - "記載のない中間ROMの条件は推測しない"
+
+  - id: GQ-229
+    question: "FLASH 1 byte書込みは、動作モード10h書込みと同様に全FLASHを自動再読込みしますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+    must_include_facts:
+      - "p.341はFLASH設定値変更後のリスタートを要求する"
+      - "B4hの節には自動リスタートや全FLASH自動再読込みの記載がない"
+      - "動作モード書込みDATA[0]=10hの仕様を流用しない"
+      - "50hから51hへの反映と51h単独変更への再起動要件の適用時点は未確認として区別する"
+
+  - id: GQ-230
+    question: "汎用ポート機能1Ehに05hを書くのは、bit0とbit2だけの変更指示ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+    must_include_facts:
+      - "B4hはbit指示マスクを持たず1 byte全体を書き込む"
+      - "05hはbit0とbit2を1、残りを0にする値"
+      - "定義済み機能bit1とbit6も0になる"
+      - "9Fhの現在出力用指示マスクと混同しない"
+
+  - id: GQ-231
+    question: "GPIO機能の一部を変更するため、残りのbitを初期値か取得値でそのまま埋めればよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+    must_include_facts:
+      - "変更対象外の定義済みbitは取得値から保持し初期値で埋めない"
+      - "1Ehの予約bit3・4・5・7は0"
+      - "予約bitの未知の非ゼロ値をそのまま再送せず確認を保留する"
+      - "機能変更だけでは方向・起動初期値・現在出力を同時に変更しない"
+
+  - id: GQ-232
+    question: "p.181のFLASHアドレス94（5Bh）は、どちらに合わせますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_b4_read_flash_settings.md"
+      - "docs/current/SOURCE_REVIEW_STATUS.md"
+    must_include_facts:
+      - "5Bhは十進91でp.181本文と矢印注記の94と不一致"
+      - "p.246例2とp.344は91（5Bh）"
+      - "94→91はOPEN-023の訂正候補で保守者確認まで保留"
+      - "原典転記と例の送信アドレス5Bhを保持し94に合わせて送信列を変更しない"
+
+  - id: GQ-233
+    question: "5Ah・5Bh・5Ch・5Dhのtimeoutとホスト受信timeoutは同じですか。"
+    expected_source_files:
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "5AhはRF BlockWrite用でUHF_BlockWrite2以外、初期値は1.120以前7ms・2.030以降20ms"
+      - "5BhはRF Write、5DhはRF Read、5Chは上位からのUHF_BlockWrite2実行用"
+      - "5Chと5DhはROM 2.030以降、初期20ms"
+      - "USB/COM・LAN/TCPホスト受信期限そのものではない"
+
+  - id: GQ-234
+    question: "p.246のWrite 5ms例と64hの初期5msを、共通の推奨timeoutにできますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_b4_read_flash_settings.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "p.246の5msは変更例で推奨値ではない"
+      - "64hはキャリアセンス時間で待ちタイムアウトや休止時間とは別"
+      - "初期値を使用中の値に流用しない"
+      - "1 byte幅から許容範囲や0の意味を推測しない"
+
+  - id: GQ-235
+    question: "連続読み取り中にFLASH設定を読み、書込みtimeoutなら再送してリスタートすれば安全ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_b4_read_flash_settings.md"
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+    must_include_facts:
+      - "連続モード65h・66hでB4h読取りと書込みは受付例外に含まれず保証外"
+      - "00hへの復帰を設定変更として扱い読取り依頼へ自動追加しない"
+      - "timeoutは未変更の証明ではなく保存書込みや再起動を機械的に繰り返さない"
+      - "NACKとtimeoutを分け失敗時の反映単位を推測しない"
+
+  - id: GQ-236
+    question: "FLASH設定とRAMの開始値が違っていた場合、FLASHを戻して再起動すれば完全復元ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_b4_flash_write.md"
+      - "docs/current/RAM_FLASH_IMPACT_MATRIX.md"
+    must_include_facts:
+      - "FLASH復元と開始前RAM・現在出力の復元は別"
+      - "50h復元とリスタートは51hを上書きするため元RAMが異なる場合はその後のRAM復元を検討する"
+      - "保存起動モードによる連続動作再開とRAM喪失を考慮する"
+      - "p.17のリスタート後2秒以上はFLASH変更の反映時間を示す値ではない"
+
+  - id: GQ-237
+    question: "リスタートはACK待ちがtimeoutしたら再送しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9d_restart_reader.md"
+    must_include_facts:
+      - "p.148はACKもNACKも返さない"
+      - "無応答は想定内でも到達・実行成功の証拠ではない"
+      - "他要求の応答や不正フレームを切り分け9DhのACKを追加しない"
+      - "自動再送やFLASH初期化を行わない"
+
+  - id: GQ-238
+    question: "2秒待ってROM読取りが成功すれば、リスタート実行済みと証明できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9d_restart_reader.md"
+    must_include_facts:
+      - "次コマンドまで2秒以上空ける"
+      - "ROM応答は通信可能なことの確認"
+      - "再起動要求が届かず以前の動作が続いていても応答し得る"
+      - "送信結果・通信確認・設定反映を分離する"
+
+  - id: GQ-239
+    question: "リスタートでFLASHは工場初期値になり、動作モードは必ず00hになりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9d_restart_reader.md"
+    must_include_facts:
+      - "FLASHを初期化せず保存値で両RAMを上書きする"
+      - "起動モードはFLASH保存値"
+      - "RAMだけ00hにしても保存モードが65h・66hなら自動読み取りが再開し得る"
+
+  - id: GQ-240
+    question: "タグ通信要求を送らずリスタートだけならRF確認は不要ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9d_restart_reader.md"
+    must_include_facts:
+      - "ROM 1.120以前のUTR-S201は起動・リスタート時に断線確認を行う"
+      - "断線確認はキャリアセンス後にRFを出力する"
+      - "保存された自動読み取りモードのRF再開も考慮する"
+      - "全機種で常時RFという意味ではなく条件付き影響"
+
+  - id: GQ-241
+    question: "連続読み取りをリスタートで停止し、復帰後に全設定を読めますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9d_restart_reader.md"
+      - "docs/current/commands/cards/4e_6f_flash_initialize.md"
+    must_include_facts:
+      - "65h・66hでは9Dhと6Fhは受付例外に含まれず保証外"
+      - "モード書込みで00hへ戻してから扱う"
+      - "ROM読取りは例外でも各種設定読取りは保証外"
+      - "停止を観測扱いせず元値未取得を初期値で埋めない"
+
+  - id: GQ-242
+    question: "FLASH初期化ACKは無応答ですか。再起動完了も返りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_6f_flash_initialize.md"
+    must_include_facts:
+      - "CMD=30h・LEN=01h・DATA[0]=6Fh、総8 byte"
+      - "初期値・件数・範囲・再起動完了フラグは含まれない"
+      - "実行後に別途リスタートまたは電源再起動が必要"
+      - "6Fhのtimeoutを9Dhの正常無応答と混同しない"
+
+  - id: GQ-243
+    question: "FLASH初期化後、ポートを変更していなければ再起動を省略できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_6f_flash_initialize.md"
+    must_include_facts:
+      - "p.149はコマンド実行後にリスタートまたは電源再起動を要求"
+      - "ポートの注記だけを再起動条件としない"
+      - "p.148の2秒以上は後続コマンドの待機で6FhのACK期限ではない"
+
+  - id: GQ-244
+    question: "FLASH全体をB4hで一括バックアップしてから、ポートだけ初期化できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_6f_flash_initialize.md"
+    must_include_facts:
+      - "6Fhに範囲・アドレス・パラメータ種類の指定欄はない"
+      - "B4hは指定アドレスの1 byte読取りで一括読出しではない"
+      - "未掲載・予約領域を総当たりせず51hのRAM例外を区別する"
+      - "未取得の保存値を完全バックアップ済みとしない"
+
+  - id: GQ-245
+    question: "FLASH初期化はIP設定や校正値もすべて初期化し、USBも必ず再接続しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_6f_flash_initialize.md"
+      - "docs/current/commands/cards/4e_9d_restart_reader.md"
+    must_include_facts:
+      - "全物理番地・校正値・通信モジュール設定の包含と除外は未確認"
+      - "USB/COM再列挙やLAN/TCP切断をp.148から保証しない"
+      - "接続状態に応じてホスト側の復旧を判断する"
+      - "物理電源再投入と周辺を含めて同一動作としない"
+
+  - id: GQ-246
+    question: "初期化にNACKが返れば設定は元のままなので、繰り返し送ってよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_6f_flash_initialize.md"
+    must_include_facts:
+      - "失敗時に全設定が未変更という原子性は未確認"
+      - "timeoutや不正フレームも初期化未実施の証拠ではない"
+      - "自動再送・再起動・追加初期化を避け取得可能な状態から判断する"
+      - "FLASH書換え回数を減らしp.71の10万回以下を保証値にしない"
+
+  - id: GQ-247
+    question: "ROMを読む前にROMと全設定の取得を必須にしますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/rom_version_read.md"
+    must_include_facts:
+      - "ROM識別開始に既知ROMを要求する循環を避ける"
+      - "接続先と対象資料の候補を確認して取得する"
+      - "連続中も受付例外だが通常の設定取得まで保証されない"
+
+  - id: GQ-248
+    question: "ROM ACKの31 31 30 30を数値49100や小数として扱えますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/rom_version_read.md"
+    must_include_facts:
+      - "ACKはLEN=0Ah・90hで総17 byte"
+      - "DATA[1]が1文字のメジャー、DATA[2～4]が3文字のマイナー、DATA[5～9]が5文字のシリーズ"
+      - "ASCIIの1100は表示1.100で点や終端NULは含まない"
+      - "先頭ゼロを保持し比較は検証した整数の組で行う"
+
+  - id: GQ-249
+    question: "UR201というチップ名とFW 1.100からUTR-S201のROM対応を決められますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/rom_version_read.md"
+      - "docs/current/commands/cards/55_90_chip_version_read.md"
+    must_include_facts:
+      - "チップ名とシリーズ名は別"
+      - "対応条件は制御マイコンのROMとシリーズ名で判断する"
+      - "チップFWや説明書版をROM版に代用しない"
+
+  - id: GQ-250
+    question: "同じ詳細90hならROMとチップのACK/NACKを同じように判定できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/rom_version_read.md"
+      - "docs/current/commands/cards/55_90_chip_version_read.md"
+    must_include_facts:
+      - "ROMは要求4Fh・ACK LEN=0Ah"
+      - "チップは要求55hで00hならACK LEN=0Bh、01hなら0Ch"
+      - "詳細だけでなくLEN・取得種別・未完了要求を照合する"
+      - "NACKの詳細90hだけでは要求を区別できない"
+
+  - id: GQ-251
+    question: "チップの製造番号は8桁なのでACKも8 byteとして数値化しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_90_chip_version_read.md"
+    must_include_facts:
+      - "シリアルACKはLEN=0Chで総19 byte"
+      - "DATA[2～11]の10 byteが製造番号8桁を含むシリアル情報"
+      - "先頭ゼロを保持し整数化や8桁への切捨てをしない"
+      - "TK接頭辞の固定や全製品の一意性範囲は未確認"
+
+  - id: GQ-252
+    question: "p.147のシリアル応答はSUM 21hを例外許容すればよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_90_chip_version_read.md"
+    must_include_facts:
+      - "掲載SUMは21hだがSTX～ETXの再計算はFDh"
+      - "OPEN-024で21h→FDhの訂正候補を保留"
+      - "原典転記を保持しSUM例外や検査省略を追加しない"
+      - "実機試験とは区別する"
+
+  - id: GQ-253
+    question: "USM06・USM08・UMP01や未知シリーズはどの機種として扱いますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/rom_version_read.md"
+      - "docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+    must_include_facts:
+      - "USM06はUTR-SUN02V-8CH、USM08はUTR-SUN02-8CH"
+      - "UMP01は別のUTR-S101シリーズ用説明書の対象"
+      - "未知シリーズを既知USMへ推測対応しない"
+      - "機種とROMの該当列を確認し複数列なら最も右側を参照する"
+
+  - id: GQ-254
+    question: "連続読み取り中のROM応答はRF停止・リスタート完了の証明になりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/rom_version_read.md"
+      - "docs/current/commands/cards/55_90_chip_version_read.md"
+    must_include_facts:
+      - "両読取りは連続モード中の受付例外"
+      - "本要求はRFを発生させないが動作中の自動RFは停止しない"
+      - "非同期応答と固定ACKを分離しTID等でACKを伸長しない"
+      - "ROM応答は通信確認で再起動実行やRF停止を証明しない"
+
+  - id: GQ-255
+    question: "エラー情報が非ゼロならNACKとして扱いますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_80_read_error_info.md"
+    must_include_facts:
+      - "ACKはCMD=30h・LEN=04h・80hで総11 byte"
+      - "DATA[1]は00h正常・非ゼロ異常"
+      - "情報取得成功と装置正常を分ける"
+      - "非ゼロでもACKでCMD=31hのNACKとは別"
+
+  - id: GQ-256
+    question: "エラー情報の予約09h・03hは追加エラーコードですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_80_read_error_info.md"
+    must_include_facts:
+      - "DATA[2～3]は予約で通常00h"
+      - "p.123の非ゼロ例をゼロ固定違反にしない"
+      - "エラーコード2・3やアンテナ番号へ独自解釈しない"
+
+  - id: GQ-257
+    question: "エラー情報を読むとクリアされ、最後のNACKが得られますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_80_read_error_info.md"
+    must_include_facts:
+      - "読出しクリアや最新NACK保存レジスタとは記載されていない"
+      - "2.030以降は正常状態検知で00hへリセット"
+      - "直前要求と取得時刻を記録する"
+      - "全異常値と保持・優先順位は未確認"
+
+  - id: GQ-258
+    question: "CheckAntennaのACKにはRFタグや完了応答が続きますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_44_uhf_check_antenna.md"
+    must_include_facts:
+      - "ACKはLEN=03h・44hで総10 byte"
+      - "DATA[1]は番号・DATA[2]は接続情報"
+      - "固定ACKにEPCや枚数を含めず後続タグ完了を仮定しない"
+      - "TIDやアンテナID設定で長さとADRの意味を変えない"
+
+  - id: GQ-259
+    question: "8CHのANT8と4CHのANT3はどの番号を指定しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_44_uhf_check_antenna.md"
+    must_include_facts:
+      - "8CHのANT1～8は00h～07hなのでANT8は07h"
+      - "4CHのANT0～3は00h～03hなのでANT3は03h"
+      - "S201とSHR201は00hのANT0のみ"
+      - "外部番号やRFタグ応答ADRを流用しない"
+
+  - id: GQ-260
+    question: "接続情報01hや02hはNACK 68hに変換しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_44_uhf_check_antenna.md"
+    must_include_facts:
+      - "00h接続OK・01h接続エラー・02h存在しない番号"
+      - "01hと02hもACK内の診断結果"
+      - "NACK・LBT・タグ0枚と別に扱う"
+      - "未知結果値は正常に丸めない"
+
+  - id: GQ-261
+    question: "タグなしでCheckAntennaを実行するならRFは出ませんか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_44_uhf_check_antenna.md"
+    must_include_facts:
+      - "タグは不要だがキャリアセンス後にRFを出力する診断"
+      - "対象端子・機種・ROM・出力・周波数・地域・停止方法を確認"
+      - "受動的な配線読取りではない"
+
+  - id: GQ-262
+    question: "接続情報00hなら全アンテナ・ケーブル・タグは正常ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_44_uhf_check_antenna.md"
+    must_include_facts:
+      - "指定端子の診断結果で全端子正常へ広げない"
+      - "長いケーブルの損失により故障を検知できない場合がある"
+      - "タグの存在や読取性能まで保証しない"
+      - "01hも断線だけでなく周囲環境によるマッチング悪化があり得る"
+
+  - id: GQ-263
+    question: "連続モード中の異常をエラー読取りとCheckAntennaでそのまま観測できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4f_80_read_error_info.md"
+      - "docs/current/commands/cards/55_44_uhf_check_antenna.md"
+    must_include_facts:
+      - "両要求は連続モードの受付例外に含まれず保証外"
+      - "00hへ戻す操作は動作変更"
+      - "停止後の値を停止前の値にしない"
+      - "読取りのみの依頼へRF診断を自動追加しない"
+
+  - id: GQ-264
+    question: "CheckAntennaを実行した後は元のアンテナとキャリア状態に必ず戻りますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_44_uhf_check_antenna.md"
+    must_include_facts:
+      - "診断後の選択アンテナとキャリア状態は未確認"
+      - "外部ユニットの選択と診断範囲も未確認"
+      - "必要な状態確認と復旧を計画する"
+      - "timeoutを未接続と断定し自動再送や別端子切替をしない"
+
+  - id: GQ-265
+    question: "RF制御ACKのDATA[1]=00hはキャリアOFFを意味しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "ACKはLEN=02h・9Ehで総9 byte"
+      - "DATA[1]は予約で制御値のエコーや現在状態ではない"
+      - "未完了要求の制御値と対応づける"
+
+  - id: GQ-266
+    question: "ONを再送して4秒を延長できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "ON再要求は延長できずNACK"
+      - "4秒は出力開始からでACK受信起点ではない"
+      - "再ONの具体的NACK値を60hと推測しない"
+
+  - id: GQ-267
+    question: "OFF状態でOFFを送るとエラーになりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "p.133(7)では状態遷移せずACKが返る"
+      - "OFFは保持Handleを破棄する"
+      - "OFF→ONは終了用OFFの代わりではない"
+
+  - id: GQ-268
+    question: "タグ書込みがNACKならRFも必ずOFFですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "タグ読み書きNACKでは保持Handleを破棄"
+      - "Handle破棄だけではキャリアOFFを確定しない"
+      - "再試行のInventoryで別タグを取得し得るためSelectで一意にする"
+
+  - id: GQ-269
+    question: "OFF→ONの応答期限は55ms固定ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "50ms以上の休止と5ms以上のキャリアセンス"
+      - "設定時間・待ち時間・間欠出力・通信遅延を区別"
+      - "S201とSHR201は間欠対象、据置SUN02の3機種は非対象"
+      - "p.57の最大4秒遅延を全体timeout上限にしない"
+
+  - id: GQ-270
+    question: "4秒でOFFになるまで待てば途中の書込み結果も安全に確定しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "4秒経過で実行中でもOFF、Handle破棄"
+      - "中断処理の成功・未変更や返却コードは推測しない"
+      - "不要になった時点でOFFを要求する"
+
+  - id: GQ-271
+    question: "ON維持中に出力設定を下げれば直ちに実RFも下がりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "p.131は一度OFF状態になるまで出力レベルは変更されない"
+      - "設定保存・読戻しと実RF反映は別"
+      - "ON要求だけではHandleは取得されない"
+
+  - id: GQ-272
+    question: "連続モードを9Eh OFFや再起動で無条件に停止できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "9Ehは65h・66h中の受付例外ではなくOFFも保証外"
+      - "00hへ戻すモード書込みの条件を確認する"
+      - "再起動は保存モードでRF再開し得る"
+      - "timeout時にONやOFF→ONを自動再送しない"
+
+  - id: GQ-273
+    question: "p.136の207msと326msはBlockWriteでStored PCを書いた性能ですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "手順と時間表はBlockWrite、送信例コメントと詳細16hはWrite"
+      - "OPEN-025で実測対象と訂正方向を保留"
+      - "足算は一致するが比較対象コマンドは未確定"
+      - "UCode8・1枚の例で一般的な処理期限ではない"
+
+  - id: GQ-274
+    question: "p.134のキャリアON待機状態を第4の状態として実装しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/4e_9e_rf_carrier_control.md"
+    must_include_facts:
+      - "p.131の状態一覧と図・前後は維持状態"
+      - "待機→維持はOPEN-026の訂正候補として保留"
+      - "別状態の定義を追加しない"
+
+  - id: GQ-275
+    question: "GetHandleのACKを受け取ればタグと再交信して有効なHandleを取得できたことになりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_46_uhf_get_handle.md"
+    must_include_facts:
+      - "リーダ内部の最後の保持値を読む要求"
+      - "タグがOpen/Securedを抜けると値が一致しなくなり得る"
+      - "ACKだけでは現在の有効性を保証しない"
+      - "本要求のread-only分類と前後のRF処理は別"
+
+  - id: GQ-276
+    question: "GetHandleの成功応答は46hだけですか。52 90の順序はどう読みますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_46_uhf_get_handle.md"
+    must_include_facts:
+      - "要求LEN=01hで総8 byte"
+      - "ACKはLEN=03hで総10 byte、詳細46hとHandle2 byte"
+      - "MSB firstで5290h"
+      - "TID付加や完了通知を固定ACKへ流用しない"
+
+  - id: GQ-277
+    question: "ThroughCmdのHandle自動付加ならInventoryも省略できますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_46_uhf_get_handle.md"
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "キャリアONとQ自動UP/DOWNなし・開始最小最大Q=0のInventoryが必要"
+      - "複数タグから1枚の場合はSelect実行設定も必要"
+      - "自動付加ならGetHandleは省略可能"
+      - "Handle自動付加は新規取得や有効期限延長ではない"
+
+  - id: GQ-278
+    question: "ThroughCmdのbit4とbit5とbit6を1にすればHandleとCRCの処理が有効になりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "bit4=0でHandle自動付加"
+      - "bit5=0で受信CRCをホストへ付加"
+      - "bit6=0で受信CRCをチェック"
+      - "bit7=1で送信CRCを付加"
+      - "CRCとフレームSUMは別"
+
+  - id: GQ-279
+    question: "ThroughCmdの送信bit長には自動HandleとCRCや末尾の埋めbitも含めますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "指定する有効bit数で自動Handle16 bitとCRC16 bitは含めない"
+      - "端数を最終byteの上位側に詰める"
+      - "自動付加の順は指定bit列、Handle、CRC"
+      - "Handle自動付加時はCRC計算にHandleも含める"
+
+  - id: GQ-280
+    question: "ThroughCmdの種別7用のtimeout欄を種別1でも00 00で残してよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "種別7だけ2 byteの1～20ms、上位byte先"
+      - "他種別では省略しoffsetを変える"
+      - "種別1はFLASH 93/5Dh、種別2は91/5Bhを使う"
+      - "タグ待ち時間とホスト全体timeoutは別"
+
+  - id: GQ-281
+    question: "ThroughCmdは種別7以外なら送信データを249 byteまで入れてよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "原典p.308の送信データは1～247 byte"
+      - "LENは種別7以外6+n、種別7は8+n"
+      - "空き容量計算だけで上限を拡張しない"
+      - "送信bit長の細条件は未確認"
+
+  - id: GQ-282
+    question: "ThroughCmdのRead例は49 bitなのに7 byte返ります。全56 bitをデータとして使いますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "Header1+データ16+Handle16+CRC16で49 bit"
+      - "有効bitは上位詰めで下位7 bitは解析対象外"
+      - "一般に余りbitが0とは保証しない"
+      - "Headerを解釈してコマンド固有の結果を確認する"
+
+  - id: GQ-283
+    question: "ThroughCmdで受信するACKのフィールド順を教えてください。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "FFh、動作パラメータのエコー、受信bit長2 byte、受信bit列"
+      - "受信データありならLEN=4+nで5～255"
+      - "LEN=01hの固定空ACKではない"
+      - "リーダACKと透過先タグの処理成功は別"
+
+  - id: GQ-284
+    question: "ThroughCmdで送信のみを選ぶと正常無応答ですか。それともFFhだけのACKですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "種別0の要求受信bit長は0000h"
+      - "p.309は受信bit長1～2008とデータ1～251で送信のみの応答が明示されていない"
+      - "OPEN-027で応答有無と構造を保留"
+      - "固定空ACKや正常無応答を推測しない"
+
+  - id: GQ-285
+    question: "ThroughCmdで受信CRCを返さない設定なら返却bit長から16を引いて解析すればよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "bit5=1は受信CRCをホストへ付加しない"
+      - "返却bit長がCRCを含むか除くかとpayload長の対応はOPEN-028で保留"
+      - "要求受信bit長はHeaderからCRCまでという原典定義を保持"
+      - "返却値へ独自の16 bit減算を確定しない"
+
+  - id: GQ-286
+    question: "ThroughCmd前にリーダへAccessパスワードを設定すれば自動認証してSecuredになりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "p.226の自動Access対象にThroughCmdは列挙されていない"
+      - "リーダ設定だけで自動認証やSecuredを保証しない"
+      - "透過先の状態と認証条件を確認する"
+      - "write_operationやAccess確認メタデータは全要求で書込みや非ゼロ必須という意味ではない"
+
+  - id: GQ-287
+    question: "ThroughCmdをリード系種別にすればタグの書換えはできなくなりますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "種別だけで送信内容の影響を判断しない"
+      - "ホストが作るタグコマンドにはBlockWrite等も含められる"
+      - "書込みと認証条件は透過先コマンドに依存する"
+      - "timeout後に未実行と断定して自動再送しない"
+
+  - id: GQ-288
+    question: "M730 Margin Readの例は96 bitのEPCをそのまま読んで返しますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "掲載例の送信は130 bit/17 byte"
+      - "受信は33 bit/5 byteでHeader1+Handle16+CRC16"
+      - "通常Readの96 bitデータ応答として扱わない"
+      - "M730例を他のチップへ一般化しない"
+
+  - id: GQ-289
+    question: "GetHandleとThroughCmdはSUN02-4CHなら全ROMで対応していますか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_46_uhf_get_handle.md"
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "p.108と110はS201・SHR201・SUN02-4CHをROM別の列に置く"
+      - "2.040以前は非対応、2.050以降/2.100以降は対応"
+      - "全バージョン列はSUN02-8CHとSUN02V-8CH"
+      - "4CHを8CH列へ混在させない"
+
+  - id: GQ-290
+    question: "連続モードのままGetHandleで値を読んでThroughCmdを送ってよいですか。"
+    expected_source_files:
+      - "docs/current/commands/cards/55_46_uhf_get_handle.md"
+      - "docs/current/commands/cards/55_ff_uhf_through_cmd.md"
+    must_include_facts:
+      - "両コマンドは65h/66h中の受付例外ではない"
+      - "モード書込みで00hへ戻す条件を確認する"
+      - "処理終了後は直ちにキャリアOFFが推奨"
+      - "出力開始から最大4秒やHandle破棄後は旧値を再利用しない"

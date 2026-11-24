@@ -21,13 +21,19 @@ requires_antenna: true
 requires_tag: true
 requires_access_password: true
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "55_33_03_write_access_password.md"
+  - "55_16_uhf_write.md"
+  - "55_30_uhf_set_select_param.md"
+  - "55_31_uhf_set_inventory_param.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
 tags:
   - "utr-s201"
   - "command-card"
@@ -38,7 +44,7 @@ tags:
   - "requires-antenna"
   - "requires-tag"
   - "access-password"
-  - "pass-with-notes"
+  - "specification-reference"
   - "uhf-lock"
 ---
 
@@ -52,12 +58,14 @@ tags:
 - 確認区分: `tag-memory-or-high-impact`
 - 操作レベル: write/configuration
 - コマンドバイト: `55h` / 詳細コマンド: `18h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
-このコマンドの目的は、**UHF_Lock** です。
+対象領域のPasswordロックを設定・解除し、必要に応じてその状態をPermaLockで固定します。
 
 詳細なフィールド定義、データ長、レスポンス形式は公式PDFを一次情報として確認してください。このカードは、公式PDFを置き換えるものではなく、AIに実装やレビューを依頼するときの補助資料です。
 
@@ -198,6 +206,15 @@ tags:
                             ・Lock 状態が[設定]された状態で PermaLock すると、
                               Lock 状態を[解除]に変更できなくなる。
 
+```
+
+### Lockの原典転記：対象領域と処理種別
+
+<a id="lock-regions"></a>
+
+[認証条件と恒久化](#lock-conditions)と併せて参照してください。
+
+```text
               処理対象                    設定可能な処理種別
                                Password Write
        EPC 領域
@@ -214,6 +231,15 @@ tags:
                                Password Read/Write
        Kill Password 領域
                                PermaLock
+```
+
+### Lockの原典転記：認証条件と恒久化
+
+<a id="lock-conditions"></a>
+
+[対象領域と処理種別](#lock-regions)に対する説明です。p.227の訂正は[OPEN-014](../../SOURCE_REVIEW_STATUS.md)で保留中です。
+
+```text
   ※：Write Lock とは、Read はできるが Write はできない状態です。
     ・Access パスワードの認証無しの場合、Read はできますが、Write はできません。
     ・Access パスワードの認証有りの場合、Read も Write も可能となります。
@@ -227,6 +253,12 @@ tags:
         Write ができなくなり、Write Lock の[解除]ができない状態となります。
        ・Write Lock を[解除]した状態で PermaLock を実行すると、その領域に対する
         Write できますが、Write Lock が[設定]できない状態となります。
+```
+
+### Lockの原典転記：フラグ以降
+
+```text
+
 
 
   ● フラグ
@@ -327,153 +359,76 @@ tags:
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
-## 8. レスポンス処理
+## 8. 要求・応答の照合ポイント
 
-レスポンス処理では、以下を区別してください。
+PDF §7.5.6 p.278–282の補足です。DATAは0起点で、共通フレームのoffset 4から始まります。
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+### 8.1 非ゼロのAccessパスワードを事前に一致させる
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+p.278では、タグのReserved領域Word 02hから2 Wordと、リーダライタに設定したAccessパスワードが、非ゼロかつ一致することを要求しています。[Access設定](55_33_03_write_access_password.md)はリーダライタ側のRAM設定で、タグ側の値を変更しません。タグ側のパスワード設定は[Write](55_16_uhf_write.md)等の別操作です。Lock要求内にパスワード欄はありません。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+対象タグはSelectとQueryの条件で1枚に絞ります。内部QueryのQは設定値によらず0です（p.64）。Q=0やACKだけでは対象の一意性を保証しません。
 
-### 8.1 ACK/レスポンス例（成功時）
+### 8.2 MaskとActionの配置
 
-| 項目 | 内容 |
-|---|---|
-| 成功ACK例 | `02 00 30 01 18 03 4E 0D` |
-| ACKデータ部の先頭 | `18h` |
-| 注意 | タグメモリ操作は、Select/Query/Access/Write/Lock/Kill等の内部処理結果によりNACKになる場合があります。ここに示すHexは正常終了時のACK例であり、実行可否や対象タグ条件を省略してよいという意味ではありません。成功ACKだけでなく、NACKのエラーコード1/2を必ず解析してください。 |
+CMD=55h、LEN=04h、総11 byteです。DATA[0]=18h、DATA[1]=パラメータ1（P1）、DATA[2]=P2、DATA[3]=P3です。P3のbit0～3は0固定です。以下はp.279の表を、同じ対象・種別のMaskとActionが対になる形へ並べ直したものです。
 
-### 8.2 NACK例（フォーマットエラーの例）
+#### Passwordロックの5組
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 18 44 00 00 00 00 00 00 00 00 03 9C 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+| 対象 | 種別 | Mask位置 | Action位置 |
+|---|---|---|---|
+| TID | PasswordWrite | P1 bit1 | P3 bit7 |
+| EPC | PasswordWrite | P1 bit3 | P2 bit1 |
+| Access Password | PasswordRead/Write | P1 bit5 | P2 bit3 |
+| Kill Password | PasswordRead/Write | P1 bit7 | P2 bit5 |
+| User | PasswordWrite | P2 bit7 | P3 bit5 |
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+#### PermaLockの5組
 
-### 8.3 設定依存の注意
+| 対象 | 種別 | Mask位置 | Action位置 |
+|---|---|---|---|
+| TID | PermaLock | P1 bit0 | P3 bit6 |
+| EPC | PermaLock | P1 bit2 | P2 bit0 |
+| Access Password | PermaLock | P1 bit4 | P2 bit2 |
+| Kill Password | PermaLock | P1 bit6 | P2 bit4 |
+| User | PermaLock | P2 bit6 | P3 bit4 |
 
-- アンテナID出力ON/OFFにより、レスポンスのアドレス位置がリーダライタIDまたは読み取りANT番号に変わります。
-- 読取完了応答、アンテナ切替完了応答、キャリア検知応答のON/OFFで、後続ACKの有無が変わります。
-- 設定変更またはタグメモリ変更後は、対応する読み取りコマンドで読戻し確認してください。
+#### フラグの意味
 
+Mask=0ならその対象・種別のActionを書き込まず、Actionが0でも1でも変更しません。Mask=1ならAction=1で設定、Action=0で解除を指定します。既に固定されたPermaLockはAction=0でも解除できません（p.281）。全領域へ一律のMaskを作るのではなく、要求された対象と処理種別だけを指定します。
 
-### 8.4 AI実装用レスポンス定義
+p.282の例はUserのPasswordWriteだけを操作します。P1/P2/P3が00/80/20なら設定、00/80/00なら解除で、他の領域・PermaLockのMaskは0です。これらはPDF掲載パラメータの説明であり、対象条件を満たさない実機への送信許可ではありません。
 
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+### 8.3 ロックの範囲と恒久化
 
-#### 共通フレームoffset
+p.280の定義では、EPC・TID・UserのPasswordWriteは認証なしでもRead可能、Writeには認証が必要です。Access Password・Kill PasswordのPasswordRead/WriteはReadとWriteの両方に認証が必要です。タグ固有の領域の実装・読取り専用属性を、Lockコマンドで変更できるとは限りません。
 
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
+同ページのPermaLockは、Lockの設定／解除状態を固定する処理です。Write Lock設定中の恒久化と、解除中の恒久化を区別します。前者はWrite不可のまま、後者はWrite可能なままLockを設定できなくなります。リーダライタのパスワード変更や再起動で恒久化を取り消せません。
 
-#### 受信分類ルール
+p.227の包括的な「PermaLockなら読み書き不可」という記載の訂正は、[原典照合一覧](../../SOURCE_REVIEW_STATUS.md)のOPEN-014で確認中です。この節はp.280の具体的な説明を整理したもので、p.227の訂正文を確定したものではありません。
 
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `18h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 18h` の成功応答としてPDF該当節を読む |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-| `CMD=30h` の後にタグ状態確認が必要 | `ACK_PENDING_TAG_VERIFY` | タグメモリ操作はACKだけで業務成功と断定しない |
+### 8.4 固定ACKとLock確認
 
-対象識別子: コマンド `55h` / 詳細 `18h` / サブ `なし`。
+成功ACKはCMD=30h、LEN=01h、DATA[0]=18h、総8 byteです。共通フレームを検査し、この3条件で要求と対応づけます。各領域のMask・Action・設定後の状態は返りません。ADRはリーダライタIDです。TID付加や自動読み取りの通知設定で、このACKの構造・有無を変えません。
 
+p.281では、Lock直後に正しいAccessパスワードがリーダライタ側へ残っていると、Writeできる場合を説明しています。これを直ちにLock失敗と判断しません。不要になったAccess設定はゼロへ戻しますが、リーダライタ側のゼロ化はタグのLock解除ではありません。
 
-#### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は、原則として `18h` またはPDF該当節の応答識別子として扱います。
+以下は確認計画上の注意です。要求した領域・種別・Mask・Action、成功ACK、許可された範囲での認証条件別の確認を別々に記録します。タグメモリのRead結果に汎用のLock状態フィールドがあると仮定しません。状態確認のために新たな書込み・解除・恒久化を自動追加しません。
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail/status` | 対象コマンドの詳細識別子または状態識別子 |
-| 1.. | `payload` | PDF該当節の順序で読む。予約byteは独自解釈しない |
+### 8.5 NACK・timeoutと要求の対応
 
-タグメモリ操作系は、ACKが通信成功を示しても、タグ上の最終状態確認が必要な場合があります。NACK時はUHF ICエラー詳細を必ず残してください。
+共通NACKはCMD=31h、LEN=0Ah、総17 byteです。DATA[0]の詳細コマンドで要求と対応づけ、DATA[1]をエラーコード1として読みます。コード1=0Ahの場合のみDATA[2]のエラーコード2を参照します。本コマンドへEncode／BlockWrite2用の追加コードを転用しません。予約byteもSUMに含めます。
 
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
+[共通NACKマスタ](../../RESPONSE_AND_NACK_MASTER.md)と[原典照合一覧](../../SOURCE_REVIEW_STATUS.md)を参照してください。保守者訂正済みの[81h: ハンドル取得失敗]と[04h: メモリロック]はコード2です。各値がどの条件で返るかを推測で追加せず、NACKを正常なタグ0枚に読み替えません。
 
+以下は運用上の注意です。ACK・NACK・timeoutと、その後に確認できた状態を分けて記録します。timeoutで変更前の状態を保証せず、自動再試行や選別条件の拡大をしません。RF通信の内部リトライとホスト側の再送は別で、PDF p.66ではリトライ設定0でも内部再試行がある場合を説明しています。
 
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 18h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 9. 実機確認
 
 実機確認区分: `tag-memory-or-high-impact`
@@ -513,6 +468,13 @@ AIへ依頼するときは、次の前提を明示してください。
 実装言語は限定しません。Python、C#、C++、JavaScriptなど、対象環境に合わせて選択してください。
 
 ## 11. 参照ドキュメント
+
+- [55_33_03_write_access_password](55_33_03_write_access_password.md)
+- [55_16_uhf_write](55_16_uhf_write.md)
+- [55_30_uhf_set_select_param](55_30_uhf_set_select_param.md)
+- [55_31_uhf_set_inventory_param](55_31_uhf_set_inventory_param.md)
+- [RAM_FLASH_IMPACT_MATRIX](../../RAM_FLASH_IMPACT_MATRIX.md)
+- [SOURCE_REVIEW_STATUS](../../SOURCE_REVIEW_STATUS.md)
 
 - `../../COMMAND_MASTER_V117.md`
 - `../../TRACEABILITY_INDEX_V117.md`

@@ -1,0 +1,225 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "ids": [
+    "GQ-017",
+    "GQ-024",
+    "GQ-025",
+    "GQ-048",
+    "GQ-049",
+    "GQ-056",
+    "GQ-099",
+    "GQ-111",
+    "GQ-253"
+  ],
+  "order": [
+    "A1",
+    "B1",
+    "B2",
+    "A2",
+    "A3",
+    "B3"
+  ],
+  "mode": "Direct relevant extracts; no tools; 9 questions per session",
+  "files": {
+    "A": {
+      "manual.pdf": "48d546ffcb8740884398f8386ba8f4b49393beba33245b6a256e2eea1725a7b4",
+      "manual.txt": "488b7fd6cc11784d047be62af0642158fafe62a4227e9591701d4856941ad8ce"
+    },
+    "B": {
+      "docs/current/AI_CONTEXT_INDEX.md": "11dbb1a438ad9f0b9a138ba38097742750d20d7347b0dc0092eda64c9eabd7a2",
+      "docs/current/AI_IMPLEMENTATION_GUARDRAILS.md": "4a320eeebd1927185bcec76bf5e309d2fae8a2534002e0394e9e06eabf7e3a69",
+      "docs/current/ANTENNA_NUMBERING_SCHEMES.md": "2faf2d35dc36681e66314b428f2c0b9302c22aca9e5c5c4c2b053add8ca244cf",
+      "docs/current/COMMAND_MASTER_V117.md": "a2c48960de667472ed44b1cfa5a75cfad1ce466eb869a3ed1d9503e52e0fea5e",
+      "docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md": "7f9de9377990857b4ec74279daed6d599b6e2ea38c90e5d3d51ba5c23d5b5a29",
+      "docs/current/EXAMPLE_IMPLEMENTATION_REQUEST.md": "56710e31cec0a391fb7a099f7ff4b5da7500d77a7912ef8f56620d5220d1f2ba",
+      "docs/current/FRONTMATTER_SCHEMA.md": "db7f6c00614bb16b47482f539e3eb3ffec43b53617ca7bc2b92e31945c0fc1d5",
+      "docs/current/KNOWN_AI_FAILURE_PATTERNS.md": "a9fc05822f0ebea9d7c7b143cef9320e60bf3bc7c9ddabee04689d4fc3e053bd",
+      "docs/current/PARAMETER_CONFIRMATION_GUIDE.md": "13bb40b84fad752c5fee3b07a9aeddd1abdcf29aba38f933fa3213ce532478d1",
+      "docs/current/RAM_FLASH_IMPACT_MATRIX.md": "8b9d9a4a2f0551f17ed4f357cd17b652d469f78f6057b134e8b301a96f007e6b",
+      "docs/current/README.md": "734b7d2b679ef94f2cca89a65cc1fcc47f649839d1e68b08738b189f3bfb0fa9",
+      "docs/current/RESPONSE_AND_NACK_MASTER.md": "0081ef9d8deefedf7067ee2b70b5eb1bdbb27e1a251a14e8439c2d82a1b38bbb",
+      "docs/current/RESPONSE_CLASSIFICATION_MATRIX.md": "edef925b7a5aee457115b604fe079d9acaded19da76c383a23474454a4f5b656",
+      "docs/current/RESPONSE_MODE_APPLICABILITY.md": "2873c3315aebee22de5ce0a045a44e85658b0d7300beb0131470bf5ec08666a9",
+      "docs/current/RF_SAFETY_AND_CARRIER_RULES.md": "8ea39003d9447c2318ad8cbd36e2d9f8e26323f2d49fcfccd3aac23391327669",
+      "docs/current/SOURCE_REVIEW_STATUS.md": "af831c95cb810d26f34ee37c9d8ec55ba736bd86f22238bfec4ea2f71d8da0c2",
+      "docs/current/TAG_TAXONOMY.md": "fa969c44f4e5dca7b461cd7414da2cfc462d0d9eb775b88defcc5ebd84e71622",
+      "docs/current/TASK_READING_GUIDE.md": "e51914918ca5faf913cf6a605d3fa8b1cb2a25fb57d3a7554b90c9b3018ddfb0",
+      "docs/current/TID_MEMORY_AND_UNITS.md": "fab394f270e1f90efa15be7e75f9e51c7f5fa1cba7f44dab1fc859c141120216",
+      "docs/current/TRACEABILITY_INDEX_V117.md": "488eda49d5a627886304fe0cdb8316f37b7e107a2c466ca9e215b6a6c0b75649",
+      "docs/current/UTR_TAG_GUI_IMPLEMENTATION_FEEDBACK.md": "f9a6b7bcbf42b3fe614d837332fdc36d599595c644f9c4bec62ab950b5bfe692",
+      "docs/current/V100_USAGE_GUIDE.md": "76fb20f21b0898a6b234976f01a01855cc78581ba4b318c391229e880538bb10",
+      "docs/current/VERIFICATION_POLICY.md": "ce652ea6a199320baf51a3ad32fe57e989c6e77ccb4cc1fbacfa92fca4c70bb1",
+      "docs/current/commands/cards/42_buzzer_control.md": "5cbb057e270d36f0feb3eafeb08831ae82c2b58ab5e3ce249db6b83f65cced60",
+      "docs/current/commands/cards/4e_00_10_write_reader_mode.md": "15213a696d6bf8d60866e58f34a30337c8f040c411d20c65bdfad442ce646852",
+      "docs/current/commands/cards/4e_57_led_buzzer_control.md": "0a1819ec196e300251c3d50c7eb025135ddeee56bf7a084a37f0837a6a140a0a",
+      "docs/current/commands/cards/4e_6f_flash_initialize.md": "a075e57cf2a8103b97625ee16e7ff644b79873c60d7e28143d57e7356beae3cd",
+      "docs/current/commands/cards/4e_9d_restart_reader.md": "262a995aae28369e06ed5c641e2ea7ac7431e0988fe553b2afb0911f9b049ca4",
+      "docs/current/commands/cards/4e_9e_rf_carrier_control.md": "aff0211db25b271fd0fd54f87b5ed49a807e8e4e70e36f8abce62798730aa40f",
+      "docs/current/commands/cards/4e_9e_rf_carrier_control_raw.md": "09b25153d85fc540a4075ab7c5bc35b801b2b903f101ae130c0c4351ca30de23",
+      "docs/current/commands/cards/4e_9f_write_general_port.md": "85db46ff735b1f4e6f722a8feabd1c2ffabe8f61b47be3a680dee67b40728eb5",
+      "docs/current/commands/cards/4e_a0_write_extended_port.md": "e184479645d419041d2809710648866932034ea238563e606c98dcdc8e882fe6",
+      "docs/current/commands/cards/4e_b4_flash_write.md": "4f0b103c4b15b20b3af9d2157a98ad1f5a97418c5e91621b717720c7b3e89cd3",
+      "docs/current/commands/cards/4f_00_read_reader_mode.md": "c9ce486b583f05e10555989c4ea22d5e789dadfae8550198bb0657796aeb3e43",
+      "docs/current/commands/cards/4f_80_read_error_info.md": "78de67337e14e6feb5bea9f45101916b88a797314b1df7619f65b4424d868788",
+      "docs/current/commands/cards/4f_9f_read_general_port.md": "6c0f3e538725a456aab27bbdba5460f44c6dbcbc4fbb80e64417ed94e90f418d",
+      "docs/current/commands/cards/4f_a0_read_extended_port.md": "3808917b087dbc3ea3f29adac48729367edb348dbbd27c8af2a56cd94eaaee8d",
+      "docs/current/commands/cards/4f_b4_read_flash_settings.md": "4643466da26099ff18a9b79fddf423af9514e80481d891ef2c02928fea4b369b",
+      "docs/current/commands/cards/55_10_uhf_inventory.md": "8b665b766ad570f4ebdeb8f1ef31d37e0104ab1f084d9ce16760a03a75e6ef35",
+      "docs/current/commands/cards/55_14_uhf_inventory_read.md": "1cc1a55f482214f82d475a709fa063e23b86c0b51723e47f92b87a1f051ba1c0",
+      "docs/current/commands/cards/55_15_uhf_read.md": "ffa1b63a607b9e46b21673187d1a81b8a263be11942787d7967bb5d0f3843f2a",
+      "docs/current/commands/cards/55_16_uhf_write.md": "debccfcbd29368d66507ce0c5bd3c1401a4c9f73fed59eda18ee9392673c5782",
+      "docs/current/commands/cards/55_17_uhf_kill.md": "9ba9f7cec05858bf5a13f51082c534aad015a6ff5b763ef10411b2cdb11cca9b",
+      "docs/current/commands/cards/55_18_uhf_lock.md": "117f3e6da54864a5932da66714dbe0e978feb51cd58bb1891edd1fd50e41c113",
+      "docs/current/commands/cards/55_1a_uhf_block_write.md": "a99fc3cadc1132d8f2c39366c49981bbab1b44f9a013dfabf949e789bc6687e4",
+      "docs/current/commands/cards/55_1b_uhf_block_erase.md": "223617a2350a461efc0d33788eeaa84462ca2ff4ca4d64d017a776b03f679c28",
+      "docs/current/commands/cards/55_1d_uhf_block_write2.md": "ad61abfb49475508f8c3ce9d87f7200d8a6c7f00a377d5aceed70032c93e672d",
+      "docs/current/commands/cards/55_1e_uhf_encode.md": "e0a68caa39adb9029eea9553cae97850a25acf65991b0bea28be04ba8252f78a",
+      "docs/current/commands/cards/55_1e_uhf_encode_raw.md": "e285b62469d9c17e7bf6b1a0e7ca5116933560a28c4eb5de10291b1eaec8c386",
+      "docs/current/commands/cards/55_30_uhf_set_select_param.md": "ee5f2c5ef86f4759379866fc28f0948f249ca649449be3bea8e453019ad3fcf7",
+      "docs/current/commands/cards/55_31_uhf_set_inventory_param.md": "a64026be9ad0a42fbb0970e3d0ebf3fe7f483ad8cb6aede3ec4bdc8cd0751985",
+      "docs/current/commands/cards/55_31_uhf_set_inventory_param_raw.md": "4798b6f7b799d4ed55618d0059f0a8c27f4feb6f653f872c617966a1cc4dc253",
+      "docs/current/commands/cards/55_32_uhf_set_expand_select_param.md": "4055f0b74dd1f74651446f2de7eb11290dbe762372209ab18999482e627246d1",
+      "docs/current/commands/cards/55_33_00_write_antenna_switching.md": "a164b240785ead2645292a105ce11903745855b65ded7cdf1319de1ec927fc17",
+      "docs/current/commands/cards/55_33_01_write_output_power.md": "edea0e010b2e7b7137f52d91f12721af589844deb949d4142101b2f0dd446292",
+      "docs/current/commands/cards/55_33_02_write_frequency.md": "0f687d17008c4c987ef47c56b7978d4ddd2c06e040dbd7bcba3571e617c92d60",
+      "docs/current/commands/cards/55_33_03_write_access_password.md": "9e87ab31d276b17d03791f82fee1efcdb213fdda498c9c368ce5070b9e2c9d7c",
+      "docs/current/commands/cards/55_33_04_write_rf_tag_comm_params.md": "71a9e436f23460f0fdbd559a897cc9a1fd43a95abe811e5790757901104e7f06",
+      "docs/current/commands/cards/55_33_05_write_epc_uii_params.md": "1d2d698ee19bd9c2a7fb4741362fa8fd16103c9cdbaffe19690985ce780e62c8",
+      "docs/current/commands/cards/55_37_write_external_antenna_auto_switch.md": "1667ed050f1dd351ebb629da9a286de120aab128419c67daed32db37f4f74805",
+      "docs/current/commands/cards/55_38_write_active_antenna.md": "e85931ed7fa0d3f64150e8ec8a8892a7b9bb785b10f9c7276c47677de037bfee",
+      "docs/current/commands/cards/55_39_write_rssi_filter.md": "3867cecb0a46a3c87390f4f7962f58e6cc52ffba06f06f83e2627d35c3d61067",
+      "docs/current/commands/cards/55_39_write_rssi_filter_raw.md": "ad76498897d03d0b774a4f9238da451b21e34eaf5cc82c0aab3ae79c6890e581",
+      "docs/current/commands/cards/55_3a_write_antenna_output_power.md": "ccc0dd3e859f19a1ae6686915d5cf830b970618b9709b28a862a8f618c1d0113",
+      "docs/current/commands/cards/55_40_uhf_get_select_param.md": "c4e31be8c7a97e66f2f79986d6a1994f494b5c029f1db8cf3305b7483831ba24",
+      "docs/current/commands/cards/55_41_uhf_get_inventory_param.md": "b183ea7f9b54086c898ad6a4f63d7fb8aff8648281e266b08b92d23b049b69ef",
+      "docs/current/commands/cards/55_42_uhf_get_expand_select_param.md": "4a36f307a06edee5104c74b216d15156e772337b713e2be6ee676fd8aea97b09",
+      "docs/current/commands/cards/55_43_00_read_antenna_switching.md": "ff8db593933a4473279e7303a33b3065b361cac9668fe4e6bece3cd290c5e3bd",
+      "docs/current/commands/cards/55_43_01_read_output_power.md": "2a8050554c5d2bf942c4adad156bbbc8de27f40271f3fbe77f35af549d8ffa8d",
+      "docs/current/commands/cards/55_43_02_read_frequency.md": "6a09cea899c80109bee38baa2fdd15009213a8a45f146cacb3199cff48fed7e0",
+      "docs/current/commands/cards/55_43_04_read_rf_tag_comm_params.md": "93ee9140910cb45d8fef58a877d702f131dca514a0e7410e0b6336029e8a0ef6",
+      "docs/current/commands/cards/55_43_05_read_epc_uii_params.md": "23f7fea4bdf592e7006d9916a988936449919a958c8f8fe88e1654cd72a100e3",
+      "docs/current/commands/cards/55_44_uhf_check_antenna.md": "0c1953f152825178abeac4bd8e9e67a458eec34700eec9f0923a4a2cc99a65a4",
+      "docs/current/commands/cards/55_46_uhf_get_handle.md": "225ab9d2fa7b3d258facda70ad35f519ea0f6189523d3efd7e15553a93332551",
+      "docs/current/commands/cards/55_47_read_external_antenna_auto_switch.md": "93beaa4222f215cdea05318dfea2b9c65ad25140c4a60e1c520b44aa540b1114",
+      "docs/current/commands/cards/55_48_read_active_antenna.md": "27af71e20f0e3fb97bd0476be90daba742a967d7bc2fc30074ad97b25381b977",
+      "docs/current/commands/cards/55_49_read_rssi_filter.md": "c3dd82ac15a3dd096f4c874e0c4157b65ac5ece64f7a5eaedd0c9926b4e49489",
+      "docs/current/commands/cards/55_4a_read_antenna_output_power.md": "6157551fa8a44fcdede11e593cff9017b11803c6a81383ddf78e8238b6d9bc13",
+      "docs/current/commands/cards/55_90_chip_version_read.md": "a12cf37e94481b3af941320cbf4aee2f4ae5ee321d3a0ad2667375743bbcf5f8",
+      "docs/current/commands/cards/55_ff_uhf_through_cmd.md": "213b37fa7a453f73675641a4731bd0c27472bce104528945c61d5c2a3bdd0621",
+      "docs/current/commands/cards/55_ff_uhf_through_cmd_raw.md": "69604dd913813d253014bc6ea0a06c2f4b97ac812c7c9831cbb4e32e670162fd",
+      "docs/current/commands/cards/AI_RETRIEVAL_INDEX.md": "b6b4892d5e9609d1aa2f5825b593ba6852293ee7405ff586c99e93c6b1f4f53d",
+      "docs/current/commands/cards/OPERATION_LEVEL_INDEX.md": "cc227204573f75a569f069e327d3a78f02f2989859fed0c1869f78e2ec544cd8",
+      "docs/current/commands/cards/README.md": "e1ac67cddc21c944d0fd473c15667fbf292a93bf1a20d555c2e728755005b3a3",
+      "docs/current/commands/cards/rom_version_read.md": "bb354ff43d9d55d6c93600deb6c6a8a5fc0ad90f74af7eedd052ebb4c5bfa32f",
+      "docs/current/commands/cards/SAFETY_INDEX.md": "e39768d9ebb9fdff122ab040acfa974b1861a5b574274dc06648af93dd6fac15",
+      "docs/current/commands/cards/TEST_STATUS_INDEX.md": "b4cece7d890cc6b50b25b649fb9e799bebf63ed28ee790eb8548dd066880badb"
+    }
+  },
+  "active_order": [
+    "DA1",
+    "DB1",
+    "DB2",
+    "DA2",
+    "DA3",
+    "DB3"
+  ],
+  "pdf_pages": [
+    2,
+    59,
+    99,
+    100,
+    108,
+    218,
+    226,
+    227,
+    234,
+    263,
+    264,
+    268,
+    269,
+    271,
+    272,
+    273,
+    317
+  ],
+  "markdown_sections": [
+    [
+      "RESPONSE_AND_NACK_MASTER.md",
+      "2.2"
+    ],
+    [
+      "RESPONSE_AND_NACK_MASTER.md",
+      "2.3"
+    ],
+    [
+      "RESPONSE_AND_NACK_MASTER.md",
+      "2.4"
+    ],
+    [
+      "RESPONSE_AND_NACK_MASTER.md",
+      "4"
+    ],
+    [
+      "RESPONSE_MODE_APPLICABILITY.md",
+      "1"
+    ],
+    [
+      "RESPONSE_MODE_APPLICABILITY.md",
+      "2"
+    ],
+    [
+      "RESPONSE_MODE_APPLICABILITY.md",
+      "3"
+    ],
+    [
+      "commands/cards/55_10_uhf_inventory.md",
+      "8"
+    ],
+    [
+      "commands/cards/55_14_uhf_inventory_read.md",
+      "8"
+    ],
+    [
+      "commands/cards/55_33_01_write_output_power.md",
+      "6.2"
+    ],
+    [
+      "commands/cards/55_43_01_read_output_power.md",
+      "6.1"
+    ],
+    [
+      "commands/cards/55_15_uhf_read.md",
+      "8.1"
+    ],
+    [
+      "commands/cards/55_15_uhf_read.md",
+      "8.2"
+    ],
+    [
+      "commands/cards/55_33_03_write_access_password.md",
+      "8"
+    ],
+    [
+      "commands/cards/rom_version_read.md",
+      "8.1"
+    ],
+    [
+      "commands/cards/rom_version_read.md",
+      "8.3"
+    ],
+    [
+      "DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md",
+      "2"
+    ]
+  ],
+  "excluded_attempt": "A1: read tool blocked; cancelled; not scored",
+  "prompt_hashes": {
+    "A": "da6a3667d55786dc165843b1229a7a4b30e43c499ce54587a584cd132def3086",
+    "B": "38ded3b6d3c073f399bc755fdcf69c818ede5f16c492daeb39c4f9256446e07d"
+  },
+  "cli_version": "0.154.0-alpha.6.2",
+  "authentication": "ChatGPT subscription; no API billing amount measured",
+  "usage_notes": "CLI turn.completed; input includes runtime context; cached_input subset of input; reasoning_output subset of output, not added again",
+  "scheduling": "DA1 then DB1 then DB2,DA2,DA3,DB3; DB1 and DB2 may overlap; no latency ranking"
+}

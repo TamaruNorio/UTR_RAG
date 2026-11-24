@@ -14,26 +14,32 @@ operation_profile: "settings-change"
 operation_level: "write/configuration"
 rf_emission: false
 write_operation: true
-flash_operation: false
+flash_operation: true
 tag_memory_operation: false
 requires_rom_check: true
 requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "55_42_uhf_get_expand_select_param.md"
+  - "55_30_uhf_set_select_param.md"
+  - "55_40_uhf_get_select_param.md"
+  - "55_31_uhf_set_inventory_param.md"
+  - "55_41_uhf_get_inventory_param.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-setting"
   - "write-operation"
-  - "pass-with-notes"
+  - "specification-reference"
   - "uhf-set-expand-select-param"
 ---
 
@@ -47,8 +53,10 @@ tags:
 - 確認区分: `settings-change`
 - 操作レベル: write/configuration
 - コマンドバイト: `55h` / 詳細コマンド: `32h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -70,7 +78,7 @@ tags:
 |---|---|
 | RF送信 | なし |
 | 書き込み操作 | あり |
-| FLASH操作 | なし |
+| FLASH操作 | あり（種類02hの場合） |
 | タグメモリ操作 | なし |
 | ROM確認 | あり |
 | アンテナ条件確認 | なし |
@@ -178,6 +186,15 @@ tags:
     ビットアドレス[00]h からユーザメモリ
 
 
+```
+
+### 拡張SelectのAction表：定義と後続条件
+
+<a id="expand-action-def"></a>
+
+[000～011](#expand-action-low) / [100～111](#expand-action-high)へ続きます。通常Selectと異なり、拡張の初期値は001です。
+
+```text
 ● Action 値
     「マスク条件」で指定した内容に「一致」／「不一致」の RF タグに対し、「Target 値」で指定
     したフラグの状態をそれぞれどのように変化させるかを指定するパラメータです。（FLASH 初
@@ -195,6 +212,15 @@ tags:
                   Inventoried        SL フラグ      Inventoried        SL フラグ
 ( )内は 10 進数
                   フラグが対象              が対象        フラグが対象              が対象
+```
+
+### 拡張SelectのAction表：000～011
+
+<a id="expand-action-low"></a>
+
+p.206。列順はAction、一致時のInventoried・SL、不一致時のInventoried・SL。指定Targetのみ変化。[適用条件](#expand-action-def)を併読。[100～111](#expand-action-high)。
+
+```text
     000        Inventoried フラグ      SL フラグを   Inventoried フラグ      SL フラグを
     (0)          を[A]にセット             セット       を[B]にセット             リセット
     001        Inventoried フラグ      SL フラグを
@@ -208,6 +234,15 @@ tags:
                                                       なにもしない
     (3)          ※[A]なら[B]へ         反転
                  ※[B]なら[A]へ
+```
+
+### 拡張SelectのAction表：100～111
+
+<a id="expand-action-high"></a>
+
+p.206。列順はAction、一致時のInventoried・SL、不一致時のInventoried・SL。指定Targetのみ変化。[適用条件](#expand-action-def)を併読。[000～011](#expand-action-low)。
+
+```text
     100        Inventoried フラグ   SL フラグを      Inventoried フラグ   SL フラグを
     (4)          を[B]にセット         リセット          を[A]にセット          セット
     101        Inventoried フラグ   SL フラグを
@@ -221,6 +256,12 @@ tags:
                        なにもしない
     (7)                                         ※[A]なら[B]へ         反転
                                                 ※[B]なら[A]へ
+```
+
+### 拡張Select原典：Target以降
+
+```text
+
 
 
 ● Target 値
@@ -284,6 +325,15 @@ tags:
    ※以下の説明では、
            「Target 値」=[SL]の場合の例を示しています。
 
+```
+
+### 拡張Select原典のOR例：条件と処理のつながり
+
+<a id="expand-or-1"></a>
+
+p.208例1。両方Target=SL、1回目Action=000、2回目Action=001。[部分2](#expand-or-2) / [部分3](#expand-or-3)を併読。
+
+```text
 (例 1) 1 回目の Select の Action 値 000 (0)、2 回目の Select の Action 値 001 (1)を指定した場合
  ※Action 値の説明 （必要部分を抜粋）
                                   SL フラグが対象
@@ -296,6 +346,15 @@ tags:
   りますので、1 回目の Select の結果によらず[SL=Set]になります。
   マスク条件 2 に[不一致]の RF タグは、Action が[なにもしない]なので、1 回目の Select の結果が
   そのまま反映されます。
+```
+
+### 拡張Select原典のOR例：実行前SL=Set
+
+<a id="expand-or-2"></a>
+
+p.208例1。両方Target=SL、1回目Action=000、2回目Action=001。[部分1](#expand-or-1) / [部分3](#expand-or-3)を併読。列順は実行前、条件1、Select1後、条件2、Select2後。条件1または条件2に一致するとSL=Setになります。
+
+```text
        コマンド      マスク条件 1 への         Select1   マスク条件 2 への         Select2
        実行前       [一致]／[不一致]         実行後       [一致]／[不一致]         実行後
                                                   一致               Set
@@ -305,6 +364,15 @@ tags:
                                                   一致               Set
                       不一致            Reset
                                                  不一致              Reset
+```
+
+### 拡張Select原典のOR例：実行前SL=Resetと結論
+
+<a id="expand-or-3"></a>
+
+p.208例1。両方Target=SL、1回目Action=000、2回目Action=001。[部分1](#expand-or-1) / [部分2](#expand-or-2)を併読。列順は実行前、条件1、Select1後、条件2、Select2後。条件1または条件2に一致するとSL=Setになります。
+
+```text
                                                   一致               Set
                        一致             Set
                                                  不一致               Set
@@ -314,6 +382,12 @@ tags:
                                                  不一致              Reset
    以上の動作をおこなうと、[マスク条件 1]または[マスク条件 2]に一致する RF タグが
    [SL=Set]となるため、結果として論理演算の[OR]の動作をおこないます。
+```
+
+### 拡張Select原典：例2以降
+
+```text
+
 
 (例 2) 2 回目の Select の Action 値に、000(0)または 100 (4)を指定した場合
  ※Action 値の説明 （必要部分を抜粋）
@@ -486,192 +560,131 @@ tags:
        02 00 30 01 32 03 68 0D
 ```
 
-### 6.1 拡張Select条件設定ビット表
+### 6.1 通常Selectとの違い
 
-#### パラメータ1［初期値: 85h］（設定するマスクデータ数n回繰り返す構造の内側）
+根拠は§7.4.4 p.160–162、§7.4.19 p.204–211です。通常SelectをSelect1、拡張の7枠をSelect2～Select8と呼びます。要求のnは先頭から扱う拡張枠数（1～7）で、Select1を含めた回数や有効条件の個数ではありません。任意の開始枠を指定するフィールドはありません。
 
-| bit | 項目 | 値 | 意味 |
-|---:|---|---:|---|
-| bit0-1 | MemBank | 00 | RFU |
-| bit0-1 | MemBank | 01 | EPC(UII)［初期値］ |
-| bit0-1 | MemBank | 10 | TID |
-| bit0-1 | MemBank | 11 | User |
-| bit2-4 | Action値 | 001 | 詳細はパラメータ説明参照 |
-| bit5-7 | Target値 | 000 | Inventoried(S0) |
-| bit5-7 | Target値 | 001 | Inventoried(S1) |
-| bit5-7 | Target値 | 010 | Inventoried(S2) |
-| bit5-7 | Target値 | 011 | Inventoried(S3) |
-| bit5-7 | Target値 | 100 | SL［初期値］ |
-| bit5-7 | Target値 | 101 | Reserved |
-| bit5-7 | Target値 | 110 | Reserved |
-| bit5-7 | Target値 | 111 | Reserved |
+| 項目 | 通常Select | 拡張Select |
+|---|---|---|
+| 設定先 | Select1 | Select2～Select8 |
+| マスク領域 | ceil(bit数/8) byte、0なら省略 | 各枠16 byte固定、0 bitでも省略しない |
+| パラメータ1初期値 | 81h（Action=000） | 85h（Action=001） |
+| マスクbit数0 | Select使用ONなら空マスクで送信 | その枠とそれ以降のSelectを送信しない |
 
-#### パラメータ2［初期値: 00h］
+設定の読戻しはタグのフラグ状態や実際の選別結果の観測ではありません。RFタグへ送る条件は、[通常Select](55_30_uhf_set_select_param.md)と[Inventory設定](55_31_uhf_set_inventory_param.md)のSelect使用・Session・Sel・Inventory Targetも併せて確認します。
 
-| bit | 項目 | 値 | 意味 |
-|---:|---|---:|---|
-| bit0-1 | 将来拡張のための予約 | 0 | 通常は0 |
-| bit2 | Truncate値 | 0 | Disable［初期値］ |
-| bit2 | Truncate値 | 1 | Enable（未サポート） |
-| bit3-7 | 将来拡張のための予約 | 0 | 通常は0 |
+### 6.2 23 byteの条件ブロック
 
-注: 55_30との違いは、こちらは繰り返し構造（1～7ヶ所）を持つ点。パラメータ1の初期値も85hと81hで異なる。
+先頭位置をBとすると、1枠は次の23 byteです。開始アドレスはbit単位で、Word単位ではありません。
+
+| ブロック内位置 | 内容 |
+|---|---|
+| B+0 | パラメータ1：bit0–1=MemBank、bit2–4=Action、bit5–7=Select Target |
+| B+1 | パラメータ2：bit2=Truncate（0のみ対応）、他は予約（通常0） |
+| B+2～B+5 | マスク開始bitアドレス、4 byte・MSBファースト |
+| B+6 | マスクbit数b、0～128 |
+| B+7～B+22 | マスクデータ、16 byte固定 |
+
+MemBankは01=EPC/UII、10=TID、11=User、00は使用不可のRFUです。Targetは000～011=S0～S3、100=SL、101～111は予約です。Actionは000～111で、初期値は001です。85hはMemBank=EPC/UII・Action=001・Target=SLを表します。Truncate Enableは反映されず、ACKだけで有効化成功としません（p.206）。
+
+#### 端数bitと残りbyteの0埋め
+
+書込みでは、先頭から8 bitずつ区切り、端数となる最後のbyteだけ下位側へ詰め、上位bitを0埋めします。その後、16 byteに足りない分を末尾へ00で埋めます（p.207）。通常Selectの可変長データをそのまま連結しません。
+
+例えばp.211の4 bitのマスク値0011は、先頭byteを03とし、後ろに00を15 byte置きます。マスクbit数は4のままで、領域の長さに合わせて128へ変更しません。読取りでは16 byte全部を受信し、マスク対象は指定されたb bitとして解釈します。対象外のbyteで次のブロック位置をずらさず、SUMには全byteを含めます。
+
+### 6.3 マスク0は後続も停止する
+
+p.207では、拡張枠のマスクbit数が0なら、その枠も後続の枠もSelectを送りません。後ろに非ゼロ条件があっても飛び越して実行しません。次の表はSelect使用が有効な場合です。
+
+| Select1～8のマスクbit数（p.207） | 実行範囲 |
+|---|---|
+| 0, 96, 16, 0, 32, 0, 0, 0 | Select1～3 |
+| 0, 0, 0, 0, 0, 0, 0, 0 | Select1のみ |
+| 32, 0, 16, 96, 96, 96, 16, 0 | Select1のみ |
+| 96, 16, 16, 32, 96, 96, 0, 0 | Select1～6 |
+
+拡張条件を使わない場合はSelect2のbit数0が停止条件になります。n=0は指定範囲外であり、全消去コマンドとして使いません。無効枠も23 byteのデータ構造は残ります。読取りACKは要求したn枠すべてを解析し、最初の0 bitで受信解析を打ち切りません。
+
+### 6.4 保存先と未指定枠
+
+両RAMは独立です。00hはコマンド用RAMのみ、01hは自動用RAMのみ、02hはFLASHと両RAMへ反映します（§3.12 p.71–74）。変更前後の種類と条件順を記録し、[RAM/FLASHガイド](../../RAM_FLASH_IMPACT_MATRIX.md)に従って復元します。
+
+少ないnで書いたときに、送らなかった後続枠が保持・消去・初期化のどれになるかは、本照合範囲の原典から確定していません。「n=1ならSelect3以降は消える」とは断定しません。必要な後続設定も含めて変更前後を読戻し、設定が残っていることと、0 bitで実行されないことを分けて記録します。
+
+### 6.5 Actionと条件の順序
+
+Actionの8通りのフラグ遷移は、p.206と[通常SelectのAction表](55_30_uhf_set_select_param.md)で一致します。変更するのは指定したTargetのみです。SelectのTarget（S0～S3／SL）と、InventoryのTarget（A/B）を混同しません。
+
+p.206・208では、最初と同じTargetを使う後続SelectにAction=000または100を指定しないよう説明しています。これらは一致・不一致の両方で対象フラグを設定し、それ以前の結果を上書きするためです。**Targetが異なる場合はp.206の例外**があります。全Targetで禁止される値や、必ずNACKとなる値とは解釈しません。
+
+#### 最初がAction=000の場合
+
+以下は、Select1・2がともに実行され、両方のTargetがSLの場合です。P・Qを各マスクへの一致とし、SL=Setとなる条件を示します（p.208–209）。
+
+| Select2のAction | SL=Setとなる条件 |
+|---|---|
+| 001 | P OR Q |
+| 010 | P AND Q |
+| 011 | P XOR Q |
+| 101 | P AND NOT Q |
+| 110 | P OR NOT Q |
+| 111 | NOT (P XOR Q) |
+
+#### 最初がAction=100の場合
+
+同じ前提で、Select1が100の場合の表です（p.210）。
+
+| Select2のAction | SL=Setとなる条件 |
+|---|---|
+| 001 | NOT P OR Q |
+| 010 | NOT P AND Q |
+| 011 | NOT (P XOR Q) |
+| 101 | NOT (P OR Q) |
+| 110 | NOT (P AND Q) |
+| 111 | P XOR Q |
+
+p.210の001の式「P NAND NOT Q」は「NOT P OR Q」と等価です。誤記として扱いません。Action=001をいつでも「通常条件とのOR」と決めつけず、最初のAction・Target・実行順を確認します。例えば順にOR、ANDを適用すると結果は(P OR Q) AND Rであり、条件順の変更は結果を変え得ます。
+
+これらはフラグの状態遷移の整理です。最終的にQueryへ応答するには、Inventory側のSession・Sel・Targetの条件も満たす必要があります。
 
 ## 7. コマンド形式の扱い
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
 ## 8. レスポンス処理
 
-レスポンス処理では、以下を区別してください。
+### 8.1 書込み要求と固定長ACK
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+要求はCMD=55h・LEN=3+23×nです。DATA[0]=32h、DATA[1]=種類、DATA[2]=n（1～7）で、DATA[3]からn個の23 byteブロックを並べます。0起点のj番目のブロックはB=3+23×j、Select(j+2)の条件です。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+| n | 要求LEN | 要求総長 | 書込みACK総長 |
+|---:|---|---:|---:|
+| 1 | 1Ah（26） | 33 byte | 8 byte |
+| 7 | A4h（164） | 171 byte | 8 byte |
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+ACKはCMD=30h・LEN=01h・DATA[0]=32h、総8 byte固定です（p.211）。種類、n、条件ブロックは返りません。DATA[1]を参照して種類や件数を読むことはできません。
 
-### 8.1 ACK/レスポンス例（設定変更成功時）
+### 8.2 判定と読戻し
 
-| 項目 | 内容 |
-|---|---|
-| ACK構造 | `02 ADR 30 01 32 03 SUM 0D` |
-| `CMD` | `30h`（ACK） |
-| `LEN` | `01h` |
-| `DATA[0]` | `32h`（詳細コマンド: UHF_SetExpandSelectParam） |
-| PDF掲載レスポンス例 | `02 00 30 01 32 03 68 0D` |
-| 注意 | 成功ACKには書き込んだ拡張Select条件値は返りません。反映確認は `55h 42h`（UHF_GetExpandSelectParam）で読戻してください。 |
+1. 共通フレームの総長・固定値・SUMを検査し、CMD=30h・LEN=01h・詳細32hで成功ACKを識別します。
+2. 要求側で種類・n・全条件を順序も含めて保持し、[GetExpandSelectParam](55_42_uhf_get_expand_select_param.md)で同じ種類を読戻します。
+3. 各枠のMemBank・Action・Target・Truncate・開始bitアドレス・bit数・マスク対象データを照合します。16 byteの領域を受け取り、マスク対象部分と対象外部分を分けます。予約へ意味を付けません。
+4. 後続枠まで影響を確認する場合は7枠を取得します。未指定枠の扱いを推測せず、最初の0 bitによる実行範囲も確認します。
+5. ACK受信、読戻し一致、FLASHの再起動後保持、タグ選別の実機試験を別の結果として記録します。
 
-設定変更後は、対応する読み取りコマンドで読戻し確認し、RAM変更の場合は終了時に開始値へ復元してください。FLASH変更の場合は再起動後の保持も確認対象です。
+### 8.3 NACK・非同期応答
 
-### 8.2 NACK例（フォーマットエラーの例）
+NACKはCMD=31h・LEN=0Ah・総17 byteの[共通形式](../../RESPONSE_AND_NACK_MASTER.md)です。DATA[0]を要求の詳細と対応づけ、DATA[1]を主エラー、DATA[2]を主エラー0Ahの場合の追加エラーとして読みます。Encode／BlockWrite2固有の追加コードをこの設定コマンドへ転用しません。予約領域は独自解釈せず、非ゼロでもSUMに含めます。
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 32 44 00 00 00 00 00 00 00 00 03 B6 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+RFタグデータや切替通知を設定要求の成功ACKへ取り込まず、ホストの待機期限切れを機器NACKと区別します。設定ACKの解析に、TID付加やアンテナID出力設定を一律必須にはしません。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
-
-### 8.3 設定依存の注意
-
-- 設定変更またはタグメモリ変更後は、対応する読み取りコマンドで読戻し確認してください。
-
-
-### 8.4 AI実装用レスポンス定義
-
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
-
-#### 共通フレームoffset
-
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
-
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `32h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 32h` の成功応答としてPDF該当節を読む |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-| `CMD=30h` だが書込値の反映を確認していない | `ACK_PENDING_VERIFY` | 必要に応じて対応する読出コマンドで読戻し確認する |
-
-対象識別子: コマンド `55h` / 詳細 `32h` / サブ `なし`。
-
-
-#### ACK/データ部offset
-成功ACK `CMD=30h` は `LEN=01h` の固定長ACKです。書き込んだ拡張Select条件値はACKには含まれません。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail` | `32h`: UHF_SetExpandSelectParam成功ACK |
-
-`LEN` が `01h` 以外、または `DATA[0]` が `32h` 以外の場合は、このコマンドの通常成功ACKとして扱わず、別レスポンスまたは異常フレームとして分類してください。
-
-設定書き込み系は、ACK受信後に必要なら対応する読出コマンドで読戻しし、RAM/FLASHの反映範囲と復元要否を別管理してください。
-
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
-
-
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 32h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 9. 実機確認
 
 実機確認区分: `settings-change`
@@ -716,5 +729,12 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- [RAM_FLASH_IMPACT_MATRIX](../../RAM_FLASH_IMPACT_MATRIX.md)
+- [55_42_uhf_get_expand_select_param](55_42_uhf_get_expand_select_param.md)
+- [55_30_uhf_set_select_param](55_30_uhf_set_select_param.md)
+- [55_40_uhf_get_select_param](55_40_uhf_get_select_param.md)
+- [55_31_uhf_set_inventory_param](55_31_uhf_set_inventory_param.md)
+- [55_41_uhf_get_inventory_param](55_41_uhf_get_inventory_param.md)
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

@@ -20,9 +20,9 @@ requires_rom_check: true
 requires_antenna: true
 requires_tag: false
 requires_access_password: false
-requires_parameters: false
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+requires_parameters: true
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
@@ -31,13 +31,17 @@ related_docs:
   - "../../RF_SAFETY_AND_CARRIER_RULES.md"
   - "../../PARAMETER_CONFIRMATION_GUIDE.md"
   - "../../AI_IMPLEMENTATION_GUARDRAILS.md"
+  - "4f_80_read_error_info.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "../../ANTENNA_NUMBERING_SCHEMES.md"
+  - "4e_00_10_write_reader_mode.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-control"
   - "rf-emission"
   - "requires-antenna"
-  - "pass-with-notes"
+  - "specification-reference"
   - "uhf-check-antenna"
 ---
 
@@ -51,8 +55,10 @@ tags:
 - 確認区分: `rf-read`
 - 操作レベル: RF diagnostic
 - コマンドバイト: `55h` / 詳細コマンド: `44h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -80,8 +86,8 @@ tags:
 | アンテナ条件確認 | あり |
 | タグ条件確認 | なし |
 | Accessパスワード確認 | なし |
-| パラメータ確認 | なし |
-| 明示許可 | 不要または通常不要 |
+| パラメータ確認 | 機種別のアンテナ番号を確認 |
+| 明示許可 | RF診断が許可された範囲で実行 |
 
 高影響コマンドを、高影響という理由だけで仕様上禁止扱いにはしません。ただし、上記の確認事項が揃うまで実機送信しません。
 
@@ -207,152 +213,54 @@ tags:
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
-## 8. レスポンス処理
+## 8. 指定端子の接続診断
 
-レスポンス処理では、以下を区別してください。
+### 8.1 要求と固定ACK
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+要求はCMD=55h・LEN=02h、DATA[0]=44h・DATA[1]=アンテナ番号で総9 byteです（p.137）。成功ACKはCMD=30h・LEN=03h、DATA[0]=44h・DATA[1]=アンテナ番号・DATA[2]=接続情報で総10 byteです（p.138）。フレーム長・SUM、詳細と要求番号への対応を確認します。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+このACKは固定3 byteのDATAで、RFタグのEPC/UII・読取枚数・完了通知を含みません。アンテナID出力ONでもADRへ診断番号を移さず、番号はDATA[1]から読みます。TID付加や自動読み取りの通知設定によって応答長・後続完了ACKが変わるという既存の汎用説明は適用しません。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+### 8.2 機種別番号
 
-### 8.1 ACK/レスポンス例（RF処理成功時）
-
-| 項目 | 内容 |
-|---|---|
-| 成功ACK構造例 | `02 ADR 30 01 44 <RF処理結果...> 03 7A 0D` |
-| ACK/応答データ部の先頭 | `44h` |
-| RFタグ応答 | コマンドにより、ACKとは別にRFタグデータ、読取完了ACK、またはエラーNACKが返ります。 |
-
-RF系では1送信1応答に固定しません。タグ応答、完了応答、NACK、timeoutを同じ受信ループで分類してください。
-
-### 8.2 NACK例（フォーマットエラーの例）
-
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 44 44 00 00 00 00 00 00 00 00 03 C8 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
-
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
-
-### 8.3 設定依存の注意
-
-- アンテナID出力ON/OFFにより、レスポンスのアドレス位置がリーダライタIDまたは読み取りANT番号に変わります。
-- 読取完了応答、アンテナ切替完了応答、キャリア検知応答のON/OFFで、後続ACKの有無が変わります。
-
-
-### 8.4 AI実装用レスポンス定義
-
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
-
-#### 共通フレームoffset
-
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
-
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
+| 機種 | 要求・ACKの番号値 | 端子表示 |
 |---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]=44h` | `ACK` | 対象コマンド `55h 44h` の成功応答としてPDF該当節を読む |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期タグ応答候補。要求コマンドのACKと混同しない |
-| `CMD=30h` かつ `DATA[0]=10h` `DATA[1]=02h` | `CARRIER_DETECTED` | キャリア検知応答ON時のみイベントとして扱う |
+| UTR-S201／UTR-SHR201 | 00hのみ | ANT0 |
+| UTR-SUN02-4CH | 00h～03h | ANT0～ANT3 |
+| UTR-SUN02V-8CH／UTR-SUN02-8CH | 00h～07h | ANT1～ANT8 |
 
-対象識別子: コマンド `55h` / 詳細 `44h` / サブ `なし`。
+p.137–139の対応です。8CHのANT8は07h、4CHのANT3は03hです。機種を問わず表示番号をそのまま送信値にしません。本要求には外部アンテナ番号欄・全端子一括マスク・RAM/FLASH選択欄はありません。[番号体系](../../ANTENNA_NUMBERING_SCHEMES.md)に従い、RFタグ応答のADRや外部ユニット番号を流用しません。
 
+### 8.3 ACK内の接続情報
 
-#### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は、原則として `44h` またはPDF該当節の応答識別子として扱います。
+| DATA[2] | p.138–139の意味 | 扱い |
+|---|---|---|
+| 00h | 接続OK、マッチング良好 | 指定端子の診断結果 |
+| 01h | 未接続またはマッチングの極端なずれ等 | 接続エラーを示すACK |
+| 02h | 存在しないアンテナ番号 | パラメータ異常を示すACK |
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail/status` | 対象コマンドの詳細識別子または状態識別子 |
-| 1.. | `payload` | PDF該当節の順序で読む。予約byteは独自解釈しない |
+01h・02hもCMD=30hのACK内の結果で、NACKへ置換しません。02hをタグ0枚やLBTエラーと解釈せず、存在しない番号を検出するための無差別送信もしません。未定義結果値は元値を記録して未確認とし、正常へ丸めません。別途CMD=31hが来た場合は§7.6のNACKとして扱います。
 
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
+### 8.4 RFと診断の限界
 
+断線確認はキャリアセンス後にRFを出力し、反射電力から判断します（p.48–49）。タグは不要ですがRFを使うため、機種・ROM・対象端子・接続アンテナ・周波数・出力・地域・停止方法と送信許可範囲を確認します。受動的な配線読取りではありません。
 
-#### NACK分類
+01hはケーブル断線だけを断定せず、水分・人体・金属等によるマッチング悪化も確認します（p.139）。長いケーブルでは損失により実際の故障を断線として検知しない場合があります（p.48）。00hでもケーブル・全アンテナの完全な健全性、タグの存在や読取性能までは保証しません。
 
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
+ROM 2.030以降は正常と判断されたポートではRFを出力でき、1.120以前のUTR-S201では断線判断中に全ポートで出力できないという違いがあります（p.49）。[エラー情報読取り](4f_80_read_error_info.md)は別の状態取得で、結果形式・取得時点を分けます。診断のために以前の状態が保持されると仮定しません。
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 44h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
+### 8.5 モード・復旧・未確認範囲
 
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
+本要求は連続65h／66h中の受付例外ではなく、動作保証外です（p.19–20）。00hへの復帰条件を確認してから診断します。RF診断後の選択アンテナ、キャリア状態、外部ユニット側の選択・診断範囲、出力時間と最長応答時間は本節だけでは確定できません。元の設定保持や自動RF停止を保証せず、必要な状態確認と復旧を計画します。
 
-#### 最小疑似コード
+NACK・timeout・不正フレームは接続情報00h／01h／02hと別に記録します。受信できないことを未接続と断定したり、自動再送・出力増加・別端子への切替を追加したりしません。複数端子を診断する場合も機種に存在する各端子の結果を個別に記録し、単一端子の00hを全端子正常へ広げません。
 
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 9. 実機確認
 
 実機確認区分: `rf-read`
@@ -400,5 +308,10 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../RF_SAFETY_AND_CARRIER_RULES.md`
 - `../../PARAMETER_CONFIRMATION_GUIDE.md`
 - `../../AI_IMPLEMENTATION_GUARDRAILS.md`
+
+- `4f_80_read_error_info.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `../../ANTENNA_NUMBERING_SCHEMES.md`
+- `4e_00_10_write_reader_mode.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。
