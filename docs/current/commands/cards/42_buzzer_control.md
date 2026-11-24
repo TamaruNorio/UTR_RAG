@@ -10,7 +10,7 @@ command_name: "ブザーの制御"
 command_byte: "42h"
 detail_command: null
 subcommand: null
-operation_profile: "needs-metadata-confirmation"
+operation_profile: "reader-control"
 operation_level: "reader-control"
 rf_emission: false
 write_operation: false
@@ -21,19 +21,23 @@ requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "4f_9f_read_general_port.md"
+  - "4e_57_led_buzzer_control.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-control"
   - "requires-parameters"
-  - "pass-with-notes"
+  - "specification-reference"
   - "buzzer-control"
 ---
 
@@ -45,11 +49,13 @@ tags:
 
 - PDF章番号: `7.3.2`
 - コマンド分類: リーダライタ制御
-- 確認区分: `needs-metadata-confirmation`
+- 確認区分: `reader-control`
 - 操作レベル: reader-control
 - コマンドバイト: `42h` / 詳細コマンド: `null` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -61,7 +67,9 @@ tags:
 
 判定: `SUPPORTED`
 
-このコマンドはPDF Ver.1.17のコマンド一覧に含まれるため、仕様上の対象コマンドとして扱います。
+p.108の対応表では、UTR-S201／UTR-SHR201／UTR-SUN02-4CHの掲載ROM区分（2.040以前・2.050以降・2.100以降）と、UTR-SUN02-8CH／UTR-SUN02V-8CHの全バージョン欄で対応です。コマンド対応と、LED・ブザーの実装／接続は別に確認します。
+
+本カードの`reader-control`は鳴動・表示を変える制御操作です。`write_operation: false`は設定保存やタグメモリ書込みの要求ではないという分類で、観測だけの操作を意味しません。RF送信・FLASH保存は行いません。
 
 ただし、仕様に存在することと、実機へ送信してよいことは別です。実機送信前には、対象機種、ROMバージョン、接続先、パラメータ、影響範囲、復旧方法、停止条件を確認してください。
 
@@ -128,7 +136,7 @@ tags:
 | `03h` | ピッピッピー |  |
 | `04h` | ピーー |  |
 | `05h` | ピーピーピーピー |  |
-| `06h` | ピーーー |  |
+| `06h` | ピーーーー |  |
 | `07h` | ピッピッピッピッピッ |  |
 | `08h` | ピッピッピッピッ |  |
 
@@ -140,159 +148,45 @@ tags:
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
-## 7. レスポンス処理
+## 7. レスポンス処理と鳴動確認
 
-レスポンス処理では、以下を区別してください。
+### 7.1 応答要求による分岐
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+要求は`CMD=42h / LEN=02h`、DATA[0]応答要求・[1]音番号で総9 byteです。詳細コマンドはありません（p.124）。応答要求を未完了要求の情報として保持します。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+| 送信DATA[0] | 正常時の応答 | 受信処理 |
+|---|---|---|
+| 00h | レスポンスなし | ACK待ちtimeoutを失敗にせず、応答を要求していない状態として扱う。ただしNACKは受信・記録する |
+| 01h | CMD=30h、LEN=00h、総7 byte | DATAなし。DATA[0]に42hが返るという条件を作らない |
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+無応答だけではコマンド到達や鳴動成功を証明できません。00hでNACKを受けた場合はエラーであり、無応答指定を理由に捨てません。01hでACKが得られなければtimeoutとし、正常無応答へ読み替えません。非同期タグ応答を本要求のACKにしません。
 
-### 7.1 ACK/レスポンス例（PDF掲載例）
+### 7.2 PDF掲載例と確認範囲
 
-| 種別 | Hex |
+| 種別 | p.125掲載Hex |
 |---|---|
 | TX | `02 00 42 02 01 00 03 4A 0D` |
 | RX | `02 00 30 00 03 35 0D` |
 
-ACKはデータ長00hです。応答要求00hの場合は正常時レスポンスを返しません。
+例は応答要求あり・音00h「ピー」です。p.125は、ACKと汎用ポート7の機能条件に依存する鳴動を分けて説明しています。ACKには鳴動状態・音番号・経過時間は返りません。ACKを音の終了通知や実際に聞こえた証拠にはせず、必要な実動作確認を別に記録します。
 
-実動作として、汎用ポート7の機能が「ブザー制御信号出力ポート」に設定されている場合、リーダライタ本体またはインターフェース基板のブザーから、指定したブザー音が鳴動します。
+### 7.3 汎用ポート7と関連設定
 
-### 7.2 NACK例（フォーマットエラーの例）
+[汎用ポート読取り](4f_9f_read_general_port.md)で機能byteを確認します。ポート7はbit6で、0=ブザー制御信号出力、1=汎用ポートです（p.177、342）。本コマンドには0が必要です。方向bitだけを出力にしても専用機能へ切り替わりません。
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 42 44 00 00 00 00 00 00 00 00 03 C6 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+機能はFLASH 30（1Eh）、ブザー種別は38（26h）のbit4です。種別0=標準（他励式）、1は将来拡張の予約でブザーが動作しなくなるため設定しないと明記されています（p.343）。これらは別の保存設定で、鳴動要求の前処理として変更しません。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+[LED&ブザー制御](4e_57_led_buzzer_control.md)はポート1・3にも機能条件があります。単独42hにその条件を移しません。逆に57hの音FFh・時間指定を42hへ追加しません。42hの音00hは「ピー」で、消音指定ではありません。
 
+### 7.4 異常応答・再送・未確認範囲
 
-### 7.4 AI実装用レスポンス定義
+共通フレーム・SUM・固定NACKは[応答マスタ](../../RESPONSE_AND_NACK_MASTER.md)に従います。詳細コマンドのない42hでNACKの先頭DATAに何が返るかは、p.124の参照先§7.6だけでは具体値を確定できません。未出典のNACK完成例や独自の照合例外を作らず、未完了要求と受信値を記録します。
 
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+再送で音が重複する可能性を考慮します。実行中の割込み・再要求の優先順位、鳴動中止手順、各パターンの正確な長さ、ACKの返却時点は今回未確認です。無応答やACKだけで停止完了を判定せず、鳴動・接続条件を確認します。
 
-#### 共通フレームoffset
-
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
-
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `DATA[0]`送信値が`00h`、かつ正常時にレスポンスなし | `NO_RESPONSE` | 応答要求なしの正常系。timeoutとは分けて扱う |
-| `CMD=30h` かつ `LEN=00h` | `ACK` | 応答要求`01h`時の成功ACK |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-
-対象識別子: コマンド `42h` / 詳細 `なし` / サブ `なし`。
-
-
-#### ACK/データ部offset
-応答要求 `01h` の成功ACKは `CMD=30h`、`LEN=00h` です。ACKのDATA部はありません。
-
-| offset | フィールド | 値 | 解釈 |
-|---:|---|---|---|
-| 0 | STX | `02h` | フレーム開始 |
-| 1 | ADR | `00h` | 通常はリーダライタID |
-| 2 | CMD | `30h` | ACK |
-| 3 | LEN | `00h` | DATAなし |
-| 4 | ETX | `03h` | フレーム終了 |
-| 5 | SUM | `SUM` | SUM値 |
-| 6 | CR | `0Dh` | 終端 |
-
-応答要求 `00h` の正常系はレスポンスなしです。ただし、SUM値エラーなどの異常時はNACKが返る可能性があります。
-
-
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `42h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-if request.response_required == 0x00:
-    frame = read_next_frame(short_error_window)
-    if frame is None:
-        return NO_RESPONSE_SUCCESS
-    parsed = parse_common_frame(frame)
-    if parsed.cmd == 0x31:
-        return parse_nack(parsed)
-    return parse_unexpected_response(parsed)
-
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
-
-このコマンドでは、上記に加えて、汎用ポート7の機能、送信DATA[0]の応答要求、送信DATA[1]のブザー音をパーサへ渡してください。応答要求`00h`の場合、正常無応答をtimeout失敗として扱わないでください。
 ## 8. 実機確認
 
-実機確認区分: `needs-metadata-confirmation`
+実機確認区分: `reader-control`
 
 実機確認では、以下をログに残してください。
 
@@ -334,5 +228,10 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- `../../RAM_FLASH_IMPACT_MATRIX.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `4f_9f_read_general_port.md`
+- `4e_57_led_buzzer_control.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

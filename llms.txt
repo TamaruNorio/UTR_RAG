@@ -1,20 +1,40 @@
-# UTR_RAG AI入口
+# UTR_RAG
 
-このリポジトリは、UTR-S201シリーズ制御プログラムのAIペアプログラミング支援用ドキュメントです。
+> タカヤUTR-S201シリーズの公開通信プロトコルを、生成AIと人間が参照しやすく整理した文書群。メーカーSDKを必須とせず、USB/COM・LAN/TCPからの実装を支援します。
 
-AIが最初に読む文書:
-- docs/current/AI_CONTEXT_INDEX.md
-- docs/current/V100_USAGE_GUIDE.md
-- docs/current/COMMAND_MASTER_V117.md
-- docs/current/RESPONSE_AND_NACK_MASTER.md
-- docs/current/RESPONSE_CLASSIFICATION_MATRIX.md
-- docs/current/commands/cards/TEST_STATUS_INDEX.md
-- docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md
-- docs/current/PARAMETER_CONFIRMATION_GUIDE.md
-- docs/current/ANTENNA_NUMBERING_SCHEMES.md
-- docs/current/EXAMPLE_IMPLEMENTATION_REQUEST.md
-- docs/current/UTR_TAG_GUI_IMPLEMENTATION_FEEDBACK.md
-- docs/current/KNOWN_AI_FAILURE_PATTERNS.md
-- docs/current/commands/cards/
+公式PDFが一次情報です。カードのrelated_docsを確認し、不明な仕様や実機条件は推測せず確認してください。現在はRAG文書整備を先行し、プログラム改修は後工程です。
 
-公式PDFが一次情報です。PDF原本は別途準備してください。GitHubにはPDF原本をアップロードしないでください。
+## 入口と用途
+
+- [README](README.md): 目的、共通資料、作業範囲。
+- [AI作業規則](AGENTS.md): AIが最初に確認する必読順序・適用条件。以下の索引で代替しません。
+- [公開範囲](RELEASE_SCOPE.md): 保証の範囲、著作権、公開情報の扱い。
+- [利用ガイド](docs/current/V100_USAGE_GUIDE.md): 読み方と実装前の条件。
+- [用途別参照](docs/current/TASK_READING_GUIDE.md): 単発・連続読取り、複数アンテナ、NACK、メモリ操作の入口。
+- [コマンド一覧](docs/current/COMMAND_MASTER_V117.md): 54カードへの索引。
+
+## 共通仕様と適用条件
+
+- [公式PDF Ver.1.17](https://www.product.takaya.co.jp/dcms_media/other/TDR-MNL-PRC-UTR-S201-117.pdf): 一次情報。PDF原本は本リポジトリへアップロードしません。
+- [ACK・NACK](docs/current/RESPONSE_AND_NACK_MASTER.md): 共通応答と条件付きの解釈。
+- [応答分類](docs/current/RESPONSE_CLASSIFICATION_MATRIX.md): コマンド別の応答参照先。
+- [機種・ROM](docs/current/DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md): 機種判定と対応可否。
+- [モード別応答](docs/current/RESPONSE_MODE_APPLICABILITY.md): 単発の終了と連続読取り中のサイクル通知を区別。
+- [TIDと単位](docs/current/TID_MEMORY_AND_UNITS.md): GS1のWord定義、UTRの付加範囲、原典の換算不整合。
+- [アンテナ番号](docs/current/ANTENNA_NUMBERING_SCHEMES.md): 内部・外部番号と応答ADRの区別。
+- [実装前の確認](docs/current/AI_IMPLEMENTATION_GUARDRAILS.md): 送信条件、停止、復旧、ログ。
+
+## 根拠と品質
+
+- [確認状態の方針](docs/current/VERIFICATION_POLICY.md): 文書照合・ソフトウェア試験・実機試験を分離。
+- [確認状態索引](docs/current/commands/cards/TEST_STATUS_INDEX.md): 仕様参照資料としての表示と旧ラベルの履歴。
+- [原典照合一覧](docs/current/SOURCE_REVIEW_STATUS.md): 今回の照合範囲と未解決事項。
+- [既知の失敗](docs/current/KNOWN_AI_FAILURE_PATTERNS.md): 誤実装の再発防止。
+- [改善計画](docs/IMPROVEMENT_PLAN.md): 他社事例の採用範囲と工程。
+- [品質評価](docs/QUALITY_EVALUATION_PLAN.md): 正確さ・参照量・利用量の比較手順。
+- [限定的な比較記録](docs/SMALL_COMPARISON_REPORT.md): 関連抜粋9問の回答比較。PDF全体・検索・生成コードの動作確認や一般的な優位性の実証ではありません。
+
+## 依頼例と過去の記録
+
+- [実装依頼例](docs/current/EXAMPLE_IMPLEMENTATION_REQUEST.md): 要件を明確にする例。プログラム実装は後工程。
+- [GUI制作記録](docs/current/UTR_TAG_GUI_IMPLEMENTATION_FEEDBACK.md): 過去の観測と誤解の訂正。現行仕様や推奨実装の正本にはしません。

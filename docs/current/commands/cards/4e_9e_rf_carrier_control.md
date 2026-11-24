@@ -10,7 +10,7 @@ command_name: "RF送信信号の制御"
 command_byte: "4Eh"
 detail_command: "9Eh"
 subcommand: null
-operation_profile: "needs-metadata-confirmation"
+operation_profile: "reader-control"
 operation_level: "reader-control"
 rf_emission: true
 write_operation: false
@@ -21,20 +21,27 @@ requires_antenna: true
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "4e_9e_rf_carrier_control_raw.md"
+  - "../../RF_SAFETY_AND_CARRIER_RULES.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "4e_00_10_write_reader_mode.md"
+  - "55_30_uhf_set_select_param.md"
+  - "55_33_01_write_output_power.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-control"
   - "rf-emission"
   - "requires-parameters"
-  - "pass-with-notes"
+  - "specification-reference"
   - "rf-carrier-control"
 ---
 
@@ -46,11 +53,13 @@ tags:
 
 - PDF章番号: `7.3.4`
 - コマンド分類: リーダライタ制御
-- 確認区分: `needs-metadata-confirmation`
+- 確認区分: `reader-control`
 - 操作レベル: リーダライタ制御
 - コマンドバイト: `4Eh` / 詳細コマンド: `9Eh` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -170,7 +179,7 @@ SUM確認:
 |---|---|---|---|
 | キャリアOFF状態 | OFF | なし | `ON` または `OFF→ON` でON維持へ |
 | キャリアON状態 | ON | コマンド単位 | RFタグ通信コマンド実行中の通常状態 |
-| キャリアON維持状態 | ON | 後続RFタグ通信で維持可能 | 最大4秒、`OFF`・4秒経過・NACK等でOFF状態へ |
+| キャリアON維持状態 | ON | 後続RFタグ通信で維持可能 | 最大4秒、`OFF`・4秒経過でOFFへ。NACK時のHandle破棄とは分離 |
 
 キャリアON維持状態で最初のRFタグ通信コマンドがRFタグのハンドルを取得すると、後続のRFタグ通信コマンドではInventory処理を省略して同じハンドルで通信できます。これにより処理時間を短縮できますが、対象タグが複数存在すると誤対象になる可能性があるため、Select条件などで1枚に絞ってください。
 
@@ -178,13 +187,13 @@ SUM確認:
 
 | 条件 | 結果 | 実装アクション |
 |---|---|---|
-| キャリアOFF状態で `ON` | キャリアON維持状態へ | ACK後、最大4秒の制限をタイマ管理する |
+| キャリアOFF状態で `ON` | キャリアON維持状態へ | 出力開始から最大4秒。ACK起点で延長しない |
 | キャリアOFF状態で `OFF→ON` | OFF後にON維持状態へ | OFF時間50msec以上とキャリアセンス待ちを考慮する |
 | キャリアON維持状態でRFタグ通信 | ON維持を継続し、ハンドルを維持 | 後続通信は同一タグ前提。対象タグをマスクで限定する |
 | キャリアON維持状態で `ON` | 4秒制限は延長されない | 継続目的で使わない。PDFではNACK条件として扱う |
 | キャリアON維持状態で `OFF→ON` | 一度OFFし、ハンドル破棄後にON | ハンドルを使い回す設計にしない |
 | キャリアONから4秒経過 | コマンド実行中でもOFFへ | timeoutや途中終了と混同しない。ハンドルは破棄される |
-| 一部機種の間欠出力中 | 前回ON時間と同じ時間だけ休止 | 休止中のコマンドは休止終了後に実行され、応答が遅れる可能性がある |
+| 一部機種の間欠出力中 | 前回ON時間・設定休止時間を考慮 | 休止中のコマンドは休止終了後に実行され、応答が遅れる可能性がある |
 
 ### 7.7 キャリアセンスとNACK条件
 
@@ -208,142 +217,53 @@ PDF掲載の使用例では、事前にキャリアONにしてから `UHF_Invent
 
 この使用例は性能例であり、RFタグIC、タグ個体差、書き込み内部リトライ、周辺RF環境により変動します。運用前に実際のタグで確認してください。
 
-## 8. レスポンス処理
+## 8. 制御結果とキャリア状態を分ける
 
-レスポンス処理では、以下を区別してください。
+### 8.1 固定ACK・予約・要求の対応
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- フレーム不正
-- キャリア検知エラー
-- キャリア休止による応答遅延
-- RFタグ通信中の後続レスポンス
-- RFタグハンドル破棄後の再Inventory要否
+要求とACKはともにLEN=02h、総9 byteです。ACKはCMD=30h・DATA[0]=9Eh、DATA[1]は将来拡張の予約（通常00h）です（p.129・135）。00hを現在OFF、成功status、要求制御値のエコーとして解釈しません。ON要求でも予約は通常00hで、ACKから現在キャリア状態を直接読み出す形式ではありません。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+長さ・SUM・詳細と未完了要求の制御値を対応づけます。アンテナID・TID付加・読取完了・キャリア検知通知設定を9Ehの固定ACKへ流用しません。後続タグ通信の応答は、そのコマンド固有の定義で別に解析します。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+### 8.2 OFF、ON再送、NACK
 
-### 8.1 受信分類ルール
+OFF状態でOFFを要求しても状態は遷移せずACKが返ります（p.133(7)）。ON状態でONを再要求しても4秒を延長できずNACKです（p.130）。この再ONの具体的なNACKコードは本節に記載されておらず、キャリア検知60hと決めつけません。
 
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `LEN=02h` かつ `DATA[0]=9Eh` | `ACK` | RF送信信号制御の成功ACK。`DATA[1]` は予約扱い |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中などの非同期タグ応答候補。通常ACKとは分離する |
-| キャリア休止時間中に応答が遅れる | `DELAYED_RESPONSE_POSSIBLE` | timeout値設計時に機種仕様を考慮する |
+ON／OFF→ONでキャリアセンス待ち時間内に出力を開始できない場合は、エラーコード1=60hのNACKとなり、キャリアOFF状態です（p.130）。この条件を全NACKやtimeoutへ一般化しません。タグ読み書きのNACKはハンドル破棄を伴いますが（p.131）、それだけでキャリアOFFになったとは確定しません。
 
-対象識別子: コマンド `4Eh` / 詳細 `9Eh` / サブ `なし`。
+### 8.3 4秒と休止時間
 
-### 8.2 ACK/レスポンス例
+最大4秒はキャリア出力開始からで、ACK受信時に新たな4秒を開始しません。4秒経過時はコマンド実行中でもOFFとなり、保持Handleは破棄されます（p.130・134）。境界で中断したタグ処理の成功・未変更や返却コードを推測しません。処理終了時は4秒待ちに任せず、不要になった時点でOFFにします（p.135）。
 
-| 項目 | 内容 |
-|---|---|
-| 代表ACK Hex | `02 00 30 02 9E 00 03 D5 0D` |
-| ACKデータ部 | `DATA[0]=9Eh`, `DATA[1]=00h` |
-| `DATA[1]` | 将来拡張のための予約。通常 `00h`。成功状態やキャリア状態として独自解釈しない |
-| タイミング注意 | 一部機種ではキャリア間欠出力により、キャリア休止時間後に実行・応答される場合がある |
+OFF→ONは50ms以上の休止と5ms以上のキャリアセンスを経て再ONします（p.130）。正確に55msで完了する保証ではありません。設定したキャリアセンス時間、待ち時間、機種の間欠出力、通信遅延をホストtimeoutと区別します。
 
-### 8.3 NACK例（フォーマットエラーの例）
+p.56–57の間欠出力対象はUTR-S201・UTR-SHR201で、据置型のSUN02-4CH／SUN02V-8CH／SUN02-8CHは非対象です。対象機では前回ON時間に相当する休止が必要で、設定休止時間が長い場合はそちらを優先します。p.57の最大4秒の遅延は休止によるもので、すべてを含む応答期限の上限ではありません。機種別条件をROMの任意の閾値に置き換えません。
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 9E 44 00 00 00 00 00 00 00 00 03 22 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコード |
+### 8.4 ハンドル保持と対象タグ
 
-### 8.4 このコマンドで特に見るNACK
+ON要求だけではHandleを取得しません。維持状態でその後の初回RFタグ通信が取得したHandleを使い、後続処理のInventoryを省略できるという条件です（p.129–132）。新しいHandle取得、OFF、OFF→ON、4秒経過、タグ読み書きNACKで旧Handleを使い続けません。
 
-| エラー | 意味 | 実装アクション |
-|---|---|---|
-| `error_code_1=60h` | キャリア検知エラー | キャリア出力はOFFのままと判断し、再送・チャンネル変更・環境確認は操作者判断にする |
-| `FORMAT_ERROR` | 制御値、データ長、フレーム形式などの不正 | 送信フレーム生成を見直す。RF再送はしない |
-| `SUM_ERROR` | SUM不一致 | フレーム生成を見直す。実機状態変更の有無をACKなしで断定しない |
-| すでにON維持状態で `ON` | 4秒延長不可のNACK条件 | 継続目的なら設計を見直す。安易に連続送信しない |
+再試行時はInventoryで別タグを取得する可能性があるため、Handle保持中も[Select](55_30_uhf_set_select_param.md)で一意のタグを選ぶ必要があります（p.131）。HandleはEPC/TIDのような恒久識別子ではありません。維持中のInventoryは最初のEPC取得で終了するというp.134(11)の条件を、通常の複数枚Inventoryへ一般化しません。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、PDF定義の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+出力レベル設定は維持中に変更しても、いったんOFF状態へ戻るまで反映されません（p.131）。[出力設定](55_33_01_write_output_power.md)の保存・読戻しと、現在RF出力への反映を分けます。
 
-### 8.5 AI実装用レスポンス定義
+### 8.5 受付・停止・復旧
 
-#### 共通フレームoffset
+9Ehはp.19–20の連続65h／66h中の受付例外ではなく、OFF指定も連続モード停止の代用にはできません。[モード書込み](4e_00_10_write_reader_mode.md)の条件に従い00hへ戻してから扱います。本要求にアンテナ番号・RAM/FLASH指定はなく、設定と現在選択、RF条件を事前確認します。
 
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
+timeoutや不正応答ではキャリア状態を未確認として扱い、ONやOFF→ONを自動再送しません。予定したOFF・停止・通信復旧の手順と、その結果確認を分けます。リスタートは保存モードで起動しRFが再開する場合があるため、無条件のRF停止手段にしません。
 
-#### ACK/データ部offset
+### 8.6 原典の不一致と残項目
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail_command` | `9Eh`。RF送信信号の制御に対するACK |
-| 1 | `reserved` | 通常 `00h`。PDFで意味が定義されていないため独自解釈しない |
+p.136のStored PC書込みは冒頭手順と両時間表がUHF_BlockWriteですが、送信例コメントと詳細16hはUHF_Writeです。表記・実測対象の確認を[OPEN-025](../../SOURCE_REVIEW_STATUS.md)で保留します。時間合計207ms／326msの足算は一致しますが、コマンド差を未解決のまま性能比較を保証しません。例はUCode8・1枚条件で、一般的な処理期限ではありません。
 
-#### NACK分類
+p.134(14)だけ「キャリアONの待機状態」となり、p.131の状態一覧・同図・前後は「維持状態」です。「待機→維持」は[OPEN-026](../../SOURCE_REVIEW_STATUS.md)の訂正候補として保留し、第4の状態を追加しません。
 
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象詳細コマンド `9Eh` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、キャリア検知エラーなどの主エラー |
-| 2 | `error_code_2` | PDF定義がある場合のみ参照 |
-| 3 | `error_code_3` | PDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-snapshot = read_startup_snapshot()
-send_4e_9e(control_value)
-frame = read_next_frame(timeout_with_carrier_rest_consideration)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30 and parsed.len == 2 and parsed.data[0] == 0x9E:
-    return ACK_RF_CARRIER_CONTROL(reserved=parsed.data[1])
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | TIMEOUT | INVALID_FRAME | DELAYED_RESPONSE_POSSIBLE",
-  "command": "RF送信信号の制御",
-  "command_bytes": "4E 9E",
-  "control_value": "00h | 01h | 02h",
-  "carrier_state_assumption": "off | on_hold | unknown",
-  "data_length": 2,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、送信出力、使用周波数、キャリアセンス条件、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象、現在推定キャリア状態を取得し、この結果をパーサへ渡してください。
+ON再要求の具体的NACK値、4秒境界での処理結果・返却順、ACKと実際のRF遷移の厳密な時刻、休止中のOFF処理時点、全機種ROMの挙動は未確認です。原典転記は[raw資料](4e_9e_rf_carrier_control_raw.md)に保持します。
 
 ## 9. 実機確認
 
-実機確認区分: `needs-metadata-confirmation`
+実機確認区分: `reader-control`
 
 実機確認では、以下をログに残してください。
 
@@ -385,6 +305,14 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- `4e_9e_rf_carrier_control_raw.md`
+- `../../RF_SAFETY_AND_CARRIER_RULES.md`
+- `../../RAM_FLASH_IMPACT_MATRIX.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `4e_00_10_write_reader_mode.md`
+- `55_30_uhf_set_select_param.md`
+- `55_33_01_write_output_power.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。
 

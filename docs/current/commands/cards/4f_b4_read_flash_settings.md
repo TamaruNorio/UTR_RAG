@@ -21,19 +21,23 @@ requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "4e_00_10_write_reader_mode.md"
+  - "4e_b4_flash_write.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-setting"
   - "read-only"
-  - "pass-with-notes"
+  - "specification-reference"
   - "read-flash-settings"
 ---
 
@@ -48,8 +52,10 @@ tags:
 - 確認区分: `read-only`
 - 操作レベル: read-only
 - コマンドバイト: `4Fh` / 詳細コマンド: `B4h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -198,148 +204,38 @@ ACKの `DATA[1]` が、指定したFLASHアドレスに格納されている1byt
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理、アドレス別デコードを分けて設計してください。
 
-## 8. レスポンス処理
+## 8. 対象固有の応答・解釈
 
-レスポンス処理では、以下を区別してください。
+### 8.1 固定長ACKと要求の対応
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+要求はCMD=4Fh、LEN=02h、DATAはB4h・対象アドレスで総9 byteです。成功ACKはCMD=30h、LEN=02h、DATA[0]=B4h、DATA[1]=設定値で総9 byteです（p.181）。フレーム長・SUMを検証し、値は要求したアドレスの定義で解釈します。ACKには対象アドレスが返りません。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+要求のDATA[1]はアドレス、応答のDATA[1]は値です。同じB4hの[書込みACK](4e_b4_flash_write.md)はLEN=01hです。詳細値だけで両者を振り分けず、未完了の読取り要求と要求アドレスを対応づけます。アンテナID・TID付加・タグ完了通知設定でこの固定ACKは伸長しません。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+### 8.2 アドレス・モードと異常応答
 
-### 8.1 ACK/レスポンス例（読み取り成功時）
+フレームのADRは通信相手の識別、要求DATA[1]は設定メモリのアドレスです。p.245の「Hex文字列」はフィールド表の1 byteに従って扱い、十進30なら1Ehを指定します。ASCIIの「1E」2文字や30hへ置き換えません。アドレス幅が1 byteでも、全0～255番地の利用を保証しません。§9.1 p.342–344に記載された対象機種・ROM・bit定義を確認し、未掲載・予約領域を推測で読み書きしません。
 
-| 項目 | 内容 |
-|---|---|
-| TX | `02 00 4F 02 B4 5B 03 65 0D` |
-| RX | `02 00 30 02 B4 14 03 FF 0D` |
-| ACK CMD | `30h` |
-| ACK LEN | `02h` |
-| ACK DATA[0] | `B4h`。詳細コマンド |
-| ACK DATA[1] | FLASH設定値。この例では`14h` |
+65h／66hの連続モード中は、本読取り・書込みともp.19–20の受付例外に含まれず動作保証外です。[モード設定](4e_00_10_write_reader_mode.md)の条件に従って00hへ復帰してから扱います。読取りだけの依頼へ、停止や設定変更を自動追加しません。
 
-読み取り系は、ACKデータ部に読戻し値が入ります。実装では、`LEN=02h` と `DATA[0]=B4h` を確認してから、`DATA[1]` を指定アドレスのFLASH設定値としてパースしてください。
+NACKは[共通マスタ](../../RESPONSE_AND_NACK_MASTER.md)の§7.6に従い、timeout・フレーム不正・非同期応答と分離します。未掲載アドレスや予約bitに対する具体的なNACK値、書込み失敗時の反映単位は未確認です。タグ0枚・LBT・Encode固有コードを、このコマンドの正常結果や固有エラーとして流用しません。
 
-### 8.2 NACK例（フォーマットエラーの例）
+### 8.3 保存値とRAM例外
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A B4 44 00 00 00 00 00 00 00 00 03 38 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+FLASH値の読取り結果は、現在の出力状態や実動作への反映完了を保証しません。p.341はFLASH変更後のリスタートを要求しています。一方、一覧の81（51h）はRAMとして動作する例外です。80（50h）の変更時と電源再投入・リスタート時に50hから51hへ反映されます（p.344※2）。51hの読戻しを永続保存の確認に使いません。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+50h／51hはROM 1.120以前のInventoryタイムアウト用で、値×10msです。ROM 2.030以降ではこの機能は未実装で実動作に使われません（※3）。中間ROMの適用条件は補いません。[RAM・FLASH影響](../../RAM_FLASH_IMPACT_MATRIX.md)で、その他の時間設定と復元順も確認してください。このカードのFLASH操作「なし」は変更を伴わない分類で、FLASH値にアクセスしないという意味ではありません。
 
-### 8.3 設定依存の注意
+### 8.4 p.181のアドレス表記不一致
 
-- FLASH変更は再起動後保持され、RAM設定を上書きする場合があります。
-- 設定変更またはタグメモリ変更後は、対応する読み取りコマンドで読戻し確認してください。
+p.181の例は本文と矢印注記の2箇所で「94（5Bh）」と記載しますが、5Bhは十進91です。p.246例2とp.344のWriteタイムアウト欄は91（5Bh）で一致します。「94→91」を[OPEN-023](../../SOURCE_REVIEW_STATUS.md)の訂正候補として保留しています。原典転記を保持し、例の送信アドレス5Bhを94に合わせて変更しません。
 
+5Bhの値14hは20msで、RFタグへのWriteのタイムアウト設定です。USB/COM・LAN/TCPのホスト受信期限ではありません。p.246の5ms例は推奨値ではなく、現場条件を確認せず短縮する根拠にしません。
 
-### 8.4 AI実装用レスポンス定義
+### 8.5 確認記録と未確認範囲
 
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+対象機種・ROM・動作モード・要求アドレス・返却値・単位・保存先区分・読取り時点を記録します。初期値を使用中の設定の代わりにせず、読めなかった値は未取得として扱います。アドレスごとの許容範囲と値0の意味、変更から実動作までの厳密なタイミング、全機種ROMの挙動は未確認です。
 
-#### 共通フレームoffset
-
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
-
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `LEN=02h` かつ `DATA[0]=B4h` | `ACK` | 対象コマンド `4Fh B4h` の読み取り成功ACK |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-
-対象識別子: コマンド `4Fh` / 詳細 `B4h` / サブ `なし`。
-
-
-#### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は `B4h` です。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail_command` | `B4h`。FLASH設定値の読み取りに対するACK |
-| 1 | `flash_value` | 指定アドレスのFLASH設定値 |
-
-`flash_value` の意味は読み取りアドレスに依存します。PDF 9.1 FLASHアドレス一覧でデコードしてください。
-
-
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `4Fh B4h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
-
-このコマンドでは、上記に加えて、読み取りFLASHアドレスとACK DATA[1]のFLASH設定値をパーサへ渡してください。
 ## 9. 実機確認
 
 実機確認区分: `read-only`
@@ -384,5 +280,10 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- `../../RAM_FLASH_IMPACT_MATRIX.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `4e_00_10_write_reader_mode.md`
+- `4e_b4_flash_write.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

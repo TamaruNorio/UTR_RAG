@@ -21,12 +21,14 @@ requires_antenna: true
 requires_tag: true
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
+  - "../../RESPONSE_MODE_APPLICABILITY.md"
+  - "../../TID_MEMORY_AND_UNITS.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
   - "../../RF_SAFETY_AND_CARRIER_RULES.md"
   - "../../PARAMETER_CONFIRMATION_GUIDE.md"
@@ -39,7 +41,7 @@ tags:
   - "rf-emission"
   - "requires-antenna"
   - "requires-tag"
-  - "pass-with-notes"
+  - "specification-reference"
   - "uhf-inventory-read"
 ---
 
@@ -53,8 +55,10 @@ tags:
 - 確認区分: `rf-read`
 - 操作レベル: RF read
 - コマンドバイト: `55h` / 詳細コマンド: `14h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -98,6 +102,8 @@ tags:
 5. 周波数、送信出力、アンテナ設定、FLASH、タグメモリに影響する場合は、事前承認を取る。
 
 ## 6. PDF仕様フィールド定義
+
+> 単位換算の訂正（2026-09-07）: 下記原典転記のTID長には換算の不整合があります。GS1 Gen2の1 Word＝16 bitに従い、**4 Word＝64 bit、6 Word＝96 bit** と解釈してください。[TIDメモリと単位](../../TID_MEMORY_AND_UNITS.md)に根拠を記載しています。転記本文は保持し、RAG側の訂正注記と区別します。
 
 以下は、公式PDF `7.5.2` のコマンド表、レスポンス表、条件、例を、AIがカード単体で参照できるように転記したものです。値一覧、byte数、条件、ACK/NACK条件を省略せず、この節を実装時の一次確認に使ってください。
 
@@ -351,11 +357,9 @@ tags:
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
@@ -375,7 +379,7 @@ AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送
 
 NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+ACK、後続レスポンス、可変長データの解釈は、対象コマンドのPDF定義と機種・ROM・設定に基づきます。[応答マスタ](../../RESPONSE_AND_NACK_MASTER.md)と[モード別適用範囲](../../RESPONSE_MODE_APPLICABILITY.md)を確認し、TID付加や自動読み取り用の通知設定を、すべてのコマンドACKへ一般化しないでください。
 
 ### 8.1 ACK/レスポンス例（PDF掲載例）
 
@@ -384,7 +388,7 @@ ACK、後続レスポンス、可変長データの解釈は、コマンド番�
 | TX | `02 00 55 07 14 07 00 00 00 00 02 03 7E 0D` |
 | RX | `02 00 6C 25 0A FE FF 2F 0E 34 00 <EPC_BYTES> 04 <READ_DATA_BYTES> 0C <TID_BYTES> 03 D9 0D`<br>`02 00 30 05 14 00 01 00 1A 03 69 0D` |
 
-1行目はRFタグデータ、2行目は読み取り完了ACKです。アンテナID出力ONの場合、アドレス位置に読み取りANT番号が入ります。
+1行目はRFタグデータ、2行目は読み取り完了ACKです。単発UHF_InventoryReadの正常動作ではタグデータに続いて完了ACKが1回返り、正常0枚では完了ACKだけが返ります（PDF §7.5.2 p.268–269）。自動読み取り用のサイクル通知OFFを、この完了応答へ適用しません。アンテナID出力ONの場合、アドレス位置の意味は機種・設定で確認します。
 
 ### 8.2 NACK例（フォーマットエラーの例）
 
@@ -399,8 +403,9 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 ### 8.3 設定依存の注意
 
 - アンテナID出力ON/OFFにより、レスポンスのアドレス位置がリーダライタIDまたは読み取りANT番号に変わります。
-- 読取完了応答、アンテナ切替完了応答、キャリア検知応答のON/OFFで、後続ACKの有無が変わります。
-- TID付加、EPC/UII応答設定、読み取りWord数により、可変長データの長さが変わります。
+- メモリ領域・開始アドレス・読取りWord数・TID付加は、このコマンド内の指定を確認します。SetInventoryParamの読取り設定で上書き解釈しません（PDF §7.5.2 p.266–267）。
+- 自動読み取り用のサイクル・切替・キャリア通知設定を、単発InventoryReadの完了条件へ適用しません。
+- 指定メモリや付加対象TIDが読めない場合は、EPCが読めてもそのタグのデータ応答は返りません（p.268）。タグデータ応答がないことだけで、物理的にタグが存在しないとは断定しません。
 
 
 ### 8.4 AI実装用レスポンス定義
@@ -427,13 +432,11 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 | フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
 | 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
 | `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=6Ch` かつ `DATA[0]=0Ah` | `RF_TAG_DATA` | RFタグデータとして可変長解析する |
-| `CMD=30h` かつ `DATA[0]=14h` かつ `DATA[1]=00h` | `COMPLETION` | 読取完了応答ON時の完了ACKとして扱う |
-| `CMD=30h` かつ `DATA[0]=10h` かつ `DATA[1]=01h` | `ANT_SWITCH_COMPLETE` | アンテナ切替完了応答ON時のみ必須候補にする |
-| `CMD=30h` かつ `DATA[0]=10h` かつ `DATA[1]=02h` | `CARRIER_DETECTED` | キャリア検知応答ON時のみイベントとして扱う。0件は失敗ではない |
-| `CMD=30h` だが上記に一致しない | `ACK` | PDF該当節のACKとして詳細確認する |
+| `CMD=6Ch`、`DATA[0]=0Ah`、対象の可変長形式が成立 | `RF_TAG_DATA` | タグデータを記録し、単発の完了を待つ |
+| `CMD=30h`、`LEN=05h`、`DATA[0]=14h`、`DATA[1]=00h` | `COMPLETION` | PDF §7.5.2 p.269の単発完了応答として枚数とチャンネルを読む |
+| `CMD=30h` だが対象応答の形式に一致しない | 対象外・形式未確認 | この単発コマンドの成功にはしない。モードや応答元を確認する |
 
-受信ループは「タグ応答が複数回来る」「最後に完了ACKが来る場合がある」「設定により完了ACK自体が来ない」を前提にしてください。
+DATAへのアクセス前に必要な長さを確認します。正常な単発の終了には完了応答が必要です。期限までに完了が得られない場合は未完了として扱い、途中で受けたタグデータと成功判定を分けます。自動読み取り用の通知設定から部分成功を推測しません。
 
 対象識別子: コマンド `55h` / 詳細 `14h` / サブ `なし`。
 
@@ -449,19 +452,19 @@ RFタグデータ `CMD=6Ch` / `DATA[0]=0Ah`:
 | 4 | `n_pc_epc` | PC+EPC長 |
 | 5.. | `PC+EPC` | `n_pc_epc` byte |
 | 可変 | `read_data_length/read_data` | 読み取り対象メモリの戻り値。要求Word数に依存 |
-| 可変 | `tid_length/tid` | TID付加ON時のみ出現。OFF時は長さ0または領域なしとして扱う |
+| 可変 | `tid_length/tid` | TID長を表す1バイトは残る。付加OFF時は長さ0となり、後続TIDデータは0バイト。長さフィールド自体を省略しない（PDF p.268のn3、§3.9 p.59の付加OFF例） |
 
-読取完了ACK `CMD=30h` / `DATA[0]=14h` / `DATA[1]=00h`:
+読取完了ACK `CMD=30h` / `LEN=05h` / `DATA[0]=14h` / `DATA[1]=00h`（PDF §7.5.2 p.269）:
 
 | DATA offset | フィールド | 解釈 |
 |---:|---|---|
 | 0 | `detail` | `14h` |
-| 1 | `status` | `00h`: 読取完了 |
+| 1 | `fixed` | `00h`固定値。別コマンドのステータスや自動読み取りイベント値へ読み替えない |
 | 2 | `count_lsb` | 読取タグ数LSB |
 | 3 | `count_msb` | 読取タグ数MSB |
 | 4 | `channel` | 使用CH |
 
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
+自動読み取りの切替通知やキャリア検知通知を、単発InventoryReadの正常応答として受理しません。共通受信処理を設計する際も、動作モードごとの分類を分けます。
 
 
 #### NACK分類
@@ -479,31 +482,15 @@ RFタグデータ `CMD=6Ch` / `DATA[0]=0Ah`:
 
 判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
 
-#### 最小疑似コード
+#### 単発コマンドの判定手順
 
-```text
-deadline = now + command_timeout
-while now < deadline:
-    frame = read_next_frame()
-    if frame is None:
-        continue
-    parsed = parse_common_frame(frame)
-    if parsed.invalid:
-        emit(INVALID_FRAME)
-        continue
-    if parsed.cmd == 0x31:
-        return parse_nack(parsed)
-    if parsed.cmd == 0x6C:
-        emit(parse_rf_tag_data(parsed, settings_snapshot))
-        continue
-    if parsed.cmd == 0x30 and is_completion_ack(parsed):
-        emit(parse_completion_ack(parsed))
-        return SUCCESS
-    if parsed.cmd == 0x30 and is_optional_async_ack(parsed, settings_snapshot):
-        emit(parse_optional_async_ack(parsed))
-        continue
-return TIMEOUT_OR_PARTIAL_SUCCESS_BY_SETTINGS
-```
+1. 共通フレームの長さと整合性を確認する。不完全なDATAを参照しない。
+2. NACKの場合は異常応答として扱い、正常0枚へ変換しない。
+3. 対象のタグデータ形式を満たす場合は観測結果を記録し、完了を待つ。
+4. 対象の完了応答形式を満たした場合に単発処理を閉じ、読み取り枚数を記録する。
+5. 期限までに完了しなければ未完了として報告する。途中のタグデータは観測結果として残し、自動読み取りの通知設定で成功へ変更しない。
+
+ここでの手順は仕様条件の整理です。実装コードや受信ライブラリの改修はRAG整備後に扱います。
 
 #### 推奨パーサ出力
 
@@ -523,7 +510,7 @@ return TIMEOUT_OR_PARTIAL_SUCCESS_BY_SETTINGS
 
 #### 設定スナップショット必須項目
 
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
+実行前に機種・ROM・動作モード・使用アンテナ・アンテナID出力・このコマンドに適用される設定を確認します。TID付加・メモリ範囲は送信するコマンド内の指定を記録します。自動読み取りの通知設定を単発応答の必須解析条件へ加えません。
 ## 9. 実機確認
 
 実機確認区分: `rf-read`

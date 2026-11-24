@@ -14,16 +14,20 @@ operation_profile: "settings-change"
 operation_level: "write/configuration"
 rf_emission: false
 write_operation: true
-flash_operation: false
+flash_operation: true
 tag_memory_operation: false
 requires_rom_check: true
 requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../RESPONSE_MODE_APPLICABILITY.md"
+  - "55_41_uhf_get_inventory_param.md"
+  - "55_31_uhf_set_inventory_param_raw.md"
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
@@ -33,7 +37,7 @@ tags:
   - "command-card"
   - "reader-setting"
   - "write-operation"
-  - "pass-with-notes"
+  - "specification-reference"
   - "uhf-set-inventory-param"
 ---
 
@@ -47,8 +51,10 @@ tags:
 - 確認区分: `settings-change`
 - 操作レベル: write/configuration
 - コマンドバイト: `55h` / 詳細コマンド: `31h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -70,7 +76,7 @@ tags:
 |---|---|
 | RF送信 | なし |
 | 書き込み操作 | あり |
-| FLASH操作 | なし |
+| FLASH操作 | `02h`指定時にあり。RAM指定時はなし |
 | タグメモリ操作 | なし |
 | ROM確認 | あり |
 | アンテナ条件確認 | なし |
@@ -93,18 +99,42 @@ tags:
 
 ## 6. PDF仕様フィールド定義
 
-PDF原文の全文転記は `55_31_uhf_set_inventory_param_raw.md` を参照してください。
+### 6.1 適用範囲と原典への導線
+
+Inventory設定のコマンドモード用RAMと自動読み取りモード用RAMは独立しています。パラメータ4のMemBank・TID付加、読み取り開始Wordアドレス、読み取りWord数は連続インベントリリードモード用です。単発InventoryReadではコマンド内の指定を使います（§7.4.18 p.202、§7.5.2 p.266）。
+
+FLASHへの書込みは両RAMにも反映されます。保存先と復元条件は[RAM・FLASH影響整理](../../RAM_FLASH_IMPACT_MATRIX.md)を参照してください。
+
+### 6.2 原典転記
+
+照合対象: §7.4.18 p.196–203。今回の照合範囲は設定の適用先・ACK形式・参照節で、カード全体の試験完了を意味しません。
+
+PDF原文の全文転記は [原文転記](55_31_uhf_set_inventory_param_raw.md) を参照してください。
 このカードには、実装判断に必要な要点とAI向け構造化情報のみを残します。
+
+### 6.3 保守者による用語訂正: p.200下部
+
+2026-09-09に保守者が、＜Sel値が「ALL」の場合の注意点＞の※注記を訂正しました。
+
+| 箇所 | 誤 | 正 |
+|---|---|---|
+| 「Selectコマンドで遷移させた…」のフラグ名 | Inventoryフラグ | Inventoriedフラグ |
+
+訂正後の注記は次のとおりです。
+
+> ※Selectコマンドで遷移させたInventoriedフラグ以外のフラグを参照して読み取りをおこなった場合、Selectコマンドは意味を持たなくなります。
+
+フラグ名の表記を統一する訂正です。SelectのTargetとInventory側のSessionを対応させる説明の意味は変わりません。コマンド名UHF_SetInventoryParamや「InventoryのTarget」という項目名を、一括してInventoriedへ置き換えません。
+
+[原文転記](55_31_uhf_set_inventory_param_raw.md)は当時の記載を保持し、本注記と併せて参照します。p.193例3の3点の訂正とともに、[OPEN-012](../../SOURCE_REVIEW_STATUS.md)へ記録しています。
 
 ## 7. コマンド形式の扱い
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
@@ -124,7 +154,7 @@ AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送
 
 NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+ACK、後続レスポンス、可変長データの解釈は、対象コマンドのPDF定義と機種・ROM・設定に基づきます。[応答マスタ](../../RESPONSE_AND_NACK_MASTER.md)と[モード別適用範囲](../../RESPONSE_MODE_APPLICABILITY.md)を確認し、TID付加や自動読み取り用の通知設定を、すべてのコマンドACKへ一般化しないでください。
 
 ### 8.1 ACK/レスポンス例（設定変更成功時）
 
@@ -137,7 +167,7 @@ ACK、後続レスポンス、可変長データの解釈は、コマンド番�
 | PDF掲載レスポンス例 | `02 00 30 01 31 03 67 0D` |
 | 注意 | 成功ACKには書き込んだInventory条件値は返りません。反映確認は `55h 41h`（UHF_GetInventoryParam）で読戻してください。 |
 
-設定変更後は、対応する読み取りコマンドで読戻し確認し、RAM変更の場合は終了時に開始値へ復元してください。FLASH変更の場合は再起動後の保持も確認対象です。
+設定変更後は対応する読取りコマンドで、影響する保存先を読戻します。一時変更の復元対象と順序は[RAM・FLASH影響整理](../../RAM_FLASH_IMPACT_MATRIX.md)を確認します。FLASH値は動作中のRAMにも反映され、再起動後の保持確認とは別です。
 
 ### 8.2 NACK例（フォーマットエラーの例）
 
@@ -176,11 +206,10 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 | 条件 | 分類 | 実装アクション |
 |---|---|---|
 | フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
+| 受信期限内に対象要求の応答を確認できない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
 | `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `31h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 31h` の成功応答としてPDF該当節を読む |
+| `CMD=30h`、`LEN=01h`、`DATA[0]=31h` | `ACK` | 対象要求の応答として扱う。値の反映確認は別管理する |
 | `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-| `CMD=30h` だが書込値の反映を確認していない | `ACK_PENDING_VERIFY` | 必要に応じて対応する読出コマンドで読戻し確認する |
 
 対象識別子: コマンド `55h` / 詳細 `31h` / サブ `なし`。
 
@@ -194,9 +223,9 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 
 `LEN` が `01h` 以外、または `DATA[0]` が `31h` 以外の場合は、このコマンドの通常成功ACKとして扱わず、別レスポンスまたは異常フレームとして分類してください。
 
-設定書き込み系は、ACK受信後に必要なら対応する読出コマンドで読戻しし、RAM/FLASHの反映範囲と復元要否を別管理してください。
+ACKの成功と、読戻し一致・保持・復元の確認は別に記録します。本ACKは種類や設定値を返さないため、送信した要求と対応づけて管理します。
 
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
+非同期通知は通知自身の長さ・識別子・モード条件で別に分類します。本コマンドの成功や終了の代わりにはしません。本ACKに`DATA[1]`は存在しません。`DATA[0]=31h`は詳細識別子で、NACKの`CMD=31h`とは別です。
 
 
 #### NACK分類
@@ -214,23 +243,13 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 
 判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
 
-#### 最小疑似コード
+#### 判定手順（文書上の仕様）
 
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
+1. フレーム長、区切り、SUMを検査してからDATAへアクセスする。
+2. NACKは`CMD=31h`で分類し、対象要求との対応を確認する。通知や別要求の応答を成功として扱わない。
+3. 上の受信分類ルールにあるLEN・詳細識別子を照合する。
+4. ACK受信と、影響する保存先の読戻し確認を分けて記録する。
+5. 対象応答が期限までに得られなければ未完了とする。途中の非同期通知だけで待機を成功終了しない。
 
 #### 推奨パーサ出力
 
@@ -248,9 +267,10 @@ return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
 }
 ```
 
-#### 設定スナップショット必須項目
+#### この要求で保持する情報
 
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
+対象機種・ROM、接続先、要求識別子、パラメータ種類、受信期限を保持します。書込み時は要求値、影響する保存先の変更前値、復元条件も記録します。本設定ACKは固定長で、タグのTID付加やアンテナ通知設定によって長さを変えません。並行して非同期通知を解釈する場合の設定は、通知側の処理で別途管理します。
+
 ## 9. 実機確認
 
 実機確認区分: `settings-change`
@@ -290,6 +310,11 @@ AIへ依頼するときは、次の前提を明示してください。
 実装言語は限定しません。Python、C#、C++、JavaScriptなど、対象環境に合わせて選択してください。
 
 ## 11. 参照ドキュメント
+
+- [RAM_FLASH_IMPACT_MATRIX.md](../../RAM_FLASH_IMPACT_MATRIX.md)
+- [RESPONSE_MODE_APPLICABILITY.md](../../RESPONSE_MODE_APPLICABILITY.md)
+- [55_41_uhf_get_inventory_param.md](55_41_uhf_get_inventory_param.md)
+- [55_31_uhf_set_inventory_param_raw.md](55_31_uhf_set_inventory_param_raw.md)
 
 - `../../COMMAND_MASTER_V117.md`
 - `../../TRACEABILITY_INDEX_V117.md`

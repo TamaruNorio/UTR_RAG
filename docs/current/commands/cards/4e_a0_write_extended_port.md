@@ -21,19 +21,23 @@ requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "4f_a0_read_extended_port.md"
+  - "4f_9f_read_general_port.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-setting"
   - "write-operation"
-  - "pass-with-notes"
+  - "specification-reference"
   - "write-extended-port"
 ---
 
@@ -48,8 +52,10 @@ tags:
 - 確認区分: `settings-change`
 - 操作レベル: write/configuration
 - コマンドバイト: `4Eh` / 詳細コマンド: `A0h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -59,9 +65,9 @@ tags:
 
 ## 3. 使用可否・位置づけ
 
-判定: `SUPPORTED`
+判定: `SUPPORTED`（アンテナポート8CH仕様機に限定）
 
-このコマンドはPDF Ver.1.17のコマンド一覧に含まれるため、仕様上の対象コマンドとして扱います。
+このコマンドはPDF Ver.1.17に記載された8CH仕様機向けのコマンドです。全UTR-S201機種へ一般化せず、対象機種とROMを確認します。
 
 ただし、仕様に存在することと、実機へ送信してよいことは別です。実機送信前には、対象機種、ROMバージョン、接続先、パラメータ、影響範囲、復旧方法、停止条件を確認してください。
 
@@ -290,146 +296,46 @@ tags:
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
-## 8. レスポンス処理
+## 8. レスポンス処理と反映確認
 
-レスポンス処理では、以下を区別してください。
+### 8.1 固定ACKの照合
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+要求は`CMD=4Eh / LEN=03h`、DATAは詳細A0h・指示マスク・設定値の順で、総10 byteです。成功ACKは`CMD=30h / LEN=01h / DATA[0]=A0h`、総8 byteで、変更後の値を含みません（p.243–244）。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+[読取り](4f_a0_read_extended_port.md)のACKは同じ詳細A0hですがLEN=05hです。汎用ポートの詳細9Fhとも区別し、未完了要求と照合します。タグ通知をこのACKにせず、共通フレーム・NACK解析は[応答マスタ](../../RESPONSE_AND_NACK_MASTER.md)に従います。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+### 8.2 機種条件と機能byte
 
-### 8.1 ACK/レスポンス例（PDF掲載例）
+§7.4.12 p.179と§7.4.28 p.243は、アンテナポート8CH仕様機に限定しています。`requires_antenna: false`はRF用アンテナを接続して行う操作ではないという分類であり、全機種対応を意味しません。拡張ポート番号は、汎用ポート番号や内部・外部アンテナ番号と別に扱います。
 
-| 項目 | 内容 |
-|---|---|
-| TX | `02 00 4E 03 A0 05 04 03 FF 0D` |
-| RX | `02 00 30 01 A0 03 D6 0D` |
-| ACK CMD | `30h` |
-| ACK LEN | `01h` |
-| ACK DATA[0] | `A0h`。詳細コマンド |
+機能byteのbit0～7はすべて0固定です（p.179、FLASH一覧p.342）。[汎用ポート](4f_9f_read_general_port.md)の専用／汎用機能選択やLED条件を流用し、1を書いて拡張機能を有効にする手順を作りません。
 
-ACKは通信上の正常受理を示します。実際にポート値が意図どおり変わったかは、対応する読み取りコマンドで確認してください。
+p.180の方向表は0=入力／1=出力ですが、「機能が拡張ポートの場合のみ有効」という注記の選択値が示されていません。[OPEN-022](../../SOURCE_REVIEW_STATUS.md)として確認を保留します。原典の注記を保持し、0固定だから方向が無効とも、別の機能値を設定すべきとも断定しません。
 
-### 8.2 NACK例（フォーマットエラーの例）
+### 8.3 起動設定と機種別の初期値
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A A0 44 00 00 00 00 00 00 00 00 03 24 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+機能はFLASH 34（22h）、方向は36（24h）、起動初期値は37（25h）の別設定です（p.342–343）。現在値の書込み要求には機能・方向・起動初期値・FLASHアドレス・RAM／FLASH種類のフィールドはありません。[保存と復元](../../RAM_FLASH_IMPACT_MATRIX.md)を参照してください。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+p.343の各bitをbyteへまとめると、次の初期設定になります。
 
-### 8.3 設定依存の注意
+| p.343の対象 | 方向 | 起動初期値 | bitの意味 |
+|---|---|---|---|
+| ※6 UTR-SUN02V-8CH／UTR-SUN02-8CH | 0Fh | F0h | ポート1～4は出力・初期Low、5～8は入力・初期High |
+| ※7 上記以外の8CH仕様リーダライタ | 00h | FFh | 全ポート入力・初期High |
 
-- 設定変更またはタグメモリ変更後は、対応する読み取りコマンドで読戻し確認してください。
+現在の設定は実機から確認し、工場初期値で補いません。p.180の応答例にある方向00h・初期値FFhを、名指しの2機種を含む全8CH機の工場設定へ一般化しません。入力の初期値Highは現在の入力が必ずHighになる保証ではありません。
 
+### 8.4 指示マスクと対象出力の読戻し
 
-### 8.4 AI実装用レスポンス定義
+対象ポートが出力であることを先に確認します（p.243）。指示bit=1だけを設定値に変更し、指示bit=0は設定bitが0でも1でも書込みしません。bit0=拡張ポート1、bit7=8です。p.244の指示05h・設定04hはポート1をLow、3をHighとし、他をLowへ書き換える要求ではありません。
 
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+ACK後は4Fh/A0hで読戻し、`現在値 AND 指示マスク`と`設定値 AND 指示マスク`を比較します。対象外の入力変化を出力失敗と混同しません。ACK、対象bitの一致、外部負荷の実動作を分けて記録します。値書込みの前処理として方向・FLASHの変更や再起動を自動追加しません。
 
-#### 共通フレームoffset
+### 8.5 失敗時と復元の限界
 
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
+timeoutを未変更の証明にせず、現在の出力状態を確認して再送を判断します。入力ポートへの指示が無視されるかNACKになるか、複数bitの同時反映、失敗時の反映単位や競合時の保証は未確認です。未記載のNACKコードを割り当てません。NACKの詳細A0hだけでは読取りと書込みを区別できないため、未完了要求と対応づけます。
 
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `LEN=01h` かつ `DATA[0]=A0h` | `ACK` | 対象コマンド `4Eh A0h` の成功ACK |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-| `CMD=30h` だが書込値の反映を確認していない | `ACK_PENDING_VERIFY` | 必要に応じて対応する読出コマンドで読戻し確認する |
-
-対象識別子: コマンド `4Eh` / 詳細 `A0h` / サブ `なし`。
-
-
-#### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は `A0h` です。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail_command` | `A0h`。拡張ポート値の書き込みに対するACK |
-
-このACKには変更後ポート値の詳細データは含まれません。状態確認が必要な場合は `4Fh A0h` で読戻してください。
-
-
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `4Eh A0h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
-
-このコマンドでは、上記に加えて、対象機がアンテナポート8CH仕様か、対象拡張ポートの機能、入出力設定、送信DATA[1]のポート指示、送信DATA[2]のポート設定値をパーサへ渡してください。
+復元には変更前の方向・対象出力値と、実際の接続先・負荷条件を記録します。起動初期値の保存と現在出力の変更を分け、再起動だけで作業開始前の値へ戻るとは判断しません。入力の観測値を復元用出力へ流用せず、外部へ与えた信号の結果まで巻き戻るとみなしません。端子の電気的条件と全機種ROMの対応下限は今回未照合です。
 
 ## 9. 実機確認
 
@@ -475,5 +381,10 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- `../../RAM_FLASH_IMPACT_MATRIX.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `4f_a0_read_extended_port.md`
+- `4f_9f_read_general_port.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

@@ -14,16 +14,22 @@ operation_profile: "settings-change"
 operation_level: "write/configuration"
 rf_emission: false
 write_operation: true
-flash_operation: false
+flash_operation: true
 tag_memory_operation: false
 requires_rom_check: true
 requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
+  - "55_43_00_read_antenna_switching.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../ANTENNA_NUMBERING_SCHEMES.md"
+  - "../../RESPONSE_MODE_APPLICABILITY.md"
+  - "55_33_05_write_epc_uii_params.md"
+  - "55_43_05_read_epc_uii_params.md"
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
@@ -33,7 +39,7 @@ tags:
   - "command-card"
   - "reader-setting"
   - "write-operation"
-  - "pass-with-notes"
+  - "specification-reference"
   - "write-antenna-switching"
 ---
 
@@ -48,8 +54,10 @@ tags:
 - 確認区分: `settings-change`
 - 操作レベル: write/configuration
 - コマンドバイト: `55h` / 詳細コマンド: `33h` / サブコマンド: `00h`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -59,9 +67,9 @@ tags:
 
 ## 3. 使用可否・位置づけ
 
-判定: `SUPPORTED`
+判定: `SUPPORTED`（機種条件あり。8CH機では無効でNACK）
 
-このコマンドはPDF Ver.1.17のコマンド一覧に含まれるため、仕様上の対象コマンドとして扱います。
+PDF §6.2.2 p.109では読取り（55h/43h/00h）は8CH機も対応ですが、書込み（55h/33h/00h）は8CH機では非対応です。読めることから同形式で書けると判断しないでください。8CH機の制御は[使用アンテナ番号](55_38_write_active_antenna.md)と[外部アンテナ自動切替設定](55_37_write_external_antenna_auto_switch.md)の機種条件を別途確認します。
 
 ただし、仕様に存在することと、実機へ送信してよいことは別です。実機送信前には、対象機種、ROMバージョン、接続先、パラメータ、影響範囲、復旧方法、停止条件を確認してください。
 
@@ -71,7 +79,7 @@ tags:
 |---|---|
 | RF送信 | なし |
 | 書き込み操作 | あり |
-| FLASH操作 | なし |
+| FLASH操作 | パラメータ種類02hであり。RAM指定ではなし |
 | タグメモリ操作 | なし |
 | ROM確認 | あり |
 | アンテナ条件確認 | なし |
@@ -93,6 +101,15 @@ tags:
 5. 周波数、送信出力、アンテナ設定、FLASH、タグメモリに影響する場合は、事前承認を取る。
 
 ## 6. PDF仕様フィールド定義
+
+### 適用範囲の補足（原典転記と区別）
+
+根拠: 公式PDF Ver.1.17 §7.4.5 p.163–165、§7.4.20 p.212–216。
+
+- 自動切替は自動読み取りモードで有効です。コマンドモードでは自動切替しません。切替方式00bは使用対象の最小番号を使用し、01bは小さい順に切り替えます。10bと11bは予約で、通知節の「複数アンテナを一つとして扱う」という説明から割り当てを推測しません。
+- 書込み対象のAnt0～Ant3は使用有無のbit maskです。全て不使用、またはコマンド用RAMへ複数を使用指定するとNACKです。機種に存在しないポートが設定されない場合もあるため、要求値と読戻し値を区別します。
+- RAMは種類ごとに独立します。FLASHに複数指定すると、自動読み取り用RAMには同じ選択、コマンド用RAMには最小番号の1本だけが反映されます。[RAM・FLASH影響整理](../../RAM_FLASH_IMPACT_MATRIX.md)を参照してください。
+- アンテナID出力bitはタグ応答のADRに関係します。設定ACKや切替終了通知のADRを、タグ応答と同じアンテナ番号として扱わないでください。[番号体系](../../ANTENNA_NUMBERING_SCHEMES.md)と[通知の適用範囲](../../RESPONSE_MODE_APPLICABILITY.md)で区別します。
 
 以下は、公式PDF `7.4.20` のコマンド表、レスポンス表、条件、例を、AIがカード単体で参照できるように転記したものです。値一覧、byte数、条件、ACK/NACK条件を省略せず、この節を実装時の一次確認に使ってください。
 
@@ -331,11 +348,9 @@ tags:
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
@@ -355,7 +370,7 @@ AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送
 
 NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+ACK、後続レスポンス、可変長データの解釈は、対象コマンドのPDF定義と機種・ROM・設定に基づきます。[応答マスタ](../../RESPONSE_AND_NACK_MASTER.md)と[モード別適用範囲](../../RESPONSE_MODE_APPLICABILITY.md)を確認し、TID付加や自動読み取り用の通知設定を、すべてのコマンドACKへ一般化しないでください。
 
 ### 8.1 ACK/レスポンス例（設定変更成功時）
 
@@ -373,7 +388,7 @@ ACK、後続レスポンス、可変長データの解釈は、コマンド番�
 | PDF掲載レスポンス例 | `02 00 30 08 33 00 01 80 01 00 00 00 03 F2 0D` |
 | 注意 | 成功ACKは書き込んだ設定値の反映型です。アンテナ設定は実機動作に直結するため、自動送信せず、必ず読戻しで確認してください。 |
 
-設定変更後は、対応する読み取りコマンドで読戻し確認し、RAM変更の場合は終了時に開始値へ復元してください。FLASH変更の場合は再起動後の保持も確認対象です。
+設定変更後は対象種類を指定して読戻します。FLASH書込み時は両RAMへの反映も確認します。一時変更は開始前の保存先別の値へ復元し、再起動やモード復帰だけで復元完了とはみなしません。
 
 ### 8.2 NACK例（フォーマットエラーの例）
 
@@ -412,33 +427,30 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 | 条件 | 分類 | 実装アクション |
 |---|---|---|
 | フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
+| 受信期限内に対象要求の応答を確認できない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
 | `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `33h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 33h 00h` の成功応答としてPDF該当節を読む |
+| `CMD=30h`、`LEN=08h`、`DATA[0]=33h`、`DATA[1]=00h`、`DATA[2]`が要求した種類と一致 | `ACK` | 対象の設定要求への応答。切替終了通知とは別 |
 | `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-| `CMD=30h` だが書込値の反映を確認していない | `ACK_PENDING_VERIFY` | 必要に応じて対応する読出コマンドで読戻し確認する |
 
 対象識別子: コマンド `55h` / 詳細 `33h` / サブ `00h`。
 
 
 #### ACK/データ部offset
-成功ACK `CMD=30h` は `LEN=08h` の設定反映型ACKです。
+
+`CMD=30h`、`LEN=08h`、`DATA[0]=33h`、`DATA[1]=00h`、`DATA[2]`が要求した種類と一致することを確認します。DATAは8byte固定で、通知設定やアンテナID出力設定によって長さを変えません。
 
 | DATA offset | フィールド | 解釈 |
 |---:|---|---|
-| 0 | `detail` | `33h`: 設定書込系 |
-| 1 | `sub` | `00h`: アンテナ切替書込 |
-| 2 | `parameter_type` | `00h` コマンドモード / `01h` 自動読み取りモード / `02h` FLASH |
-| 3 | `switch_mode` | bit0-1: アンテナ切替方式、bit7: アンテナID出力 |
-| 4 | `antenna_mask` | bit0-3: Ant0-3の使用有無、bit4-7予約 |
-| 5..7 | reserved | 通常 `00h`。PDFで意味定義がない限り独自解釈しない |
+| 0 | `detail` | `33h` |
+| 1 | `sub` | `00h` |
+| 2 | `parameter_kind` | 要求した00h/01h/02h。状態コードではない |
+| 3 | `parameter_1` | bit0–1切替方式、bit2–6予約、bit7アンテナID出力 |
+| 4 | `antenna_mask` | bit0–3がAnt0～Ant3の使用有無、bit4–7予約 |
+| 5..7 | `reserved` | 通常00h。独自の意味を与えない |
 
-`LEN=08h`、`DATA[0]=33h`、`DATA[1]=00h` を満たさない場合は、このコマンドの通常成功ACKとして扱わないでください。
+ACKに返る値、影響する保存先の読戻し、復元確認は別々に記録します。FLASHへの複数選択とコマンド用RAMの1本選択が異なるのは、§7.4.20 p.214に記載された反映条件です。
 
-設定書き込み系は、ACK受信後に必要なら対応する読出コマンドで読戻しし、RAM/FLASHの反映範囲と復元要否を別管理してください。
-
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
-
+切替終了通知は連続モード用のLEN=02h、DATA=[10h,01h]または[14h,01h]です。本設定のACKや継続受信全体の終了とは区別します。[通知の識別条件](../../RESPONSE_MODE_APPLICABILITY.md)を参照してください。
 
 #### NACK分類
 
@@ -455,23 +467,13 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 
 判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
 
-#### 最小疑似コード
+#### 判定手順（文書上の仕様）
 
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
+1. フレーム長、区切り、SUMを確認してからDATAにアクセスする。
+2. CMDでNACKとACKを分類し、対象要求との対応を確認する。
+3. 設定ACKは上記LEN・詳細・サブ・要求した種類を全て照合する。
+4. 切替終了通知やタグ応答は別イベントとして扱い、設定要求への成功応答に代用しない。
+5. 対象応答が期限までに得られなければ未完了とする。ACK受信と読戻し・復元の確認は別に記録する。
 
 #### 推奨パーサ出力
 
@@ -489,9 +491,10 @@ return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
 }
 ```
 
-#### 設定スナップショット必須項目
+#### この要求で保持する情報
 
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
+機種・ROM、接続先、要求識別子、パラメータ種類、受信期限を保持します。書込みでは物理ポート数、要求値、影響する保存先の変更前値、復元条件も確認します。固定長の設定ACKを読むためにTID付加や全通知設定を要求しません。並行する自動読み取りの通知条件は、通知側で別に管理します。
+
 ## 9. 実機確認
 
 実機確認区分: `settings-change`
@@ -531,6 +534,13 @@ AIへ依頼するときは、次の前提を明示してください。
 実装言語は限定しません。Python、C#、C++、JavaScriptなど、対象環境に合わせて選択してください。
 
 ## 11. 参照ドキュメント
+
+- [55_43_00_read_antenna_switching.md](55_43_00_read_antenna_switching.md)
+- [RAM_FLASH_IMPACT_MATRIX.md](../../RAM_FLASH_IMPACT_MATRIX.md)
+- [ANTENNA_NUMBERING_SCHEMES.md](../../ANTENNA_NUMBERING_SCHEMES.md)
+- [RESPONSE_MODE_APPLICABILITY.md](../../RESPONSE_MODE_APPLICABILITY.md)
+- [55_33_05_write_epc_uii_params.md](55_33_05_write_epc_uii_params.md)
+- [55_43_05_read_epc_uii_params.md](55_43_05_read_epc_uii_params.md)
 
 - `../../COMMAND_MASTER_V117.md`
 - `../../TRACEABILITY_INDEX_V117.md`

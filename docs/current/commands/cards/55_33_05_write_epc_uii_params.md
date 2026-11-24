@@ -14,16 +14,19 @@ operation_profile: "settings-change"
 operation_level: "write/configuration"
 rf_emission: false
 write_operation: true
-flash_operation: false
+flash_operation: true
 tag_memory_operation: false
 requires_rom_check: true
 requires_antenna: false
 requires_tag: false
 requires_access_password: false
 requires_parameters: true
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../RESPONSE_MODE_APPLICABILITY.md"
+  - "55_43_05_read_epc_uii_params.md"
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
@@ -33,7 +36,7 @@ tags:
   - "command-card"
   - "reader-setting"
   - "write-operation"
-  - "pass-with-notes"
+  - "specification-reference"
   - "write-epc-uii-params"
 ---
 
@@ -48,8 +51,10 @@ tags:
 - 確認区分: `settings-change`
 - 操作レベル: write/configuration
 - コマンドバイト: `55h` / 詳細コマンド: `33h` / サブコマンド: `05h`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -71,7 +76,7 @@ tags:
 |---|---|
 | RF送信 | なし |
 | 書き込み操作 | あり |
-| FLASH操作 | なし |
+| FLASH操作 | `02h`指定時にあり。RAM指定時はなし |
 | タグメモリ操作 | なし |
 | ROM確認 | あり |
 | アンテナ条件確認 | なし |
@@ -93,6 +98,18 @@ tags:
 5. 周波数、送信出力、アンテナ設定、FLASH、タグメモリに影響する場合は、事前承認を取る。
 
 ## 6. PDF仕様フィールド定義
+
+### 6.1 適用範囲と原典への導線
+
+EPC/UII設定はRAMの片方へ書き込むと両モード用RAMへ反映されます。bit0は1回のInventory処理内の重複抑制で、StoredPCも判定対象です。bit1–3は自動読み取りモード用の通知で、コマンドモード用RAMに値が入っていても単発コマンドの通知条件には転用しません。アンテナ切替通知は使用対象の全アンテナでの読み取り終了時であり、各アンテナ終了ごとの通知ではありません（§7.4.25 p.234–235）。
+
+FLASHへの書込みは両RAMにも反映されます。保存先と復元条件は[RAM・FLASH影響整理](../../RAM_FLASH_IMPACT_MATRIX.md)を参照してください。
+
+原典p.235の参照「7.4.18 RFタグ通信関連パラメータの書き込み」は、Ver.1.17では **§7.4.24** です。[該当カード](55_33_04_write_rf_tag_comm_params.md)へ進んでください。転記は保持します。これは本資料での参照先補足であり、メーカー発行の正誤表ではありません。
+
+### 6.2 原典転記
+
+照合対象: §7.4.25 p.233–236。今回の照合範囲は設定の適用先・ACK形式・参照節で、カード全体の試験完了を意味しません。
 
 以下は、公式PDF `7.4.25` のコマンド表、レスポンス表、条件、例を、AIがカード単体で参照できるように転記したものです。値一覧、byte数、条件、ACK/NACK条件を省略せず、この節を実装時の一次確認に使ってください。
 
@@ -277,11 +294,9 @@ tags:
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
@@ -301,7 +316,7 @@ AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送
 
 NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+ACK、後続レスポンス、可変長データの解釈は、対象コマンドのPDF定義と機種・ROM・設定に基づきます。[応答マスタ](../../RESPONSE_AND_NACK_MASTER.md)と[モード別適用範囲](../../RESPONSE_MODE_APPLICABILITY.md)を確認し、TID付加や自動読み取り用の通知設定を、すべてのコマンドACKへ一般化しないでください。
 
 ### 8.1 ACK/レスポンス例（設定変更成功時）
 
@@ -313,11 +328,11 @@ ACK、後続レスポンス、可変長データの解釈は、コマンド番�
 | `DATA[0]` | `33h`（詳細コマンド） |
 | `DATA[1]` | `05h`（詳細サブコマンド: EPC/UII関連パラメータ書込） |
 | `DATA[2]` | パラメータ種類: `00h` コマンドモード / `01h` 自動読み取りモード / `02h` FLASH |
-| `DATA[3]` | EPC(UII)バッファリング、読取完了応答、アンテナ自動切替完了応答、キャリア検知応答のbit flags |
+| `DATA[3]` | EPC(UII)バッファリング、自動読み取りサイクル終了応答、アンテナ自動切替完了応答、キャリア検知応答のbit flags |
 | PDF掲載レスポンス例 | `02 00 30 04 33 05 02 08 03 7B 0D` |
-| 注意 | `DATA[3]` は非同期レスポンスの有無に影響します。ACK後の受信ループ設計も併せて確認してください。 |
+| 注意 | `DATA[3]` のbit1–3は自動読み取り用通知の設定です。適用モードを確認してください。 |
 
-設定変更後は、対応する読み取りコマンドで読戻し確認し、RAM変更の場合は終了時に開始値へ復元してください。FLASH変更の場合は再起動後の保持も確認対象です。
+設定変更後は対応する読取りコマンドで、影響する保存先を読戻します。一時変更の復元対象と順序は[RAM・FLASH影響整理](../../RAM_FLASH_IMPACT_MATRIX.md)を確認します。FLASH値は動作中のRAMにも反映され、再起動後の保持確認とは別です。
 
 ### 8.2 NACK例（フォーマットエラーの例）
 
@@ -356,11 +371,10 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 | 条件 | 分類 | 実装アクション |
 |---|---|---|
 | フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
+| 受信期限内に対象要求の応答を確認できない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
 | `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `33h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 33h 05h` の成功応答としてPDF該当節を読む |
+| `CMD=30h`、`LEN=04h`、`DATA[0]=33h`、`DATA[1]=05h`、`DATA[2]` が要求したパラメータ種類と一致 | `ACK` | 対象要求の応答として扱う。値の反映確認は別管理する |
 | `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-| `CMD=30h` だが書込値の反映を確認していない | `ACK_PENDING_VERIFY` | 必要に応じて対応する読出コマンドで読戻し確認する |
 
 対象識別子: コマンド `55h` / 詳細 `33h` / サブ `05h`。
 
@@ -373,13 +387,13 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 | 0 | `detail` | `33h`: 設定書込系 |
 | 1 | `sub` | `05h`: EPC/UII関連パラメータ書込 |
 | 2 | `parameter_type` | `00h` コマンドモード / `01h` 自動読み取りモード / `02h` FLASH |
-| 3 | `flags` | bit0: EPC(UII)バッファリング、bit1: 読取完了応答、bit2: アンテナ自動切替完了応答、bit3: キャリア検知応答、bit4-7予約 |
+| 3 | `flags` | bit0: EPC(UII)バッファリング、bit1: 自動読み取りサイクル終了応答、bit2: アンテナ自動切替完了応答、bit3: キャリア検知応答、bit4-7予約 |
 
 `LEN=04h`、`DATA[0]=33h`、`DATA[1]=05h` を満たさない場合は、このコマンドの通常成功ACKとして扱わないでください。
 
-設定書き込み系は、ACK受信後に必要なら対応する読出コマンドで読戻しし、RAM/FLASHの反映範囲と復元要否を別管理してください。
+ACKの成功と、読戻し一致・保持・復元の確認は別に記録します。EPC/UIIのACKはパラメータ種類とflagsも返すため、要求値と照合します。
 
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
+非同期通知は通知自身の長さ・識別子・モード条件で別に分類します。本コマンドの成功や終了の代わりにはしません。
 
 
 #### NACK分類
@@ -397,23 +411,13 @@ NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラー
 
 判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
 
-#### 最小疑似コード
+#### 判定手順（文書上の仕様）
 
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
+1. フレーム長、区切り、SUMを検査してからDATAへアクセスする。
+2. NACKは`CMD=31h`で分類し、対象要求との対応を確認する。通知や別要求の応答を成功として扱わない。
+3. 上の受信分類ルールにあるLEN・詳細識別子・サブコマンド・要求したパラメータ種類を照合する。
+4. ACK受信と、影響する保存先の読戻し確認を分けて記録する。
+5. 対象応答が期限までに得られなければ未完了とする。途中の非同期通知だけで待機を成功終了しない。
 
 #### 推奨パーサ出力
 
@@ -431,9 +435,10 @@ return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
 }
 ```
 
-#### 設定スナップショット必須項目
+#### この要求で保持する情報
 
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
+対象機種・ROM、接続先、要求識別子、パラメータ種類、受信期限を保持します。書込み時は要求値、影響する保存先の変更前値、復元条件も記録します。本設定ACKは固定長で、タグのTID付加やアンテナ通知設定によって長さを変えません。並行して非同期通知を解釈する場合の設定は、通知側の処理で別途管理します。
+
 ## 9. 実機確認
 
 実機確認区分: `settings-change`
@@ -473,6 +478,10 @@ AIへ依頼するときは、次の前提を明示してください。
 実装言語は限定しません。Python、C#、C++、JavaScriptなど、対象環境に合わせて選択してください。
 
 ## 11. 参照ドキュメント
+
+- [RAM_FLASH_IMPACT_MATRIX.md](../../RAM_FLASH_IMPACT_MATRIX.md)
+- [RESPONSE_MODE_APPLICABILITY.md](../../RESPONSE_MODE_APPLICABILITY.md)
+- [55_43_05_read_epc_uii_params.md](55_43_05_read_epc_uii_params.md)
 
 - `../../COMMAND_MASTER_V117.md`
 - `../../TRACEABILITY_INDEX_V117.md`

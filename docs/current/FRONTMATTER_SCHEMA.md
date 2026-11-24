@@ -30,11 +30,11 @@ Markdownファイルの先頭にYAML frontmatterを置きます。空配列は `
 | rf_emission | RF送信有無 |
 | write_operation | 書き込み操作有無 |
 | flash_operation | FLASH操作有無 |
-| tag_memory_operation | タグメモリ操作有無 |
+| tag_memory_operation | タグメモリ操作有無。読取りも含む。書込み有無はwrite_operationで区別 |
 | requires_rom_check | ROM確認要否 |
 | requires_antenna | アンテナ要否 |
 | requires_tag | タグ要否 |
-| requires_access_password | Accessパスワード要否 |
+| requires_access_password | Accessパスワード条件の確認要否。trueでも常時非ゼロ必須とは限らず、本文の適用条件を確認 |
 | requires_parameters | パラメータ確認要否 |
 | verification_status | 確認状態 |
 | result_status | 結果状態 |
@@ -63,6 +63,8 @@ Markdownファイルの先頭にYAML frontmatterを置きます。空配列は `
 | updated_at | 更新日 |
 
 ## 初期バリデーション方針
+
+確認状態の意味と公開証跡の条件は[仕様照合・試験状態の記録方針](VERIFICATION_POLICY.md)を参照してください。仕様参照カードは `verification_status: "SPECIFICATION_REFERENCE"`、`result_status: "NOT_AN_EXECUTION_RESULT"` とします。キーが存在し型検査を通っても、仕様照合完了や実機試験の根拠があることにはなりません。
 
 `scripts/validate_frontmatter.py` は、まず `docs/current/commands/cards/` 配下の `command_card` を対象に、必須キーの存在、`related_docs` と `tags` が配列であること、主要な真偽値項目がboolであることを確認します。
 

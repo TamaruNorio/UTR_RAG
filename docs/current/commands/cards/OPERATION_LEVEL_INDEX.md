@@ -21,4 +21,4 @@ tags:
 Classify operations by impact: read-only, control, setting change, RF-emitting, FLASH-persistent, tag-memory-changing, irreversible tag operation, and external I/O operation.
 
 コマンドごとの操作分類とカードへのリンクの実表は
-`../../RESPONSE_CLASSIFICATION_MATRIX.md` の第4節を参照してください。
+[レスポンス分類マトリクス](../../RESPONSE_CLASSIFICATION_MATRIX.md) の第4節を参照してください。

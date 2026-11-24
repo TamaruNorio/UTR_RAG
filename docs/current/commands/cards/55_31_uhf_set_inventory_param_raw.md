@@ -13,6 +13,8 @@ tags:
   - "raw-reference"
 ---
 
+p.200下部の「Inventoryフラグ」は、2026-09-09の保守者訂正により「Inventoriedフラグ」と読み替えます。[訂正内容](55_31_uhf_set_inventory_param.md)を併せて参照してください。以下の原典転記は訂正前の記載を保持しています。
+
 ```text
 7.4.18 UHF_SetInventoryParam
  「コマンドモード」、「UHF連続インベントリモード」、および「UHF連続インベントリリードモ

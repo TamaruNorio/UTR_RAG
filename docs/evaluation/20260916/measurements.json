@@ -1,0 +1,446 @@
+{
+  "runs": [
+    {
+      "run": "DA1",
+      "condition": "A",
+      "usage": {
+        "input_tokens": 27614,
+        "cached_input_tokens": 6656,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1184,
+        "reasoning_output_tokens": 102
+      },
+      "elapsed_seconds": 40.26,
+      "tool_calls": 0,
+      "answer_sha256": "5aefb3d0baa3d1774e3ed493040fce4e6ebe7e0ef42cf77f8315770d4a653429",
+      "grades": {
+        "GQ-017": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-024": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-025": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-048": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-049": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 4
+        },
+        "GQ-056": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-099": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-111": {
+          "core_correct": true,
+          "all_criteria_explicit": false,
+          "factual_error": false,
+          "criteria_met": 1
+        },
+        "GQ-253": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        }
+      }
+    },
+    {
+      "run": "DB1",
+      "condition": "B",
+      "usage": {
+        "input_tokens": 27812,
+        "cached_input_tokens": 6656,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1408,
+        "reasoning_output_tokens": 121
+      },
+      "elapsed_seconds": 49.27,
+      "tool_calls": 0,
+      "answer_sha256": "1e0686d0867cd177d5efb14d1a925f2c28555262b822edb7b1c4791b0e7e81b4",
+      "grades": {
+        "GQ-017": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-024": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-025": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-048": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-049": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 4
+        },
+        "GQ-056": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-099": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-111": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-253": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        }
+      }
+    },
+    {
+      "run": "DB2",
+      "condition": "B",
+      "usage": {
+        "input_tokens": 27812,
+        "cached_input_tokens": 6656,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1303,
+        "reasoning_output_tokens": 102
+      },
+      "elapsed_seconds": 43.88,
+      "tool_calls": 0,
+      "answer_sha256": "3dd4c85d66c3dcb6901b155852eff8fb2e40320eed0261bc64bda57e7dff3990",
+      "grades": {
+        "GQ-017": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-024": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-025": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-048": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-049": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 4
+        },
+        "GQ-056": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-099": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-111": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-253": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        }
+      }
+    },
+    {
+      "run": "DA2",
+      "condition": "A",
+      "usage": {
+        "input_tokens": 27614,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1152,
+        "reasoning_output_tokens": 72
+      },
+      "elapsed_seconds": 38.69,
+      "tool_calls": 0,
+      "answer_sha256": "5262d1d51e1cd0b0e4dc9a22449596b695d2b70cdf1df35cf811113817bc9007",
+      "grades": {
+        "GQ-017": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-024": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-025": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-048": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-049": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 4
+        },
+        "GQ-056": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-099": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-111": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-253": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        }
+      }
+    },
+    {
+      "run": "DA3",
+      "condition": "A",
+      "usage": {
+        "input_tokens": 27614,
+        "cached_input_tokens": 11776,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1222,
+        "reasoning_output_tokens": 104
+      },
+      "elapsed_seconds": 40.64,
+      "tool_calls": 0,
+      "answer_sha256": "791735b7eb836e537c451f3c56df2e0f4fab60e01580f33f700646cfb5ea2688",
+      "grades": {
+        "GQ-017": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-024": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-025": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-048": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-049": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 4
+        },
+        "GQ-056": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-099": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-111": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-253": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        }
+      }
+    },
+    {
+      "run": "DB3",
+      "condition": "B",
+      "usage": {
+        "input_tokens": 27812,
+        "cached_input_tokens": 27648,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1313,
+        "reasoning_output_tokens": 78
+      },
+      "elapsed_seconds": 43.91,
+      "tool_calls": 0,
+      "answer_sha256": "2874101a38672f272178cd2e51ceceb5b6e20547b4639bf5cafcccb0b2ef0842",
+      "grades": {
+        "GQ-017": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-024": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-025": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-048": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        },
+        "GQ-049": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 4
+        },
+        "GQ-056": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-099": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-111": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 2
+        },
+        "GQ-253": {
+          "core_correct": true,
+          "all_criteria_explicit": true,
+          "factual_error": false,
+          "criteria_met": 3
+        }
+      }
+    }
+  ],
+  "totals": {
+    "A": {
+      "input_tokens": 82842,
+      "cached_input_tokens": 18432,
+      "output_tokens": 3558,
+      "reasoning_output_tokens": 278,
+      "total_tokens": 86400,
+      "explicit_pass": 26,
+      "criteria_met": 74
+    },
+    "B": {
+      "input_tokens": 83436,
+      "cached_input_tokens": 40960,
+      "output_tokens": 4024,
+      "reasoning_output_tokens": 301,
+      "total_tokens": 87460,
+      "explicit_pass": 27,
+      "criteria_met": 75
+    }
+  },
+  "actual_cost": null,
+  "grading_note": "DA1/GQ-111: correct conclusion and readback prohibition, but no explicit statement that ACK omits password; counted as explanation omission, not factual error. Graded by the same assistant that prepared the materials, not blinded or independently human-validated."
+}

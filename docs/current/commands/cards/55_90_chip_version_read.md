@@ -20,20 +20,23 @@ requires_rom_check: true
 requires_antenna: false
 requires_tag: false
 requires_access_password: false
-requires_parameters: false
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+requires_parameters: true
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "rom_version_read.md"
+  - "../../SOURCE_REVIEW_STATUS.md"
+  - "../../RESPONSE_MODE_APPLICABILITY.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-control"
   - "read-only"
-  - "pass-with-notes"
+  - "specification-reference"
   - "chip-version-read"
 ---
 
@@ -48,8 +51,10 @@ tags:
 - 確認区分: `rom-identification`
 - 操作レベル: 読み取り専用
 - コマンドバイト: `55h` / 詳細コマンド: `90h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -77,7 +82,7 @@ tags:
 | アンテナ条件確認 | なし |
 | タグ条件確認 | なし |
 | Accessパスワード確認 | なし |
-| パラメータ確認 | なし |
+| パラメータ確認 | 取得種別00h／01hを確認 |
 | 明示許可 | 不要または通常不要 |
 
 高影響コマンドを、高影響という理由だけで仕様上禁止扱いにはしません。ただし、上記の確認事項が揃うまで実機送信しません。
@@ -207,159 +212,47 @@ PDF掲載TX例:
 
 実装では `DATA[1]` の要求種別とACK内の `DATA[1]` が一致することを確認してください。要求と異なる応答種別は `UNEXPECTED_RESPONSE` として扱います。
 
-## 8. レスポンス処理
+## 8. 取得種別ごとの固定ACK
 
-レスポンス処理では、以下を区別してください。
+### 8.1 要求とファームウェアACK
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+要求はCMD=55h・LEN=02h・DATA[0]=90h、DATA[1]は00h=ファームウェア、01h=シリアル番号で総9 byteです。取得種別は1 byteのバイナリ値で、ASCIIの0・1ではありません。種別なしの[ROM読取り](rom_version_read.md)と混同しません。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
+種別00hの成功ACKはCMD=30h・LEN=0Bh・DATA[0]=90h・DATA[1]=00h、総18 byteです（p.146）。
 
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
+| DATA位置 | byte数 | 内容 |
+|---|---:|---|
+| 0～1 | 2 | 詳細90h・取得種別00h |
+| 2 | 1 | メジャー番号、ASCII |
+| 3～5 | 3 | マイナー番号、ASCII |
+| 6～10 | 5 | チップ名、ASCII |
 
-### 8.1 ACK/レスポンス例（読み取り成功時）
+例は1100UR201で、内蔵チップのFW 1.100・チップ名UR201です。ROM読取りの1100USM01とは情報の対象が異なります。同じ版番号でも同一のファームウェアと仮定せず、対応コマンドのROM条件は4Fh 90hの制御マイコン版とシリーズ名で判断します。
 
-#### ファームウェアバージョン取得時
+### 8.2 シリアル番号ACK
 
-| 項目 | 内容 |
-|---|---|
-| RX例 | `02 00 30 0B 90 00 31 31 30 30 55 52 32 30 31 03 CC 0D` |
-| ACK判定 | `CMD=30h` / `LEN=0Bh` / `DATA[0]=90h` / `DATA[1]=00h` |
+種別01hの成功ACKはCMD=30h・LEN=0Ch・DATA[0]=90h・DATA[1]=01h、総19 byteです（p.147）。DATA[2～11]の10 byteがシリアル番号です。p.146の「製造番号8桁を含む情報」をACK全体やシリアル欄が8 byteという意味にしません。
 
-| DATA offset | byte数 | 内容 | 例 | 実装上の扱い |
-|---:|---:|---|---|---|
-| `DATA[0]` | 1 | `90h` | `90h` | 応答識別子 |
-| `DATA[1]` | 1 | `00h` | `00h` | ファームウェアバージョン取得 |
-| `DATA[2]` | 1 | メジャーバージョン番号 | `31h`=`1` | ASCIIとして読む |
-| `DATA[3..5]` | 3 | マイナーバージョン番号 | `31 30 30`=`100` | ASCIIとして読む |
-| `DATA[6..10]` | 5 | チップ名 | `55 52 32 30 31`=`UR201` | ASCIIとして読む |
+掲載例の文字列はTK00002514です。先頭ゼロを含む識別子として保持し、整数化や8桁への切捨てをしません。TKという接頭辞の固定保証、全製品の文字種や番号の一意性範囲は未確認です。チップ名・シリーズ名・シリアル番号は別の項目として保持します。実機シリアルは公開用の例と分け、必要な範囲でマスクします。
 
-#### シリアル番号取得時
+### 8.3 掲載例SUMの不一致と判定
 
-| 項目 | 内容 |
-|---|---|
-| RX例 | `02 00 30 0C 90 01 54 4B 30 30 30 30 32 35 31 34 03 21 0D` |
-| ACK判定 | `CMD=30h` / `LEN=0Ch` / `DATA[0]=90h` / `DATA[1]=01h` |
-| SUM注意 | PDF掲載例のSUMは `21h`。ただし本書5.3方式で `STX` から `ETX` までを再計算すると `FDh` になるため、実装時は実機応答ログで要確認 |
+p.147のシリアル番号応答例はSUM=21hですが、掲載列を§5.3のSTX～ETXで加算するとFDhです。[OPEN-024](../../SOURCE_REVIEW_STATUS.md)へ21h→FDhを訂正候補として記録し、原典転記を保持しています。訂正は未確定で、21hを許容するSUM例外やSUM検査の省略を追加しません。実機試験は未実施です。
 
-| DATA offset | byte数 | 内容 | 例 | 実装上の扱い |
-|---:|---:|---|---|---|
-| `DATA[0]` | 1 | `90h` | `90h` | 応答識別子 |
-| `DATA[1]` | 1 | `01h` | `01h` | シリアル番号取得 |
-| `DATA[2..11]` | 10 | シリアル番号 | `54 4B 30 30 30 30 32 35 31 34`=`TK00002514` | ASCIIとして読む |
+実応答はフレーム長・SUM、CMD・詳細・取得種別・LENを確認します。種別00hは0Bh、01hは0Chという固定形式で、任意の可変長ではありません。要求と異なる種別の応答を同じ90hだからと受理しません。ROM読取りのLEN=0Ahとも区別します。
 
-### 8.2 NACK例（フォーマットエラーの例）
+### 8.4 受付モードと異常応答
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 90 44 00 00 00 00 00 00 00 00 03 14 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+両読取りはp.19–20の連続モード中の受付例外です。65h／66hを00hへ停止しなくても実行対象になります。ただし、その前後に通常の設定読取りを追加できる保証ではありません。自動読み取りのRFタグ応答・完了通知を本要求のACKへ混ぜず、TID付加やアンテナID出力によって固定ACKを拡張しません。本要求自身はRFを発生させませんが、既に動作中の自動RFは停止しません。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+NACKは[共通マスタ](../../RESPONSE_AND_NACK_MASTER.md)の§7.6に従います。両要求は詳細90hを共有するため、NACKの詳細だけでは元要求を区別できません。未完了要求のコマンドと取得種別を保持して対応づけます。timeout・不正フレーム・未知のシリーズ名をNACKやタグ0枚で代用しません。
 
+起動・リスタート後の約2秒は応答不能で、リスタート後の次コマンドまで2秒以上空けます（p.17・148）。読取り成功は通信可能なことの確認で、再起動実行、全設定反映、RF停止の証明ではありません。
 
-### 8.4 AI実装用レスポンス定義
+### 8.5 記録と残る確認範囲
 
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
+機種候補、要求コマンド、取得種別、接続方式、応答のLEN・識別子、ASCII変換前後の値、判定根拠、未確認条件を分離して記録します。未知の文字列を既知機種へ推測対応せず、機器不適合と通信フレーム不正も区別します。未掲載のシリーズ・チップ名・文字形式の扱い、全機種ROMの実応答、最長応答時間は未確認です。
 
-#### 共通フレームoffset
-
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
-
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `90h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 90h` の成功応答としてPDF該当節を読む |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-
-対象識別子: コマンド `55h` / 詳細 `90h` / サブ `なし`。
-
-
-#### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は、原則として `90h` またはPDF該当節の応答識別子として扱います。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail/status` | 対象コマンドの詳細識別子または状態識別子 |
-| 1.. | `payload` | PDF該当節の順序で読む。予約byteは独自解釈しない |
-
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
-
-
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 90h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 9. 実機確認
 
 実機確認区分: `rom-identification`
@@ -404,5 +297,9 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- `rom_version_read.md`
+- `../../SOURCE_REVIEW_STATUS.md`
+- `../../RESPONSE_MODE_APPLICABILITY.md`
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。

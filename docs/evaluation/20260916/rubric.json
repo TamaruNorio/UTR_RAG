@@ -1,0 +1,53 @@
+{
+  "created_utc": "2026-09-16T06:09:07.282373+00:00",
+  "criteria": {
+    "GQ-017": [
+      "正常0枚として継続しない",
+      "68hはアンテナ接続異常",
+      "正常0枚は読取り完了応答で扱う"
+    ],
+    "GQ-024": [
+      "通知OFFを単発へ適用しない",
+      "InventoryとInventoryReadは完了応答を確認",
+      "完了不達を成功にしない"
+    ],
+    "GQ-025": [
+      "長さ欄1 byteは残る",
+      "値は0",
+      "後続TIDデータが0 byteであることと区別"
+    ],
+    "GQ-048": [
+      "LENで境界を決めDATA中の03h/0Dhでは切らない",
+      "総長LEN+7",
+      "受信片は蓄積し即不正としない"
+    ],
+    "GQ-049": [
+      "STXからETXまでbyte加算",
+      "下位8 bitで13Fhなら3Fh",
+      "CRとSUM自身は除外",
+      "予約byteは含む"
+    ],
+    "GQ-056": [
+      "2.052で1ms不可・下限10ms",
+      "機種ROM別条件を優先"
+    ],
+    "GQ-099": [
+      "DATA[1]は2",
+      "要求Word数と応答byte数を区別"
+    ],
+    "GQ-111": [
+      "ACKはリーダ設定受付でタグ認証成功を示さない",
+      "パスワードはACKに返らず読戻し不可"
+    ],
+    "GQ-253": [
+      "USM06=SUN02V-8CHとUSM08=SUN02-8CH",
+      "UMP01はS101の別資料対象",
+      "未知名を既知機種へ推測対応しない"
+    ]
+  },
+  "question_pass": "all core criteria satisfied, no contradictory claim",
+  "citations": "separate supported/unsupported/absent; not mixed with content score",
+  "grader": "parent assistant, not independent human; no model condition blindness",
+  "selection_bias": "public questions already used to improve markdown; no held-out questions",
+  "cost": "actual money unavailable on subscription; token counters only"
+}

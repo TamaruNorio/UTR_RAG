@@ -6,7 +6,12 @@ V100で通常利用する現在版ドキュメントを格納します。
 
 ## 利用順
 
-詳細は `../../README.md` を参照してください。
+詳細は[リポジトリの利用案内](../../README.md)を参照してください。
+
+- [用途別参照ガイド](TASK_READING_GUIDE.md)
+- [コマンドマスタ](COMMAND_MASTER_V117.md)
+- [AI用コンテキスト索引](AI_CONTEXT_INDEX.md)
+- [メタデータ項目定義](FRONTMATTER_SCHEMA.md)と[タグ定義](TAG_TAXONOMY.md)
 
 ## 注意
 

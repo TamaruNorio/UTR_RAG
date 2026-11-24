@@ -20,20 +20,26 @@ requires_rom_check: true
 requires_antenna: false
 requires_tag: false
 requires_access_password: false
-requires_parameters: false
-verification_status: "REAL_DEVICE_VERIFIED_WITH_NOTES"
-result_status: "REAL_DEVICE_PASS_WITH_NOTES"
+requires_parameters: true
+verification_status: "SPECIFICATION_REFERENCE"
+result_status: "NOT_AN_EXECUTION_RESULT"
 related_docs:
   - "../../COMMAND_MASTER_V117.md"
   - "../../TRACEABILITY_INDEX_V117.md"
   - "../../RESPONSE_AND_NACK_MASTER.md"
   - "../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md"
+  - "../../RAM_FLASH_IMPACT_MATRIX.md"
+  - "../../TID_MEMORY_AND_UNITS.md"
+  - "55_30_uhf_set_select_param.md"
+  - "55_31_uhf_set_inventory_param.md"
+  - "55_41_uhf_get_inventory_param.md"
+  - "55_32_uhf_set_expand_select_param.md"
 tags:
   - "utr-s201"
   - "command-card"
   - "reader-setting"
   - "read-only"
-  - "pass-with-notes"
+  - "specification-reference"
   - "uhf-get-select-param"
 ---
 
@@ -47,8 +53,10 @@ tags:
 - 確認区分: `read-only`
 - 操作レベル: 読み取り専用
 - コマンドバイト: `55h` / 詳細コマンド: `40h` / サブコマンド: `null`
-- 確認状態: `REAL_DEVICE_VERIFIED_WITH_NOTES`
-- 結果状態: `REAL_DEVICE_PASS_WITH_NOTES`
+- 確認状態: `SPECIFICATION_REFERENCE`
+- 結果状態: `NOT_AN_EXECUTION_RESULT`
+
+本カードは仕様参照資料です。PDFを期待結果の基準とし、実機試験の実施結果とは区別します。[確認状態索引](TEST_STATUS_INDEX.md)を参照してください。
 
 ## 2. 目的
 
@@ -76,7 +84,7 @@ tags:
 | アンテナ条件確認 | なし |
 | タグ条件確認 | なし |
 | Accessパスワード確認 | なし |
-| パラメータ確認 | なし |
+| パラメータ確認 | あり（種類00h／01h／02h） |
 | 明示許可 | 不要または通常不要 |
 
 高影響コマンドを、高影響という理由だけで仕様上禁止扱いにはしません。ただし、上記の確認事項が揃うまで実機送信しません。
@@ -192,156 +200,122 @@ tags:
        13 [byte]目              [00]h   ・マスク bit 数 = 0
 ```
 
+### 6.1 読取り値の意味と参照先
+
+要求はCMD=55h・LEN=02h、DATA[0]=40h、DATA[1]=パラメータ種類00h／01h／02hです（p.153）。読み取る種類を先に決めます。
+
+ACKのパラメータ1はbit0–1=MemBank、bit2–4=Action、bit5–7=Select Targetです。パラメータ2のTruncateは**bit2**で、bit0–1とbit3–7は予約です。初期値はパラメータ1=81h、パラメータ2=00hです。MemBank=00は使用不可のRFU、Target=101～111は予約、TruncateはDisableのみ対応します。
+
+Actionの8通りと各フラグの状態変化は[SetSelectParamの補足](55_30_uhf_set_select_param.md)を確認します。読取り結果はリーダライタの保存設定で、タグが現在持っているS0～S3・SLの観測値ではありません。
+
+PDF p.154末尾の参照「7.4.12 UHF_SetSelectParam」は節番号が一致しません。Ver.1.17の該当節は**7.4.17（p.190–195）**です。上の転記は保持し、本補足で正しい参照先へ案内します。
+
+### 6.2 マスクの単位と端数byte
+
+根拠は§7.4.17 p.191・194です。開始位置は4 byte・MSBファーストの**bitアドレス**です。EPC本体の先頭は20h（32 bit、Wordアドレス02h相当）で、00hからのCRC・PCとは区別します。
+
+マスク長bは0～128 bit、マスクデータのbyte数nはceil(b/8)、0～16です。b=0ではn=0としてデータを省略します。128 bitを128 byteにしません。
+
+| bit数b | byte数n | 読取りACK／書込み要求のLEN=9+n |
+|---:|---:|---:|
+| 0 | 0 | 09h |
+| 5 | 1 | 0Ah |
+| 8 | 1 | 0Ah |
+| 9 | 2 | 0Bh |
+| 28 | 4 | 0Dh |
+| 128 | 16 | 19h |
+
+マスクは先頭から8 bitずつ区切ります。最後が8 bit未満なら、その最後のbyteだけは**下位側に詰め、上位を0埋め**します。開始アドレスのMSBファーストと、端数の詰め方を混同しません。これはUTRのホスト通信フィールドの規則です。
+
+| PDF p.194の条件 | 正しいマスクデータ | 誤った例 |
+|---|---|---|
+| TID先頭28 bitがE2 80 11 7 | E2 80 11 07 | E2 80 11 70 |
+| PC内のEPC Length 5 bitが00110 | 06 | 30（上位へ詰めた値） |
+
+上の値は公式PDFの公開例です。既存転記に残る`<TID_PREFIX_BYTES>`では正誤の違いが見えないため、本表で補います。TIDの先頭一致だけでタグ個体の一意性を保証しません。[TIDと単位](../../TID_MEMORY_AND_UNITS.md)を併せて確認します。
+
+### 6.3 設定変更・Select送信・タグの応答を分ける
+
+SetSelectParamはリーダライタへの設定で、その実行だけではRFタグへSelectを送りません（p.190）。マスクbit数0でも、[Inventory設定](55_31_uhf_set_inventory_param.md)でSelect使用が有効なら、空のマスクを持つSelectを送ります。長さ0をSelect使用OFFとして扱いません。
+
+SelectのTargetは変更するフラグ（S0～S3またはSL）、Actionは一致／不一致時の変更方法です。InventoryのTarget（A/B）とは別の設定です。対象を絞るには、Select後のQueryで使うSession・Sel・Inventory Targetも確認します（§3.10.1 p.62、§7.4.18 p.196–201）。
+
+- Sel=ALLでも、指定SessionのInventoriedフラグとInventory Targetの一致が必要です。「ALLだから全タグ応答」とは解釈しません。
+- Sel=SLではSL=Set、Sel=^SLではSL=Resetに加え、上記Session・Inventory Targetの一致も必要です。
+- Selectが触らないフラグはそのままです。例えばSLだけを設定しても、S0～S3を一緒に初期化したことにはなりません。
+
+追加条件がある場合は[拡張Select](55_32_uhf_set_expand_select_param.md)も確認します。通常条件に加えて最大7条件ですが、拡張枠でマスクbit数0に達すると、その枠も後続枠も送信されません（p.207）。通常Selectの0 bitとは意味が異なります。拡張側のマスク領域は常に16 byteで、通常側の可変長形式を流用しません。条件の順序・Action・Targetを確認して最終的なフラグ状態を判断します。
+
+### 6.4 RAMとFLASH
+
+00hはコマンド用RAM、01hは自動用RAM、02hはFLASHです。Select設定の両RAMは独立で、一方への書込みは他方へ反映しません。02hへの書込みはFLASHと両RAMへ反映します（§3.12 p.71–74）。[RAM/FLASHガイド](../../RAM_FLASH_IMPACT_MATRIX.md)に従い、変更前後を種類ごとに記録します。
+
+Selectの設定値と、RFタグに保持されるフラグの状態は別です。設定の読戻し一致は、タグが指定どおり選別された実機試験の代わりにはなりません。
+
+### 6.5 保守者による訂正: p.193 例3
+
+2026-09-09に保守者が次の3点を訂正しました。[OPEN-012](../../SOURCE_REVIEW_STATUS.md)は解決済みです。原典転記を保持し、本注記と併せて参照します。
+
+| 例3の※注記の箇所 | 誤 | 正 |
+|---|---|---|
+| Action値 | 001(1) | 100(4) |
+| フラグ名 | Inventory フラグ(S2) | Inventoried(S2)フラグ |
+| 不一致の表記 | 不一致 | [不一致] |
+
+訂正後の例3の本文は以下のとおりです。
+
+> (例3) 「Target値」=[S2]、「Action値」=[100(4)]の場合
+>
+> ※Action値=100(4)のInventoried(S2)フラグの遷移 → [一致]: S2=[B]、[不一致]: S2=[A]
+>
+> ・「Target値」=[S2]なので、「Inventoried(S2)フラグ」のみが遷移します。
+>
+> ・「SLフラグ」やS2以外の「Inventoriedフラグ」は遷移しません。
+
+例3の見出し・状態遷移表と、p.192のAction=100(4)の表に整合する訂正です。p.200下部の「Inventoryフラグ → Inventoriedフラグ」も、[Inventory設定カード](55_31_uhf_set_inventory_param.md)に訂正注記を記載しています。
+
 ## 7. コマンド形式の扱い
 
 コマンド形式は、共通フレームとPDF該当節のフィールド定義に従って実装してください。
 
-このカードでは、以下を意図的に記載しません。
+公式PDF掲載の完成Hex例は仕様説明として記載します。実機へそのまま送信する許可ではありません。`<...>` を含むマスク例・構造例は実行可能なフレームではなく、掲載SUMも置換後の値として使えません。
 
-- 実機へそのまま送信できる完成Hex
-- SUM計算済みの送信用コマンド例
-- 安全ガードを省略した実装コード
+利用者の条件に合わせた送信用HexやSUM計算済みコマンドは、対象・値・影響範囲・停止・復旧条件を確認してから扱います。安全ガードを省略した実装コードは記載しません。
 
 AIに実装を依頼する場合は、まずフレーム生成、SUM計算、送信、受信、ACK/NACK解析、timeout処理を分けて設計してください。
 
 ## 8. レスポンス処理
 
-レスポンス処理では、以下を区別してください。
+### 8.1 可変長ACKの位置
 
-- ACK
-- NACK
-- timeout
-- 無応答
-- 複数レスポンス
-- 完了レスポンス
-- LBTエラー
-- アンテナ関連エラー
-- UHF ICエラー
+根拠はp.154–155です。CMD=30h、LEN=9+n、総フレーム長は16+n byteです。nはマスクデータのbyte数で、bit数ではありません。
 
-NACKは共通NACK形式とPDF該当節を併せて確認してください。予約バイトは、PDFで意味が定義されていない限り、独自解釈しないでください。
-
-ACK、後続レスポンス、可変長データの解釈は、コマンド番号だけで固定せず、`../../RESPONSE_AND_NACK_MASTER.md` の起動時スナップショットに基づいてください。ROM・機種、アンテナID出力、TID付加、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH設定の状態により、ACKのタイミングや応答データ長が変わります。
-
-### 8.1 ACK/レスポンス例（読み取り成功時）
-
-| 項目 | 内容 |
+| DATA位置 | 意味 |
 |---|---|
-| ACK構造 | `02 ADR 30 LEN 40 PARAM_KIND PARAM1 PARAM2 MASK_START[4] MASK_BIT_LEN MASK_DATA[n] 03 SUM 0D` |
-| `LEN` | `9+n`。`n` はマスクデータbyte数。`MASK_BIT_LEN=00h` の場合、通常 `n=0` |
-| `DATA[0]` | `40h`: 詳細コマンド `UHF_GetSelectParam` |
-| `DATA[1]` | パラメータ種類。`00h`=コマンドモード、`01h`=自動読み取りモード、`02h`=FLASHデータ |
-| `DATA[2]` | パラメータ1。MemBank、Action、Targetをbit単位で読む |
-| `DATA[3]` | パラメータ2。Truncateと予約bitを読む。Truncate Enableは未サポート扱い |
-| `DATA[4..7]` | マスク開始ビットアドレス。MSBファースト |
-| `DATA[8]` | マスクbit数。最大 `80h`=128bit |
-| `DATA[9..]` | マスクデータ。マスクbit数に応じて存在し、マスクbit数0なら省略 |
+| 0 | 詳細40h |
+| 1 | パラメータ種類00h／01h／02h |
+| 2 | パラメータ1（MemBank・Action・Select Target） |
+| 3 | パラメータ2（Truncate・予約） |
+| 4～7 | マスク開始bitアドレス、MSBファースト |
+| 8 | マスクbit数b、0～128 |
+| 9以降 | マスクデータn=ceil(b/8) byte。b=0なら省略 |
 
-実装では `LEN >= 09h` を確認し、`LEN - 9` をマスクデータbyte数として扱ってください。`MASK_BIT_LEN` と実際の `MASK_DATA` 長が矛盾する場合は、成功ACKとして丸飲みせず、`INVALID_FRAME` または `FIELD_LENGTH_MISMATCH` として記録してください。
+### 8.2 判定手順
 
-### 8.2 NACK例（フォーマットエラーの例）
+1. 共通フレームの総長・STX／ETX／CR／SUMを検査します。CMD=30h・LEN≥9を確認してからDATA位置を参照します。
+2. DATA[0]=40hと、DATA[1]が要求した種類に一致することを確認します。
+3. b=DATA[8]が0～128で、n=ceil(b/8)、LEN=9+nであることを検査します。LENだけからnを決めてbit数との矛盾を見逃しません。
+4. b=0ならLEN=09h・総16 byte、b=128ならLEN=19h・総32 byteです。固定16 byteのマスク領域を常に読む実装にはしません。
+5. 4 byteの開始位置をMSBファーストで解釈し、端数byteの上位0埋めと各フィールドの対応を確認します。予約値や不整合値を切詰め・初期値置換して成功にしません。
 
-| 項目 | 内容 |
-|---|---|
-| 代表NACK Hex | `02 00 31 0A 40 44 00 00 00 00 00 00 00 00 03 C4 0D` |
-| エラーコード1 | `44h: FORMAT_ERROR` |
-| 見る場所 | コマンドは`31h`、データ部1byte目はエラー発生元の詳細コマンド、データ部2byte目以降がエラーコードです。 |
+要求の種類と対象機種・ROMを保持します。選別結果を検討する場合は、Inventory設定のSelect使用・Session・Sel・Inventory Target、拡張Select条件も別に確認します。読取りACKだけでそれらを取得したことにはなりません。
 
-NACK時は、エラーコード1だけでなく、UHF ICエラー時のエラーコード2、UHF_Encode/BlockWrite2固有の追加コードも確認してください。予約領域は意味定義がない限り無視します。
+### 8.3 NACK・非同期応答・要求との対応
 
+NACKはCMD=31h・LEN=0Ah・総17 byteの[共通形式](../../RESPONSE_AND_NACK_MASTER.md)です。DATA[0]の詳細を要求と対応づけ、DATA[1]を主エラー、DATA[2]を主エラー0Ahの場合の追加エラーとして読みます。Encode／BlockWrite2固有の追加コードをSelect設定へ転用しません。予約byteは意味を付けず、非ゼロでもSUMには含めます。
 
-### 8.4 AI実装用レスポンス定義
+RFタグデータや切替通知を、この設定要求の成功ACKへ取り込みません。タイムアウトはホスト側の待機結果で、機器のNACKとは別です。設定ACKの解析に、TID付加やタグ応答のアンテナID出力設定を一律必須にはしません。
 
-この節は、生成AIや実装者がACK/レスポンス処理を固定文言ではなく、byte位置と設定依存で実装するための機械可読寄りの整理です。公式PDFの該当節を一次情報とし、この表は実装時のチェックリストとして使ってください。
-
-#### 共通フレームoffset
-
-| offset | フィールド | 実装上の意味 |
-|---:|---|---|
-| 0 | `STX` | 常に `02h`。異なる場合は `INVALID_FRAME` |
-| 1 | `ADR` | 通常はリーダライタID。RFタグ応答でアンテナID出力ONの場合は読み取りANT番号 |
-| 2 | `CMD` | `30h`=ACK、`31h`=NACK、`6Ch`=RFタグデータ、その他はPDF該当節で分類 |
-| 3 | `LEN` | `DATA`部のbyte数。総フレーム長は `LEN + 7` |
-| 4..`4+LEN-1` | `DATA` | ACK/NACK/タグ応答ごとの可変領域 |
-| `4+LEN` | `ETX` | 常に `03h`。異なる場合は `INVALID_FRAME` |
-| `5+LEN` | `SUM` | `STX`から`ETX`までのSUM下位1byte |
-| `6+LEN` | `CR` | 常に `0Dh` |
-
-#### 受信分類ルール
-
-| 条件 | 分類 | 実装アクション |
-|---|---|---|
-| フレーム長不一致、`STX/ETX/CR/SUM`不正 | `INVALID_FRAME` | 破棄し、必要なら再同期する |
-| 受信期限内に1フレームも来ない | `TIMEOUT` | timeoutとして処理し、NACKとは分ける |
-| `CMD=31h` | `NACK` | 共通NACK表でエラーコードを読む |
-| `CMD=30h` かつ `DATA[0]` が `40h` またはPDF該当節の応答識別子 | `ACK` | 対象コマンド `55h 40h` の成功応答としてPDF該当節を読む |
-| `CMD=6Ch` | `RF_TAG_DATA` | 自動読み取り中の非同期応答候補。通常ACKとは分離する |
-
-対象識別子: コマンド `55h` / 詳細 `40h` / サブ `なし`。
-
-
-#### ACK/データ部offset
-成功ACK `CMD=30h` のDATA先頭は、原則として `40h` またはPDF該当節の応答識別子として扱います。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `detail/status` | 対象コマンドの詳細識別子または状態識別子 |
-| 1.. | `payload` | PDF該当節の順序で読む。予約byteは独自解釈しない |
-
-アンテナ切替完了ACKとキャリア検知ACKを受ける可能性がある受信ループでは、`DATA[0]` と `DATA[1]` の組み合わせで通常ACKと区別してください。
-
-
-#### NACK分類
-
-このコマンドのNACKは共通NACKとして扱います。`CMD=31h` の場合は、成功ACKではなく、以下のoffsetでエラーとして分類してください。
-
-| DATA offset | フィールド | 解釈 |
-|---:|---|---|
-| 0 | `error_source` | 原則として対象コマンドの詳細識別子。対象: `55h 40h` |
-| 1 | `error_code_1` | FORMAT_ERROR、SUM_ERROR、LBT_ERROR、ANTENNA_ERROR、UHF_IC_ERRORなどの主エラー |
-| 2 | `error_code_2` | `error_code_1=0Ah` のUHF ICエラー時に参照 |
-| 3 | `error_code_3` | UHF_Encode / UHF_BlockWrite2 等でPDF定義がある場合のみ参照 |
-| 4 | `error_code_4` | PDF定義がある場合のみ参照 |
-| 5..9 | reserved | PDFで意味が定義されていない限り独自解釈しない |
-
-判定: `CMD=31h` を受けた時点で `NACK`。`error_code_1` が0でも成功扱いにしないでください。
-
-#### 最小疑似コード
-
-```text
-frame = read_next_frame(timeout)
-if frame is None:
-    return TIMEOUT
-parsed = parse_common_frame(frame)
-if parsed.invalid:
-    return INVALID_FRAME
-if parsed.cmd == 0x31:
-    return parse_nack(parsed)
-if parsed.cmd == 0x30:
-    return parse_ack_payload(parsed, settings_snapshot)
-if parsed.cmd == 0x6C:
-    return RF_TAG_DATA_ASYNC_EVENT
-return UNKNOWN_RESPONSE_REQUIRES_PDF_CHECK
-```
-
-#### 推奨パーサ出力
-
-```json
-{
-  "frame_type": "ACK | NACK | RF_TAG_DATA | COMPLETION | ANT_SWITCH_COMPLETE | CARRIER_DETECTED | NO_RESPONSE | TIMEOUT | INVALID_FRAME",
-  "command": "対象コマンド名",
-  "address_role": "reader_id | antenna_id | unknown",
-  "detail": "PDFで定義された詳細コマンドまたは応答種別",
-  "data_length": 0,
-  "settings_snapshot_used": true,
-  "is_success": false,
-  "error": null,
-  "raw_hex_policy": "PDF掲載例は可。実機ログ由来のEPC/UII/TID/パスワードはマスク"
-}
-```
-
-#### 設定スナップショット必須項目
-
-実行前に、ROM/機種、物理アンテナ容量、接続OKアンテナ、現在ANT、アンテナID出力、TID付加、EPC/UII応答設定、読取完了応答、アンテナ切替完了応答、キャリア検知応答、RAM/FLASH対象を取得し、この結果をパーサへ渡してください。
 ## 9. 実機確認
 
 実機確認区分: `read-only`
@@ -386,5 +360,12 @@ AIへ依頼するときは、次の前提を明示してください。
 - `../../TRACEABILITY_INDEX_V117.md`
 - `../../RESPONSE_AND_NACK_MASTER.md`
 - `../../DEVICE_ROM_IDENTIFICATION_AND_SUPPORT.md`
+
+- [RAM_FLASH_IMPACT_MATRIX](../../RAM_FLASH_IMPACT_MATRIX.md)
+- [TID_MEMORY_AND_UNITS](../../TID_MEMORY_AND_UNITS.md)
+- [55_30_uhf_set_select_param](55_30_uhf_set_select_param.md)
+- [55_31_uhf_set_inventory_param](55_31_uhf_set_inventory_param.md)
+- [55_41_uhf_get_inventory_param](55_41_uhf_get_inventory_param.md)
+- [55_32_uhf_set_expand_select_param](55_32_uhf_set_expand_select_param.md)
 
 PDF原本は社内の正式な管理場所から別途準備してください。GitHubにはPDF原本をアップロードしないでください。
